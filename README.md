@@ -2,11 +2,11 @@
 
 The project S6 of:
 
-- Francois Barnouin
-- Cindy Do
-- Henri Gasc
-- Guillaume Ung
-- Hamza Jad AL Aoun
+- Francois Barnouin (AI)
+- Cindy Do (Communication)
+- Henri Gasc (Interface)
+- Guillaume Ung (AI)
+- Hamza Jad AL Aoun (Hands gesture)
 
 ### Objectives
 
