@@ -103,10 +103,10 @@ def update_screen(rect=None, pause=0):
     sleep(pause)
 
 
-def draw_circle(n, m, color):
+def draw_circle(n, m, color, r):
     x = n * size_cell + size_cell // 2
     y = m * size_cell + size_cell // 2
-    pg.draw.circle(board_surface, color, (x, y), radius_disk)
+    pg.draw.circle(board_surface, color, (x, y), r)
 
 
 def start_game():
@@ -114,7 +114,7 @@ def start_game():
     pg.draw.rect(board_surface, color_board, (0, 0, width_board, height_board))
     for i in range(7):
         for j in range(6):
-            draw_circle(i, j, color_trans)
+            draw_circle(i, j, color_trans, radius_hole)
     update_screen()
 
 
@@ -144,7 +144,12 @@ def click(player, color, pos_click_x):
     if i == -1:
         return player, color
     board[i, num_col] = player
-    draw_circle(num_col, i, color)
+    x = padding + num_col*size_cell+size_cell//2
+    for y in range(padding//2, padding+i*size_cell+padding//2, 5):
+        screen.fill(white)
+        pg.draw.circle(screen, color, (x, y), radius_disk)
+        update_screen()
+    draw_circle(num_col, i, color, radius_hole)
     return inverse_player(playing)
 
 
