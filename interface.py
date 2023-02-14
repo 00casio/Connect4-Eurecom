@@ -29,6 +29,71 @@ pg.display.set_caption(screen_title)
 board_surface = pg.surface.Surface((width_board, height_board)).convert_alpha()
 
 
+def center_all(list_text):
+    total_size = 0
+    for text in list_text:
+        total_size += 2 * text_box_spacing + text.get_size()[1]
+    total_size += (len(list_text) - 1) * options_spacing
+    rect_boxes = []
+    y_start = (height_screen - total_size) // 2
+    y_now = y_start
+    for text in list_text:
+        size = text.get_size()
+        x_now = (width_screen - size[0]) // 2 - text_box_spacing
+        box_rect = (
+            x_now,
+            y_now,
+            size[0] + 2 * text_box_spacing,
+            size[1] + 2 * text_box_spacing,
+        )
+        pg.draw.rect(screen, color_options_box, box_rect)
+        screen.blit(text, (x_now + text_box_spacing, y_now + text_box_spacing))
+        y_now += 2 * text_box_spacing + size[1] + options_spacing
+        rect_boxes.append(box_rect)
+    pg.display.update()
+    return rect_boxes
+
+
+def x_in_rect(rect, x, y):
+    return rect[0] <= x <= rect[0] + rect[2] and rect[1] <= y <= rect[1] + rect[3]
+
+
+def create_options_text(text):
+    font = pg.font.SysFont(text_font, text_size)
+    return font.render(text, 1, color_options_text)
+
+
+def show_options_play():
+    screen.fill(color_options_screen)
+    text_HvH = create_options_text(text_options_play_HvH)
+    text_HvIA = create_options_text(text_options_play_HvIA)
+    text_IAvIA = create_options_text(text_options_play_IAvIA)
+    boxes = center_all([text_HvH, text_HvIA, text_IAvIA])
+    status = 0
+    while status == 0:
+        for event in pg.event.get():
+            if event.type == pg.MOUSEBUTTONUP:
+                mouse = pg.mouse.get_pos()
+                if x_in_rect(boxes[0], mouse[0], mouse[1]):
+                    status = 1
+    return status
+
+
+def start_screen():
+    screen.fill(color_options_screen)
+    text_play = create_options_text(text_options_play)
+    boxes_options = center_all([text_play])
+    rect_play = boxes_options[0]
+    status = 0
+    while status == 0:
+        for event in pg.event.get():
+            if event.type == pg.MOUSEBUTTONUP:
+                mouse = pg.mouse.get_pos()
+                if x_in_rect(rect_play, mouse[0], mouse[1]):
+                    status = show_options_play()
+    return status
+
+
 def update_screen(rect=None, pause=0):
     screen.blit(board_surface, (padding, padding))
     if rect is not None:
@@ -101,6 +166,8 @@ def gaming(event):
     screen.fill(color_screen)
     pg.draw.circle(screen, color_playing, (mouse_x, padding // 2), radius_disk)
 
+
+start_screen()
 
 start_game()
 playing = player_1
