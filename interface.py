@@ -21,20 +21,17 @@ screen = pg.display.set_mode((width_screen, height_screen), 0, 32)
 pg.display.set_caption(screen_title)
 board_surface = pg.surface.Surface((width_board, height_board)).convert_alpha()
 
-def update_screen(pause=0):
+def update_screen(rect=None, pause=0):
     screen.blit(board_surface, (padding, padding))
-    pg.display.update()
+    if rect is not None:
+        pg.display.update(rect)
+    else:
+        pg.display.update()
     sleep(pause)
 
 def draw_circle(n, m):
     x = n*size_cell + size_cell//2
     y = m*size_cell + size_cell//2
-    # if board[n, m] == "0":
-    #     color = color_trans
-    # elif board[n, m] == "1":
-    #     color = color_player_1
-    # elif board[n, m] == "2":
-    #     color = color_player_2
     pg.draw.circle(board_surface, color_trans, (x, y), radius_disk)
 
 def start_game():
@@ -56,12 +53,21 @@ while True:
             pg.quit()
             sys.exit()
         elif event.type == pg.MOUSEBUTTONDOWN:
-            playing = player_2 if playing == player_1 else symbol_player_1
-            color_playing = color_player_2 if playing == player_2 else color_player_1
-            update_screen(1)
-        mouse_pos = pg.mouse.get_pos()
+            # Inverse player
+            if playing == player_1:
+                playing = player_2
+                color_playing = color_player_2
+            else:
+                playing = player_1
+                color_playing = color_player_1
+
+        mouse_x, mouse_y = pg.mouse.get_pos()
+        if mouse_x < pos_min_x:
+            mouse_x = pos_min_x
+        elif mouse_x > pos_max_x:
+            mouse_x = pos_max_x
         screen.fill(color_screen)
-        pg.draw.circle(screen, color_playing, mouse_pos, radius_disk)
+        pg.draw.circle(screen, color_playing, (mouse_x, padding//2), radius_disk)
     update_screen()
     CLOCK.tick(fps)
 

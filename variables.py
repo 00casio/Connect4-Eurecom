@@ -30,3 +30,5 @@ height_screen = 2*padding + height_board
 # Pygame
 fps = 30
 screen_title = "Connect 4"
+pos_min_x = padding + size_cell//2
+pos_max_x = padding + width_board - size_cell//2
