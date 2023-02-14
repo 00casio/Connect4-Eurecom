@@ -8,6 +8,12 @@ The project S6 of:
 - Guillaume Ung (AI)
 - Hamza Jad AL Aoun (Hands gesture)
 
+### This week objectives
+
+[ ] Contact the tutor
+[ ] Know what we have to do
+[ ] Maybe prototyping
+
 ### Objectives
 
 The objectives of this project are the following:
@@ -27,6 +33,8 @@ Optional:
 
 - Name
 - Options
+- Change theme
+- Background muic
 
 #### AI
 
