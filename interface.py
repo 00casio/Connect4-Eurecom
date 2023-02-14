@@ -29,18 +29,45 @@ def update_screen(rect=None, pause=0):
         pg.display.update()
     sleep(pause)
 
-def draw_circle(n, m):
+def draw_circle(n, m, color):
     x = n*size_cell + size_cell//2
     y = m*size_cell + size_cell//2
-    pg.draw.circle(board_surface, color_trans, (x, y), radius_disk)
+    pg.draw.circle(board_surface, color, (x, y), radius_disk)
 
 def start_game():
     screen.fill(color_screen)
     pg.draw.rect(board_surface, color_board, (0, 0, width_board, height_board))
     for i in range(7):
         for j in range(6):
-            draw_circle(i, j)
+            draw_circle(i, j, color_trans)
     update_screen()
+
+def inverse_player(playing):
+    if playing == player_1:
+        playing = player_2
+        color_playing = color_player_2
+    else:
+        playing = player_1
+        color_playing = color_player_1
+    return playing, color_playing
+
+def find_low_bound(i):
+    col = board[:, i]
+    for j in range(len(col)-1, -1, -1):
+        if col[j] == no_player:
+            return j
+    return -1
+
+def click(player, color, pos_click_x):
+    global board
+
+    num_col = pos_click_x//size_cell
+    i = find_low_bound(num_col)
+    if i == -1:
+        return player, color
+    board[i, num_col] = player
+    draw_circle(num_col, i, color)
+    return inverse_player(playing)
 
 start_game()
 playing = player_1
@@ -53,13 +80,9 @@ while True:
             pg.quit()
             sys.exit()
         elif event.type == pg.MOUSEBUTTONDOWN:
-            # Inverse player
-            if playing == player_1:
-                playing = player_2
-                color_playing = color_player_2
-            else:
-                playing = player_1
-                color_playing = color_player_1
+            pos_click = pg.mouse.get_pos()
+            if padding < pos_click[0] < width_board + padding:
+                playing, color_playing = click(playing, color_playing, pos_click[0] - padding)
 
         mouse_x, mouse_y = pg.mouse.get_pos()
         if mouse_x < pos_min_x:
