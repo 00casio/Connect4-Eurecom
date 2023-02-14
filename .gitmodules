@@ -1,4 +1,4 @@
-[submodule "connect-four-ai"]
+[submodule "docs/connect-four-ai"]
 	path = docs/connect-four-ai
 	url = https://github.com/JonathanDeLeon/connect-four-ai.git
 [submodule "docs/Hands-Gesture"]
