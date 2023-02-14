@@ -1,0 +1,22 @@
+# Python
+__pycache__
+
+# Media
+**.png
+**.jpg
+**.jpeg
+**.web*
+**.mkv
+**.mp4
+**.mp3
+
+# LaTeX
+**.out
+**.toc
+**.toc
+
+# Classical ignore
+**.log
+**.pdf
+**.tmp
+**.so
