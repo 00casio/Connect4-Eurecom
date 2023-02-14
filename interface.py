@@ -83,6 +83,25 @@ def click(player, color, pos_click_x):
     return inverse_player(playing)
 
 
+def gaming(event):
+    global playing, color_playing
+
+    if event.type == pg.MOUSEBUTTONUP:
+        pos_click = pg.mouse.get_pos()
+        if padding < pos_click[0] < width_board + padding:
+            playing, color_playing = click(
+                playing, color_playing, pos_click[0] - padding
+            )
+
+    mouse_x, mouse_y = pg.mouse.get_pos()
+    if mouse_x < pos_min_x:
+        mouse_x = pos_min_x
+    elif mouse_x > pos_max_x:
+        mouse_x = pos_max_x
+    screen.fill(color_screen)
+    pg.draw.circle(screen, color_playing, (mouse_x, padding // 2), radius_disk)
+
+
 start_game()
 playing = player_1
 color_playing = color_player_1
@@ -93,19 +112,6 @@ while True:
         if event.type == pg.QUIT:
             pg.quit()
             sys.exit()
-        elif event.type == pg.MOUSEBUTTONDOWN:
-            pos_click = pg.mouse.get_pos()
-            if padding < pos_click[0] < width_board + padding:
-                playing, color_playing = click(
-                    playing, color_playing, pos_click[0] - padding
-                )
-
-        mouse_x, mouse_y = pg.mouse.get_pos()
-        if mouse_x < pos_min_x:
-            mouse_x = pos_min_x
-        elif mouse_x > pos_max_x:
-            mouse_x = pos_max_x
-        screen.fill(color_screen)
-        pg.draw.circle(screen, color_playing, (mouse_x, padding // 2), radius_disk)
+        gaming(event)
     update_screen((0, 0, padding, width_screen))
     CLOCK.tick(fps)
