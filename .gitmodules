@@ -1,6 +1,3 @@
-[submodule "docs/connect-four-ai"]
-	path = docs/connect-four-ai
-	url = https://github.com/JonathanDeLeon/connect-four-ai
 [submodule "docs/Hands-Gesture"]
 	path = docs/Hands-Gesture
 	url = https://github.com/xenon-19/Gesture-Controlled-Virtual-Mouse
