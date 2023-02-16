@@ -8,7 +8,7 @@ import pygame as pg
 from interface import *
 from variables import *
 
-start_screen()
+status = start_screen()
 start_game()
 
 # Run the game loop forever

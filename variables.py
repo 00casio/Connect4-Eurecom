@@ -25,6 +25,10 @@ board = np.array(
 )
 nbr_max_turn = board.size
 
+# AI
+difficulty_AI = 0
+symbol_player_AI = symbol_no_player
+
 # Colors
 white = (255, 255, 255)
 black = (0, 0, 0)
@@ -44,7 +48,7 @@ color_options_text = white
 
 # Size
 size_cell = 100
-padding = int(size_cell*1.5)
+padding = int(size_cell * 1.5)
 width_board = 7 * size_cell
 height_board = 6 * size_cell
 radius_hole = 40
@@ -58,8 +62,8 @@ text_box_spacing = padding // 10
 options_menu_start = -1
 options_menu_play = 0
 options_play_HvH = 1
-options_play_HvIA = 2
-options_play_IAvIA = 3
+options_play_HvAI = 2
+options_play_AIvAI = 3
 
 # Pygame
 fps = 30
@@ -70,14 +74,15 @@ text_size = 30
 text_font = "monospace"
 text_options_play = "Play"
 text_options_play_HvH = "Human vs. Human"
-text_options_play_HvIA = "Human vs. IA"
-text_options_play_IAvIA = "Watch the world burn"
+text_options_play_HvAI = "Human vs. IA"
+text_options_play_AIvAI = "Watch the world burn"
+text_options_difficulty_HvAI = "Choose your poison"
 
 # Starting everything
 CLOCK = pg.time.Clock()
 screen = pg.display.set_mode((width_screen, height_screen), 0, 32)
 pg.display.set_caption(screen_title)
 board_surface = pg.surface.Surface((width_board, height_board)).convert_alpha()
-playing = symbol_player_1
-color_playing = color_symbol_player_1
+symbol_playing = symbol_player_1
+color_symbol_playing = color_symbol_player_1
 num_turn = 0

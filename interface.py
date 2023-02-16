@@ -5,30 +5,66 @@ from time import sleep
 
 import pygame as pg
 
-from variables import *
 from scores import who_is_winner
+from variables import *
 
 
-def center_all(list_text):
+def compute_total_size(list_text):
     total_size = 0
     for text in list_text:
-        total_size += 2 * text_box_spacing + text.get_size()[1]
-    total_size += (len(list_text) - 1) * options_spacing
-    rect_boxes = []
-    y_start = (height_screen - total_size) // 2
-    y_now = y_start
+        total_size += 2 * text_box_spacing
+        if type(text) == list:
+            total_size += max([t.get_size()[1] for t in text])
+        else:
+            total_size += text.get_size()[1]
+    return total_size + (len(list_text) - 1) * options_spacing
+
+
+def write_same_line(list_text, y):
+    box_rect = []
+    n = list_text
+    x_tot = 0
+    for text in list_text:
+        x_tot += 2 * text_box_spacing + options_spacing + text.get_size()[0]
+    x_tot -= options_spacing
+
+    x_now = (width_screen - x_tot) // 2 - text_box_spacing
     for text in list_text:
         size = text.get_size()
-        x_now = (width_screen - size[0]) // 2 - text_box_spacing
-        box_rect = (
+        b_rect = (
             x_now,
-            y_now,
+            y,
             size[0] + 2 * text_box_spacing,
             size[1] + 2 * text_box_spacing,
         )
-        pg.draw.rect(screen, color_options_box, box_rect)
-        screen.blit(text, (x_now + text_box_spacing, y_now + text_box_spacing))
-        y_now += 2 * text_box_spacing + size[1] + options_spacing
+        pg.draw.rect(screen, color_options_box, b_rect)
+        screen.blit(text, (x_now + text_box_spacing, y + text_box_spacing))
+        box_rect.append(b_rect)
+        x_now += 2 * text_box_spacing + size[0] + options_spacing
+    new_y = (
+        y
+        + max([t.get_size()[1] for t in list_text])
+        + 2 * text_box_spacing
+        + options_spacing
+    )
+    return new_y, box_rect
+
+
+def write_to_screen(text, y_now):
+    if type(text) == list:
+        new_y, box_rect = write_same_line(text, y_now)
+    else:
+        new_y, box_rect = write_same_line([text], y_now)
+        box_rect = box_rect[0]
+    return new_y, box_rect
+
+
+def center_all(list_text):
+    total_size = compute_total_size(list_text)
+    rect_boxes = []
+    y_now = (height_screen - total_size) // 2
+    for text in list_text:
+        y_now, box_rect = write_to_screen(text, y_now)
         rect_boxes.append(box_rect)
     pg.display.update()
     return rect_boxes
@@ -43,12 +79,20 @@ def create_options_text(text):
     return font.render(text, 1, color_options_text)
 
 
+def options_1AI():
+    global player_AI, difficulty_AI
+
+
+def options_2AI():
+    global player_AI, difficulty_AI
+
+
 def show_options_play():
     screen.fill(color_options_screen)
     text_HvH = create_options_text(text_options_play_HvH)
-    text_HvIA = create_options_text(text_options_play_HvIA)
-    text_IAvIA = create_options_text(text_options_play_IAvIA)
-    boxes = center_all([text_HvH, text_HvIA, text_IAvIA])
+    text_HvAI = create_options_text(text_options_play_HvAI)
+    text_AIvAI = create_options_text(text_options_play_AIvAI)
+    boxes = center_all([text_HvH, text_HvAI, text_AIvAI])
     status = options_menu_play
     while status == options_menu_play:
         for event in pg.event.get():
@@ -56,6 +100,12 @@ def show_options_play():
                 mouse = pg.mouse.get_pos()
                 if x_in_rect(boxes[0], mouse[0], mouse[1]):
                     status = options_play_HvH
+                if x_in_rect(boxes[1], mouse[0], mouse[1]):
+                    status = options_play_HvAI
+                    options_1AI()
+                if x_in_rect(boxes[2], mouse[0], mouse[1]):
+                    status = options_play_AIvAI
+                    options_2AI()
     return status
 
 
@@ -98,14 +148,14 @@ def start_game():
     update_screen()
 
 
-def inverse_player(playing):
-    if playing == symbol_player_1:
-        playing = symbol_player_2
-        color_playing = color_symbol_player_2
+def inverse_player(symbol_playing):
+    if symbol_playing == symbol_player_1:
+        symbol_playing = symbol_player_2
+        color_symbol_playing = color_symbol_player_2
     else:
-        playing = symbol_player_1
-        color_playing = color_symbol_player_1
-    return playing, color_playing
+        symbol_playing = symbol_player_1
+        color_symbol_playing = color_symbol_player_1
+    return symbol_playing, color_symbol_playing
 
 
 def find_low_bound(i):
@@ -130,18 +180,18 @@ def click(player, color, pos_click_x):
         pg.draw.circle(screen, color, (x, y), radius_disk)
         update_screen()
     draw_circle(num_col, i, color, radius_hole)
-    return inverse_player(playing)
+    return inverse_player(symbol_playing)
 
 
 def gaming(event):
-    global playing, color_playing, num_turn
+    global symbol_playing, color_symbol_playing, num_turn
 
     winner = symbol_no_player
     if event.type == pg.MOUSEBUTTONUP:
         pos_click = pg.mouse.get_pos()
         if padding < pos_click[0] < width_board + padding:
-            playing, color_playing = click(
-                playing, color_playing, pos_click[0] - padding
+            symbol_playing, color_symbol_playing = click(
+                symbol_playing, color_symbol_playing, pos_click[0] - padding
             )
             num_turn += 1
             winner = who_is_winner(board)
@@ -152,7 +202,7 @@ def gaming(event):
             elif num_turn == nbr_max_turn:
                 winner = symbol_draw
                 print("It's a draw")
-    
+
     if winner == symbol_no_player:
         mouse_x, mouse_y = pg.mouse.get_pos()
         if mouse_x < pos_min_x:
@@ -160,5 +210,7 @@ def gaming(event):
         elif mouse_x > pos_max_x:
             mouse_x = pos_max_x
         screen.fill(color_screen)
-        pg.draw.circle(screen, color_playing, (mouse_x, padding // 2), radius_disk)
+        pg.draw.circle(
+            screen, color_symbol_playing, (mouse_x, padding // 2), radius_disk
+        )
     return winner

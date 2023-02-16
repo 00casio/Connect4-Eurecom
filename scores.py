@@ -1,20 +1,22 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from variables import symbol_no_player, symbol_player_1, symbol_player_2
 from numpy import ceil, where, zeros
+
+from variables import symbol_no_player, symbol_player_1, symbol_player_2
+
 
 def state_to_bits(state):
     """Convert the state of the game for a player into the bits representation of the game"""
     n = "0b"
-    for j in range(len(state[0])-1, -1, -1):
+    for j in range(len(state[0]) - 1, -1, -1):
         n += "0"
         for i in range(len(state)):
-            n += f"{int(state[i, j])}" # <==> n += str(b)
+            n += f"{int(state[i, j])}"  # <==> n += str(b)
     return n
 
+
 def state_win(state):
-    print(state)
     bits = int(state_to_bits(state), 2)
 
     # Horizontal check
@@ -35,6 +37,7 @@ def state_win(state):
         return True
     # Nothing found
     return False
+
 
 def who_is_winner(board):
     s = board.shape
