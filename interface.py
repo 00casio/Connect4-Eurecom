@@ -27,8 +27,8 @@ def write_same_line(list_text, y):
     for text in list_text:
         x_tot += 2 * text_box_spacing + options_spacing + text.get_size()[0]
     x_tot -= options_spacing
-
     x_now = (width_screen - x_tot) // 2 - text_box_spacing
+
     for text in list_text:
         size = text.get_size()
         b_rect = (
@@ -41,6 +41,7 @@ def write_same_line(list_text, y):
         screen.blit(text, (x_now + text_box_spacing, y + text_box_spacing))
         box_rect.append(b_rect)
         x_now += 2 * text_box_spacing + size[0] + options_spacing
+
     new_y = (
         y
         + max([t.get_size()[1] for t in list_text])
@@ -74,13 +75,72 @@ def x_in_rect(rect, x, y):
     return rect[0] <= x <= rect[0] + rect[2] and rect[1] <= y <= rect[1] + rect[3]
 
 
-def create_options_text(text):
+def create_options_text(text, color=color_options_text):
     font = pg.font.SysFont(text_font, text_size)
-    return font.render(text, 1, color_options_text)
+    return font.render(text, 1, color)
+
+
+def handle_click(click_coor, list_rect):
+    for i in range(len(list_rect)):
+        if x_in_rect(list_rect[i], click_coor[0], click_coor[1]):
+            return i
+    return -1
+
+
+def highlight_box(box, text, color):
+    pg.draw.rect(screen, color, box)
+    x, y, a, b = box
+    screen.blit(text, (x + text_box_spacing, y + text_box_spacing))
+    pg.display.update()
+
+
+def draw_agreement_box(text):
+    agreement = create_options_text(text, black)
+    s = agreement.get_size()
+    x = (width_screen - s[0]) // 2 - text_box_spacing
+    y = int(0.75 * height_screen)
+    box = (x, y, s[0] + 2 * text_box_spacing, s[1] + 2 * text_box_spacing)
+    pg.draw.rect(screen, color_screen, box)
+    screen.blit(agreement, (x + text_box_spacing, y + text_box_spacing))
+    pg.display.update()
+    return box
 
 
 def options_1AI():
     global player_AI, difficulty_AI
+
+    screen.fill(color_options_screen)
+    text_diff = create_options_text(text_options_difficulty_HvAI)
+    texts_level = []
+    for i in range(5):
+        texts_level.append(create_options_text(f"Level {i}"))
+    text_options = [text_diff, texts_level]
+    boxes_levels = center_all(text_options)
+    box_clicked = boxAI_out
+    play_box = None
+    while box_clicked != boxAI_play:
+        for event in pg.event.get():
+            if event.type == pg.MOUSEBUTTONUP:
+                mouse_click = pg.mouse.get_pos()
+                index_box = handle_click(mouse_click, boxes_levels[1])
+                screen.fill(color_options_screen)
+                center_all(text_options)
+                if index_box != boxAI_out:
+                    box_clicked = boxes_levels[1][index_box]
+                    text = create_options_text(
+                        f"Level {index_box}", color_options_highlight_text
+                    )
+                    highlight_box(box_clicked, text, color_options_highlight_box)
+                    play_box = draw_agreement_box(boxAI_text_levels[index_box])
+                    difficulty_AI = index_box
+                elif play_box is not None and x_in_rect(
+                    play_box, mouse_click[0], mouse_click[1]
+                ):
+                    box_clicked = boxAI_play
+                else:
+                    play_box = None
+                    pg.display.update()
+    player_AI = symbol_player_2
 
 
 def options_2AI():

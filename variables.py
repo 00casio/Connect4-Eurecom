@@ -37,12 +37,15 @@ green = (0, 255, 0)
 blue = (38, 60, 255)
 dark_blue = (0, 0, 229)
 light_blue = (30, 160, 255)
+cyan = (45, 245, 255)
 color_trans = (0, 0, 0, 0)
 color_symbol_player_1 = red
 color_symbol_player_2 = green
 color_board = blue
 color_screen = white
 color_options_screen = light_blue
+color_options_highlight_box = cyan
+color_options_highlight_text = black
 color_options_box = blue
 color_options_text = white
 
@@ -77,6 +80,17 @@ text_options_play_HvH = "Human vs. Human"
 text_options_play_HvAI = "Human vs. IA"
 text_options_play_AIvAI = "Watch the world burn"
 text_options_difficulty_HvAI = "Choose your poison"
+
+# Boxes for levels of AI
+boxAI_out = -1
+boxAI_play = -255
+boxAI_text_levels = [
+    "Start",
+    "Start",
+    "Meh, begin",
+    "Get my a** kicked",
+    "Welcome to Hell",
+]
 
 # Starting everything
 CLOCK = pg.time.Clock()
