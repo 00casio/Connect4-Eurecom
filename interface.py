@@ -1,32 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import sys
 from time import sleep
 
-import numpy as np
 import pygame as pg
 
 from variables import *
-
-# Board
-board = np.array(
-    [
-        [no_player] * 7,
-        [no_player] * 7,
-        [no_player] * 7,
-        [no_player] * 7,
-        [no_player] * 7,
-        [no_player] * 7,
-    ]
-)
-
-# initializing pygame window
-pg.init()
-CLOCK = pg.time.Clock()
-screen = pg.display.set_mode((width_screen, height_screen), 0, 32)
-pg.display.set_caption(screen_title)
-board_surface = pg.surface.Surface((width_board, height_board)).convert_alpha()
 
 
 def center_all(list_text):
@@ -69,13 +48,13 @@ def show_options_play():
     text_HvIA = create_options_text(text_options_play_HvIA)
     text_IAvIA = create_options_text(text_options_play_IAvIA)
     boxes = center_all([text_HvH, text_HvIA, text_IAvIA])
-    status = 0
-    while status == 0:
+    status = options_menu_play
+    while status == options_menu_play:
         for event in pg.event.get():
             if event.type == pg.MOUSEBUTTONUP:
                 mouse = pg.mouse.get_pos()
                 if x_in_rect(boxes[0], mouse[0], mouse[1]):
-                    status = 1
+                    status = options_play_HvH
     return status
 
 
@@ -84,8 +63,8 @@ def start_screen():
     text_play = create_options_text(text_options_play)
     boxes_options = center_all([text_play])
     rect_play = boxes_options[0]
-    status = 0
-    while status == 0:
+    status = options_menu_start
+    while status == options_menu_start:
         for event in pg.event.get():
             if event.type == pg.MOUSEBUTTONUP:
                 mouse = pg.mouse.get_pos()
@@ -144,8 +123,8 @@ def click(player, color, pos_click_x):
     if i == -1:
         return player, color
     board[i, num_col] = player
-    x = padding + num_col*size_cell+size_cell//2
-    for y in range(padding//2, padding+i*size_cell+padding//2, 5):
+    x = padding + num_col * size_cell + size_cell // 2
+    for y in range(padding // 2, padding + i * size_cell + padding // 2, 5):
         screen.fill(white)
         pg.draw.circle(screen, color, (x, y), radius_disk)
         update_screen()
@@ -170,20 +149,3 @@ def gaming(event):
         mouse_x = pos_max_x
     screen.fill(color_screen)
     pg.draw.circle(screen, color_playing, (mouse_x, padding // 2), radius_disk)
-
-
-start_screen()
-
-start_game()
-playing = player_1
-color_playing = color_player_1
-
-# Run the game loop forever
-while True:
-    for event in pg.event.get():
-        if event.type == pg.QUIT:
-            pg.quit()
-            sys.exit()
-        gaming(event)
-    update_screen((0, 0, padding, width_screen))
-    CLOCK.tick(fps)

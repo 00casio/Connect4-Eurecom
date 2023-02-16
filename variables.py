@@ -1,10 +1,27 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import numpy as np
+import pygame as pg
+
+pg.init()
+
 # Symbols
 no_player = "0"
 player_1 = "1"
 player_2 = "2"
+
+# Board
+board = np.array(
+    [
+        [no_player] * 7,
+        [no_player] * 7,
+        [no_player] * 7,
+        [no_player] * 7,
+        [no_player] * 7,
+        [no_player] * 7,
+    ]
+)
 
 # Colors
 white = (255, 255, 255)
@@ -35,6 +52,13 @@ height_screen = 2 * padding + height_board
 options_spacing = padding // 4
 text_box_spacing = padding // 10
 
+# Options
+options_menu_start = -1
+options_menu_play = 0
+options_play_HvH = 1
+options_play_HvIA = 2
+options_play_IAvIA = 3
+
 # Pygame
 fps = 30
 screen_title = "Connect 4"
@@ -46,3 +70,11 @@ text_options_play = "Play"
 text_options_play_HvH = "Human vs. Human"
 text_options_play_HvIA = "Human vs. IA"
 text_options_play_IAvIA = "Watch the world burn"
+
+# Starting everything
+CLOCK = pg.time.Clock()
+screen = pg.display.set_mode((width_screen, height_screen), 0, 32)
+pg.display.set_caption(screen_title)
+board_surface = pg.surface.Surface((width_board, height_board)).convert_alpha()
+playing = player_1
+color_playing = color_player_1
