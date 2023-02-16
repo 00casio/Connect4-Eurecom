@@ -7,6 +7,7 @@ import pygame as pg
 pg.init()
 
 # Symbols
+draw = "-1"
 no_player = "0"
 player_1 = "1"
 player_2 = "2"
@@ -22,6 +23,7 @@ board = np.array(
         [no_player] * 7,
     ]
 )
+nbr_max_turn = board.size
 
 # Colors
 white = (255, 255, 255)
@@ -42,7 +44,7 @@ color_options_text = white
 
 # Size
 size_cell = 100
-padding = size_cell
+padding = int(size_cell*1.5)
 width_board = 7 * size_cell
 height_board = 6 * size_cell
 radius_hole = 40
@@ -78,3 +80,4 @@ pg.display.set_caption(screen_title)
 board_surface = pg.surface.Surface((width_board, height_board)).convert_alpha()
 playing = player_1
 color_playing = color_player_1
+num_turn = 0

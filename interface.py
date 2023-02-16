@@ -6,6 +6,7 @@ from time import sleep
 import pygame as pg
 
 from variables import *
+from scores import who_is_winner
 
 
 def center_all(list_text):
@@ -133,19 +134,31 @@ def click(player, color, pos_click_x):
 
 
 def gaming(event):
-    global playing, color_playing
+    global playing, color_playing, num_turn
 
+    winner = no_player
     if event.type == pg.MOUSEBUTTONUP:
         pos_click = pg.mouse.get_pos()
         if padding < pos_click[0] < width_board + padding:
             playing, color_playing = click(
                 playing, color_playing, pos_click[0] - padding
             )
-
-    mouse_x, mouse_y = pg.mouse.get_pos()
-    if mouse_x < pos_min_x:
-        mouse_x = pos_min_x
-    elif mouse_x > pos_max_x:
-        mouse_x = pos_max_x
-    screen.fill(color_screen)
-    pg.draw.circle(screen, color_playing, (mouse_x, padding // 2), radius_disk)
+            num_turn += 1
+            winner = who_is_winner(board)
+            if winner == player_1:
+                print("Winner is player 1")
+            elif winner == player_2:
+                print("Player 2 won this match")
+            elif num_turn == nbr_max_turn:
+                winner = draw
+                print("It's a draw")
+    
+    if winner == no_player:
+        mouse_x, mouse_y = pg.mouse.get_pos()
+        if mouse_x < pos_min_x:
+            mouse_x = pos_min_x
+        elif mouse_x > pos_max_x:
+            mouse_x = pos_max_x
+        screen.fill(color_screen)
+        pg.draw.circle(screen, color_playing, (mouse_x, padding // 2), radius_disk)
+    return winner

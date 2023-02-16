@@ -14,9 +14,9 @@ start_game()
 # Run the game loop forever
 while True:
     for event in pg.event.get():
-        if event.type == pg.QUIT:
+        winner = gaming(event)
+        if winner != no_player:
             pg.quit()
             sys.exit()
-        gaming(event)
     update_screen((0, 0, padding, width_screen))
     CLOCK.tick(fps)
