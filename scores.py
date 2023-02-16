@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from variables import no_player, player_1, player_2
+from variables import symbol_no_player, symbol_player_1, symbol_player_2
 from numpy import ceil, where, zeros
 
 def state_to_bits(state):
@@ -38,13 +38,13 @@ def state_win(state):
 
 def who_is_winner(board):
     s = board.shape
-    state_player_1 = zeros(s)
-    state_player_2 = zeros(s)
-    state_player_1[where(board == player_1)] = 1
-    state_player_2[where(board == player_2)] = 1
-    if state_win(state_player_1):
-        return player_1
-    elif state_win(state_player_2):
-        return player_2
+    state_symbol_player_1 = zeros(s)
+    state_symbol_player_2 = zeros(s)
+    state_symbol_player_1[where(board == symbol_player_1)] = 1
+    state_symbol_player_2[where(board == symbol_player_2)] = 1
+    if state_win(state_symbol_player_1):
+        return symbol_player_1
+    elif state_win(state_symbol_player_2):
+        return symbol_player_2
     else:
-        return no_player
+        return symbol_no_player

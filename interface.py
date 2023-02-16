@@ -99,19 +99,19 @@ def start_game():
 
 
 def inverse_player(playing):
-    if playing == player_1:
-        playing = player_2
-        color_playing = color_player_2
+    if playing == symbol_player_1:
+        playing = symbol_player_2
+        color_playing = color_symbol_player_2
     else:
-        playing = player_1
-        color_playing = color_player_1
+        playing = symbol_player_1
+        color_playing = color_symbol_player_1
     return playing, color_playing
 
 
 def find_low_bound(i):
     col = board[:, i]
     for j in range(len(col) - 1, -1, -1):
-        if col[j] == no_player:
+        if col[j] == symbol_no_player:
             return j
     return -1
 
@@ -136,7 +136,7 @@ def click(player, color, pos_click_x):
 def gaming(event):
     global playing, color_playing, num_turn
 
-    winner = no_player
+    winner = symbol_no_player
     if event.type == pg.MOUSEBUTTONUP:
         pos_click = pg.mouse.get_pos()
         if padding < pos_click[0] < width_board + padding:
@@ -145,15 +145,15 @@ def gaming(event):
             )
             num_turn += 1
             winner = who_is_winner(board)
-            if winner == player_1:
+            if winner == symbol_player_1:
                 print("Winner is player 1")
-            elif winner == player_2:
+            elif winner == symbol_player_2:
                 print("Player 2 won this match")
             elif num_turn == nbr_max_turn:
-                winner = draw
+                winner = symbol_draw
                 print("It's a draw")
     
-    if winner == no_player:
+    if winner == symbol_no_player:
         mouse_x, mouse_y = pg.mouse.get_pos()
         if mouse_x < pos_min_x:
             mouse_x = pos_min_x

@@ -7,20 +7,20 @@ import pygame as pg
 pg.init()
 
 # Symbols
-draw = "-1"
-no_player = "0"
-player_1 = "1"
-player_2 = "2"
+symbol_draw = "-1"
+symbol_no_player = "0"
+symbol_player_1 = "1"
+symbol_player_2 = "2"
 
 # Board
 board = np.array(
     [
-        [no_player] * 7,
-        [no_player] * 7,
-        [no_player] * 7,
-        [no_player] * 7,
-        [no_player] * 7,
-        [no_player] * 7,
+        [symbol_no_player] * 7,
+        [symbol_no_player] * 7,
+        [symbol_no_player] * 7,
+        [symbol_no_player] * 7,
+        [symbol_no_player] * 7,
+        [symbol_no_player] * 7,
     ]
 )
 nbr_max_turn = board.size
@@ -34,8 +34,8 @@ blue = (38, 60, 255)
 dark_blue = (0, 0, 229)
 light_blue = (30, 160, 255)
 color_trans = (0, 0, 0, 0)
-color_player_1 = red
-color_player_2 = green
+color_symbol_player_1 = red
+color_symbol_player_2 = green
 color_board = blue
 color_screen = white
 color_options_screen = light_blue
@@ -78,6 +78,6 @@ CLOCK = pg.time.Clock()
 screen = pg.display.set_mode((width_screen, height_screen), 0, 32)
 pg.display.set_caption(screen_title)
 board_surface = pg.surface.Surface((width_board, height_board)).convert_alpha()
-playing = player_1
-color_playing = color_player_1
+playing = symbol_player_1
+color_playing = color_symbol_player_1
 num_turn = 0
