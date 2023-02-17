@@ -13,7 +13,7 @@ start_game()
 while True:
     for event in pg.event.get():
         winner = gaming(event)
-        if winner != symbol_no_player:
+        if winner != symbol_no_player or event.type == pg.QUIT:
             pg.quit()
             sys.exit()
     update_screen((0, 0, padding, width_screen))
