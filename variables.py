@@ -26,8 +26,20 @@ board = np.array(
 nbr_max_turn = board.size
 
 # AI
-difficulty_AI = 0
+difficulty_AI_1 = 0
+difficulty_AI_2 = 0
 symbol_player_AI = symbol_no_player
+
+# Boxes for levels of AI
+boxAI_out = -1
+boxAI_play = -255
+boxAI_text_levels = [
+    "Start",
+    "Start",
+    "Meh, begin",
+    "Get my a** kicked",
+    "Welcome to Hell",
+]
 
 # Colors
 white = (255, 255, 255)
@@ -39,8 +51,8 @@ dark_blue = (0, 0, 229)
 light_blue = (30, 160, 255)
 cyan = (45, 245, 255)
 color_trans = (0, 0, 0, 0)
-color_symbol_player_1 = red
-color_symbol_player_2 = green
+color_player_1 = red
+color_player_2 = green
 color_board = blue
 color_screen = white
 color_options_screen = light_blue
@@ -80,17 +92,8 @@ text_options_play_HvH = "Human vs. Human"
 text_options_play_HvAI = "Human vs. IA"
 text_options_play_AIvAI = "Watch the world burn"
 text_options_difficulty_HvAI = "Choose your poison"
+text_options_difficulty_AIvAI = "How badly do you want this game to go ?"
 
-# Boxes for levels of AI
-boxAI_out = -1
-boxAI_play = -255
-boxAI_text_levels = [
-    "Start",
-    "Start",
-    "Meh, begin",
-    "Get my a** kicked",
-    "Welcome to Hell",
-]
 
 # Starting everything
 CLOCK = pg.time.Clock()
@@ -98,5 +101,5 @@ screen = pg.display.set_mode((width_screen, height_screen), 0, 32)
 pg.display.set_caption(screen_title)
 board_surface = pg.surface.Surface((width_board, height_board)).convert_alpha()
 symbol_playing = symbol_player_1
-color_symbol_playing = color_symbol_player_1
+color_playing = color_player_1
 num_turn = 0

@@ -20,7 +20,7 @@ def compute_total_size(list_text):
     return total_size + (len(list_text) - 1) * options_spacing
 
 
-def write_same_line(list_text, y):
+def write_same_line(list_text, y, color_box):
     box_rect = []
     n = list_text
     x_tot = 0
@@ -37,7 +37,7 @@ def write_same_line(list_text, y):
             size[0] + 2 * text_box_spacing,
             size[1] + 2 * text_box_spacing,
         )
-        pg.draw.rect(screen, color_options_box, b_rect)
+        pg.draw.rect(screen, color_box, b_rect)
         screen.blit(text, (x_now + text_box_spacing, y + text_box_spacing))
         box_rect.append(b_rect)
         x_now += 2 * text_box_spacing + size[0] + options_spacing
@@ -51,28 +51,40 @@ def write_same_line(list_text, y):
     return new_y, box_rect
 
 
-def write_to_screen(text, y_now):
+def write_to_screen(text, y_now, color_box):
     if type(text) == list:
-        new_y, box_rect = write_same_line(text, y_now)
+        new_y, box_rect = write_same_line(text, y_now, color_box)
     else:
-        new_y, box_rect = write_same_line([text], y_now)
+        new_y, box_rect = write_same_line([text], y_now, color_box)
         box_rect = box_rect[0]
     return new_y, box_rect
 
 
-def center_all(list_text):
+def center_all(list_text, color_box=color_options_box):
+    if type(color_box) == list:
+        assert len(list_text) == len(
+            color_box
+        ), f"list_text and color_box are not the same size ({len(list_text)} and {len(color_box)})"
     total_size = compute_total_size(list_text)
     rect_boxes = []
     y_now = (height_screen - total_size) // 2
-    for text in list_text:
-        y_now, box_rect = write_to_screen(text, y_now)
+    for i in range(len(list_text)):
+        text = list_text[i]
+        if type(color_box) == list:
+            color = color_box[i]
+        else:
+            color = color_box
+        y_now, box_rect = write_to_screen(text, y_now, color)
         rect_boxes.append(box_rect)
     pg.display.update()
     return rect_boxes
 
 
-def x_in_rect(rect, x, y):
-    return rect[0] <= x <= rect[0] + rect[2] and rect[1] <= y <= rect[1] + rect[3]
+def x_in_rect(rect, coor):
+    return (
+        rect[0] <= coor[0] <= rect[0] + rect[2]
+        and rect[1] <= coor[1] <= rect[1] + rect[3]
+    )
 
 
 def create_options_text(text, color=color_options_text):
@@ -82,7 +94,7 @@ def create_options_text(text, color=color_options_text):
 
 def handle_click(click_coor, list_rect):
     for i in range(len(list_rect)):
-        if x_in_rect(list_rect[i], click_coor[0], click_coor[1]):
+        if x_in_rect(list_rect[i], click_coor):
             return i
     return -1
 
@@ -106,45 +118,105 @@ def draw_agreement_box(text):
     return box
 
 
-def options_1AI():
-    global player_AI, difficulty_AI
+def highlight_clicked_box(box_clicked, index_box, color_box, color_text):
+    text = create_options_text(f"Level {index_box}", color_text)
+    highlight_box(box_clicked, text, color_box)
 
-    screen.fill(color_options_screen)
-    text_diff = create_options_text(text_options_difficulty_HvAI)
-    texts_level = []
-    for i in range(5):
-        texts_level.append(create_options_text(f"Level {i}"))
-    text_options = [text_diff, texts_level]
+
+def options_1AI(text_options):
     boxes_levels = center_all(text_options)
     box_clicked = boxAI_out
     play_box = None
     while box_clicked != boxAI_play:
         for event in pg.event.get():
-            if event.type == pg.MOUSEBUTTONUP:
-                mouse_click = pg.mouse.get_pos()
-                index_box = handle_click(mouse_click, boxes_levels[1])
-                screen.fill(color_options_screen)
-                center_all(text_options)
-                if index_box != boxAI_out:
-                    box_clicked = boxes_levels[1][index_box]
-                    text = create_options_text(
-                        f"Level {index_box}", color_options_highlight_text
+            if event.type != pg.MOUSEBUTTONUP:
+                continue
+            screen.fill(color_options_screen)
+            center_all(text_options)
+            mouse_click = pg.mouse.get_pos()
+            index_box = handle_click(mouse_click, boxes_levels[1])
+            if index_box != boxAI_out:
+                highlight_clicked_box(
+                    boxes_levels[1][index_box],
+                    index_box,
+                    color_options_highlight_box,
+                    color_options_highlight_text,
+                )
+                play_box = draw_agreement_box(boxAI_text_levels[index_box])
+                difficulty_AI = index_box
+            elif play_box is not None and x_in_rect(play_box, mouse_click):
+                box_clicked = boxAI_play
+            else:
+                play_box = None
+                pg.display.update()
+    return symbol_player_2, difficulty_AI
+
+
+def options_2AI(text_options):
+    colors = [color_options_box, color_player_1, color_player_2]
+    boxes_levels = center_all(text_options, colors)
+    box_clicked = boxAI_out
+    play_box = None
+    diff_AI_1, diff_AI_2 = None, None
+    options_levels = [*boxes_levels[1], *boxes_levels[2]]
+    nbr_levels_AI_1 = len(boxes_levels[1])
+    while box_clicked != boxAI_play:
+        for event in pg.event.get():
+            if event.type != pg.MOUSEBUTTONUP:
+                continue
+            mouse_click = pg.mouse.get_pos()
+            index_box = handle_click(mouse_click, options_levels)
+            if index_box != boxAI_out:
+                if 0 <= index_box < nbr_levels_AI_1:
+                    write_same_line(
+                        text_options[1], boxes_levels[1][0][1], color_player_1
                     )
-                    highlight_box(box_clicked, text, color_options_highlight_box)
-                    play_box = draw_agreement_box(boxAI_text_levels[index_box])
-                    difficulty_AI = index_box
-                elif play_box is not None and x_in_rect(
-                    play_box, mouse_click[0], mouse_click[1]
-                ):
-                    box_clicked = boxAI_play
-                else:
-                    play_box = None
-                    pg.display.update()
-    player_AI = symbol_player_2
+                    diff_AI_1 = index_box
+                elif nbr_levels_AI_1 <= index_box < len(options_levels):
+                    write_same_line(
+                        text_options[2], boxes_levels[2][0][1], color_player_2
+                    )
+                    diff_AI_2 = index_box % nbr_levels_AI_1
+                if diff_AI_1 is not None and diff_AI_2 is not None:
+                    play_box = draw_agreement_box("Sarah Connor ?")
+                highlight_clicked_box(
+                    options_levels[index_box],
+                    index_box % nbr_levels_AI_1,
+                    color_options_highlight_box,
+                    color_options_highlight_text,
+                )
+            elif play_box is not None and x_in_rect(play_box, mouse_click):
+                box_clicked = boxAI_play
+            else:
+                play_box = None
+                diff_AI_1 = None
+                diff_AI_2 = None
+                screen.fill(color_options_screen)
+                center_all(text_options, colors)
+            pg.display.update()
+    return diff_AI_1, diff_AI_2
 
 
-def options_2AI():
-    global player_AI, difficulty_AI
+def show_options_AI(number):
+    global player_AI, difficulty_AI_1, difficulty_AI_2
+
+    screen.fill(color_options_screen)
+    texts_level = []
+    for i in range(len(boxAI_text_levels)):
+        texts_level.append(create_options_text(f"Level {i}"))
+    text_difficulty_options = [
+        "",
+        text_options_difficulty_HvAI,
+        text_options_difficulty_AIvAI,
+    ]
+    text_diff = create_options_text(text_difficulty_options[number])
+    text_options = [text_diff, texts_level]
+
+    if number == 1:
+        player_AI, difficulty_AI_1 = options_1AI(text_options)
+    elif number == 2:
+        text_options.append(texts_level)
+        difficulty_AI_1, difficulty_AI_2 = options_2AI(text_options)
 
 
 def show_options_play():
@@ -158,14 +230,14 @@ def show_options_play():
         for event in pg.event.get():
             if event.type == pg.MOUSEBUTTONUP:
                 mouse = pg.mouse.get_pos()
-                if x_in_rect(boxes[0], mouse[0], mouse[1]):
+                if x_in_rect(boxes[0], mouse):
                     status = options_play_HvH
-                if x_in_rect(boxes[1], mouse[0], mouse[1]):
+                if x_in_rect(boxes[1], mouse):
                     status = options_play_HvAI
-                    options_1AI()
-                if x_in_rect(boxes[2], mouse[0], mouse[1]):
+                    show_options_AI(1)
+                if x_in_rect(boxes[2], mouse):
                     status = options_play_AIvAI
-                    options_2AI()
+                    show_options_AI(2)
     return status
 
 
@@ -179,7 +251,7 @@ def start_screen():
         for event in pg.event.get():
             if event.type == pg.MOUSEBUTTONUP:
                 mouse = pg.mouse.get_pos()
-                if x_in_rect(rect_play, mouse[0], mouse[1]):
+                if x_in_rect(rect_play, mouse):
                     status = show_options_play()
     return status
 
@@ -211,11 +283,11 @@ def start_game():
 def inverse_player(symbol_playing):
     if symbol_playing == symbol_player_1:
         symbol_playing = symbol_player_2
-        color_symbol_playing = color_symbol_player_2
+        color_playing = color_player_2
     else:
         symbol_playing = symbol_player_1
-        color_symbol_playing = color_symbol_player_1
-    return symbol_playing, color_symbol_playing
+        color_playing = color_player_1
+    return symbol_playing, color_playing
 
 
 def find_low_bound(i):
@@ -244,14 +316,14 @@ def click(player, color, pos_click_x):
 
 
 def gaming(event):
-    global symbol_playing, color_symbol_playing, num_turn
+    global symbol_playing, color_playing, num_turn
 
     winner = symbol_no_player
     if event.type == pg.MOUSEBUTTONUP:
         pos_click = pg.mouse.get_pos()
         if padding < pos_click[0] < width_board + padding:
-            symbol_playing, color_symbol_playing = click(
-                symbol_playing, color_symbol_playing, pos_click[0] - padding
+            symbol_playing, color_playing = click(
+                symbol_playing, color_playing, pos_click[0] - padding
             )
             num_turn += 1
             winner = who_is_winner(board)
@@ -270,7 +342,5 @@ def gaming(event):
         elif mouse_x > pos_max_x:
             mouse_x = pos_max_x
         screen.fill(color_screen)
-        pg.draw.circle(
-            screen, color_symbol_playing, (mouse_x, padding // 2), radius_disk
-        )
+        pg.draw.circle(screen, color_playing, (mouse_x, padding // 2), radius_disk)
     return winner
