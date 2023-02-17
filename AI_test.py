@@ -37,6 +37,9 @@ def minimax(board, depth = 1): #returns the column where the AI will play
         depth = depth_hard
     ##construct the score 
     pass #not finished
+
+
+
 def opponent(symbol_player):
     if symbol_player == symbol_player_1:
         return symbol_player_1
@@ -65,11 +68,9 @@ def score_column_prediction(board, symbol_player): #player is the number of curr
     opp = opponent(symbol_player) 
     for i in range(np.size(board, 0)): # for horizontal lines
         row = board[i, :]
-        
         for j in range(np.size(board, 1) - 3): # for horizontal lines
             buffer_row = row[j: j + 4] #buffer of 4 length to check for disks in horizontal lines
             score += count_points_buffer(buffer_row, symbol_player)
-
 
     for j in range(np.size(board, 1)): # for vertical lines
         col = board[:, j]
@@ -81,25 +82,9 @@ def score_column_prediction(board, symbol_player): #player is the number of curr
         for j in range(np.size(board, 1) - 3):
             buffer_slash = board[i+3][j+3]
             score += count_points_buffer(buffer_slash, symbol_player)
-            
 
-    for i in range(np.size(board, 0) - 3):
-        for j in range(np.size(board, )):
-            buffer_backslash = board[][]
-
-    
-    
-
-
-        
-    return score #not finished
-
-
-
-
-
-
-
-
-
-## faire fonction buffer score pour après séparer dans score_column verical/horizontal et diagonal
+    for i in range(np.size(board, 0) - 3): # for backslash diagonal
+        for j in range(np.size(board, 1) - 3, np.size(board, 1)):
+            buffer_backslash = board[i][j]
+            score += count_points_buffer(buffer_backslash, symbol_player)
+    return score
