@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from variables import *
+
 
 def compute_total_size(list_text):
     total_size = 0

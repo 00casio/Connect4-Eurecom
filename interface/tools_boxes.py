@@ -1,6 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from time import sleep
+
 from interface.tools_writing import *
 
 

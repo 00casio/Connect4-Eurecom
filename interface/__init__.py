@@ -5,6 +5,7 @@ from interface.AI import *
 from interface.screens import *
 from interface.tools_boxes import *
 from interface.tools_writing import *
+from scores import who_is_winner
 
 
 def inverse_player(symbol_playing):
