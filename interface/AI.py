@@ -5,6 +5,11 @@ from interface.tools_boxes import *
 from interface.tools_writing import *
 
 
+def reset_screen(color_screen, text, colors_text):
+    screen.fill(color_screen)
+    center_all(text, colors_text)
+
+
 def options_1AI(text_options):
     """ Show the options for when there is only 1 AI in the game """
     boxes_levels = center_all(text_options)
@@ -14,8 +19,7 @@ def options_1AI(text_options):
         for event in pg.event.get():
             if event.type != pg.MOUSEBUTTONUP:
                 continue
-            screen.fill(color_options_screen)
-            center_all(text_options)
+            reset_screen(color_options_screen, text_options, color_options_box)
             mouse_click = pg.mouse.get_pos()
             index_box = handle_click(mouse_click, boxes_levels[1])
             if index_box != boxAI_out:
@@ -75,8 +79,7 @@ def options_2AI(text_options):
                 play_box = None
                 diff_AI_1 = None
                 diff_AI_2 = None
-                screen.fill(color_options_screen)
-                center_all(text_options, colors)
+                reset_screen(color_options_screen, text_options, colors)
             pg.display.update()
     return diff_AI_1, diff_AI_2
 

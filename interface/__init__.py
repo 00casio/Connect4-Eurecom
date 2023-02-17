@@ -23,7 +23,7 @@ def find_free_slot(i):
     """ Return the index of the first free slot """
     col = board[:, i]
     for j in range(len(col) - 1, -1, -1):
-        if col[j] == symbodl_no_player:
+        if col[j] == symbol_no_player:
             return j
     return -1
 
