@@ -4,7 +4,8 @@
 from variables import *
 
 
-def compute_total_size(list_text):
+def compute_total_height(list_text):
+    """ Calculate the total height of a list of text """
     total_size = 0
     for text in list_text:
         total_size += 2 * text_box_spacing
@@ -16,6 +17,8 @@ def compute_total_size(list_text):
 
 
 def write_same_line(list_text, y, color_box):
+    """ Write on the same line centered in the middle all elements in 'list_text' in the color 'color_box'.
+    'color_box' can be list, but it must be the same size as 'list_text' """
     box_rect = []
     n = list_text
     x_tot = 0
@@ -47,6 +50,7 @@ def write_same_line(list_text, y, color_box):
 
 
 def write_to_screen(text, y_now, color_box):
+    """ Write 'text' on the screen in the color 'color_box' """
     if type(text) == list:
         new_y, box_rect = write_same_line(text, y_now, color_box)
     else:
@@ -56,11 +60,12 @@ def write_to_screen(text, y_now, color_box):
 
 
 def center_all(list_text, color_box=color_options_box):
+    """ Write the texts in 'list_text' centered in the middle of the screen """
     if type(color_box) == list:
         assert len(list_text) == len(
             color_box
         ), f"list_text and color_box are not the same size ({len(list_text)} and {len(color_box)})"
-    total_size = compute_total_size(list_text)
+    total_size = compute_total_height(list_text)
     rect_boxes = []
     y_now = (height_screen - total_size) // 2
     for i in range(len(list_text)):
@@ -75,6 +80,7 @@ def center_all(list_text, color_box=color_options_box):
     return rect_boxes
 
 
-def create_options_text(text, color=color_options_text):
-    font = pg.font.SysFont(text_font, text_size)
+def create_options_text(text, color=color_options_text, font=text_font, size=text_size):
+    """ Create text in the color, font, and size asked """
+    font = pg.font.SysFont(font, size)
     return font.render(text, 1, color)

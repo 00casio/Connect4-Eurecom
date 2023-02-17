@@ -6,6 +6,7 @@ from interface.tools_writing import *
 
 
 def options_1AI(text_options):
+    """ Show the options for when there is only 1 AI in the game """
     boxes_levels = center_all(text_options)
     box_clicked = boxAI_out
     play_box = None
@@ -18,10 +19,10 @@ def options_1AI(text_options):
             mouse_click = pg.mouse.get_pos()
             index_box = handle_click(mouse_click, boxes_levels[1])
             if index_box != boxAI_out:
-                highlight_clicked_box(
+                highlight_box(
                     boxes_levels[1][index_box],
-                    index_box,
                     color_options_highlight_box,
+                    f"Level {index_box}",
                     color_options_highlight_text,
                 )
                 play_box = draw_agreement_box(boxAI_text_levels[index_box])
@@ -35,6 +36,7 @@ def options_1AI(text_options):
 
 
 def options_2AI(text_options):
+    """ Show the options for when there are 2 AIs in the game """
     colors = [color_options_box, color_player_1, color_player_2]
     boxes_levels = center_all(text_options, colors)
     box_clicked = boxAI_out
@@ -61,10 +63,10 @@ def options_2AI(text_options):
                     diff_AI_2 = index_box % nbr_levels_AI_1
                 if diff_AI_1 is not None and diff_AI_2 is not None:
                     play_box = draw_agreement_box("Sarah Connor ?")
-                highlight_clicked_box(
+                highlight_box(
                     options_levels[index_box],
-                    index_box % nbr_levels_AI_1,
                     color_options_highlight_box,
+                    f"Level {index_box % nbr_levels_AI_1}",
                     color_options_highlight_text,
                 )
             elif play_box is not None and x_in_rect(play_box, mouse_click):
@@ -80,7 +82,10 @@ def options_2AI(text_options):
 
 
 def show_options_AI(number):
+    """ Show the options for the AIs according to the number given """
     global player_AI, difficulty_AI_1, difficulty_AI_2
+
+    assert 0 < number < 3, f"number can be something other than 1 or 2"
 
     screen.fill(color_options_screen)
     texts_level = []

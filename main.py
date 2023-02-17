@@ -3,8 +3,6 @@
 
 import sys
 
-import pygame as pg
-
 from interface import *
 from variables import *
 

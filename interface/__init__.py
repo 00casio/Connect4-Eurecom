@@ -9,6 +9,7 @@ from scores import who_is_winner
 
 
 def inverse_player(symbol_playing):
+    """ Return the symbols of the opponent of the player currently playing """
     if symbol_playing == symbol_player_1:
         symbol_playing = symbol_player_2
         color_playing = color_player_2
@@ -18,19 +19,21 @@ def inverse_player(symbol_playing):
     return symbol_playing, color_playing
 
 
-def find_low_bound(i):
+def find_free_slot(i):
+    """ Return the index of the first free slot """
     col = board[:, i]
     for j in range(len(col) - 1, -1, -1):
-        if col[j] == symbol_no_player:
+        if col[j] == symbodl_no_player:
             return j
     return -1
 
 
 def click(symbol_player, color, pos_click_x):
+    """ What happens when a player click in a row or an AI play """
     global board
 
     num_col = pos_click_x // size_cell
-    i = find_low_bound(num_col)
+    i = find_free_slot(num_col)
     if i == -1:
         return symbol_player, color
     board[i, num_col] = symbol_player
@@ -44,6 +47,7 @@ def click(symbol_player, color, pos_click_x):
 
 
 def gaming(event):
+    """ The function that should handle all events in a turn """
     global symbol_playing, color_playing, num_turn
 
     winner = symbol_no_player
