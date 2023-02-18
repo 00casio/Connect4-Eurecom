@@ -9,7 +9,7 @@ from scores import who_is_winner
 
 
 def inverse_player(symbol_playing):
-    """ Return the symbols of the opponent of the player currently playing """
+    """Return the symbols of the opponent of the player currently playing"""
     if symbol_playing == symbol_player_1:
         symbol_playing = symbol_player_2
         color_playing = color_player_2
@@ -20,7 +20,7 @@ def inverse_player(symbol_playing):
 
 
 def find_free_slot(i):
-    """ Return the index of the first free slot """
+    """Return the index of the first free slot"""
     col = board[:, i]
     for j in range(len(col) - 1, -1, -1):
         if col[j] == symbol_no_player:
@@ -29,7 +29,7 @@ def find_free_slot(i):
 
 
 def click(symbol_player, color, pos_click_x):
-    """ What happens when a player click in a row or an AI play """
+    """What happens when a player click in a row or an AI play"""
     global board
 
     num_col = pos_click_x // size_cell
@@ -38,7 +38,7 @@ def click(symbol_player, color, pos_click_x):
         return symbol_player, color
     board[i, num_col] = symbol_player
     x = padding + num_col * size_cell + size_cell // 2
-    for y in range(padding // 2, padding + i * size_cell + padding // 2, 5):
+    for y in range(padding // 2, padding + i * size_cell + size_cell // 2, 5):
         screen.fill(white)
         pg.draw.circle(screen, color, (x, y), radius_disk)
         update_screen()
@@ -47,7 +47,7 @@ def click(symbol_player, color, pos_click_x):
 
 
 def gaming(event):
-    """ The function that should handle all events in a turn """
+    """The function that should handle all events in a turn"""
     global symbol_playing, color_playing, num_turn
 
     winner = symbol_no_player

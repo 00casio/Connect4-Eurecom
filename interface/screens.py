@@ -7,7 +7,7 @@ from interface.tools_writing import *
 
 
 def show_options_play():
-    """ Show the different options when choosing to play """
+    """Show the different options when choosing to play"""
     screen.fill(color_options_screen)
     text_HvH = create_options_text(text_options_play_HvH)
     text_HvAI = create_options_text(text_options_play_HvAI)
@@ -30,8 +30,8 @@ def show_options_play():
 
 
 def start_screen():
-    """ Show the start screen.
-    For now it is only the play button but soon there will be more options """
+    """Show the start screen.
+    For now it is only the play button but soon there will be more options"""
     screen.fill(color_options_screen)
     text_play = create_options_text(text_options_play)
     boxes_options = center_all([text_play])
@@ -47,7 +47,7 @@ def start_screen():
 
 
 def start_game():
-    """ Create the board to allow the game to start """
+    """Create the board to allow the game to start"""
     screen.fill(color_screen)
     pg.draw.rect(board_surface, color_board, (0, 0, width_board, height_board))
     for i in range(7):

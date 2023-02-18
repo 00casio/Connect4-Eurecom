@@ -7,7 +7,7 @@ from interface.tools_writing import *
 
 
 def x_in_rect(rect, coor):
-    """ Return whether coor is in the rectangle 'rect' """
+    """Return whether coor is in the rectangle 'rect'"""
     return (
         rect[0] <= coor[0] <= rect[0] + rect[2]
         and rect[1] <= coor[1] <= rect[1] + rect[3]
@@ -15,7 +15,7 @@ def x_in_rect(rect, coor):
 
 
 def handle_click(click_coor, list_rect):
-    """ Return the index of the box the click was in """
+    """Return the index of the box the click was in"""
     for i in range(len(list_rect)):
         if x_in_rect(list_rect[i], click_coor):
             return i
@@ -23,7 +23,7 @@ def handle_click(click_coor, list_rect):
 
 
 def highlight_box(box, color_box, text, color_text):
-    """ Highlight the clicked box to be in a color or another """
+    """Highlight the clicked box to be in a color or another"""
     pg_text = create_options_text(text, color_text)
     pg.draw.rect(screen, color_box, box)
     x, y, a, b = box
@@ -32,7 +32,7 @@ def highlight_box(box, color_box, text, color_text):
 
 
 def draw_agreement_box(text, position=0.75):
-    """ Draw a agreement box in the center of the screen at position (in %) of the height of the screen"""
+    """Draw a agreement box in the center of the screen at position (in %) of the height of the screen"""
     agreement = create_options_text(text, black)
     s = agreement.get_size()
     x = (width_screen - s[0]) // 2 - text_box_spacing
