@@ -6,7 +6,7 @@ from interface.tools_boxes import *
 from interface.tools_writing import *
 
 
-def show_options_play():
+def show_options_play() -> int:
     """Show the different options when choosing to play"""
     screen.fill(color_options_screen)
     text_HvH = create_options_text(text_options_play_HvH)
@@ -29,7 +29,7 @@ def show_options_play():
     return status
 
 
-def start_screen():
+def start_screen() -> int:
     """Show the start screen.
     For now it is only the play button but soon there will be more options"""
     screen.fill(color_options_screen)
@@ -46,7 +46,7 @@ def start_screen():
     return status
 
 
-def start_game():
+def start_game() -> None:
     """Create the board to allow the game to start"""
     screen.fill(color_screen)
     pg.draw.rect(board_surface, color_board, (0, 0, width_board, height_board))

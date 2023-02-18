@@ -4,7 +4,7 @@
 from variables import *
 
 
-def compute_total_height(list_text):
+def compute_total_height(list_text: list[Surface | list[Surface]]) -> float:
     """Calculate the total height of a list of text"""
     total_size = 0
     for text in list_text:
@@ -16,7 +16,9 @@ def compute_total_height(list_text):
     return total_size + (len(list_text) - 1) * options_spacing
 
 
-def write_same_line(list_text, y, color_box):
+def write_same_line(
+    list_text: list[Surface], y: int, color_box: Color
+) -> tuple[int, list[Rect]]:
     """Write on the same line centered in the middle all elements in 'list_text' in the color 'color_box'.
     'color_box' can be list, but it must be the same size as 'list_text'"""
     box_rect = []
@@ -29,7 +31,7 @@ def write_same_line(list_text, y, color_box):
 
     for text in list_text:
         size = text.get_size()
-        b_rect = (
+        b_rect = Rect(
             x_now,
             y,
             size[0] + 2 * text_box_spacing,
@@ -46,10 +48,12 @@ def write_same_line(list_text, y, color_box):
         + 2 * text_box_spacing
         + options_spacing
     )
-    return new_y, box_rect
+    return (new_y, box_rect)
 
 
-def write_to_screen(text, y_now, color_box):
+def write_to_screen(
+    text: Surface | list[Surface], y_now: int, color_box: Color
+) -> tuple[int, Surface | list[Surface]]:
     """Write 'text' on the screen in the color 'color_box'"""
     if type(text) == list:
         new_y, box_rect = write_same_line(text, y_now, color_box)
@@ -59,7 +63,9 @@ def write_to_screen(text, y_now, color_box):
     return new_y, box_rect
 
 
-def center_all(list_text, color_box=color_options_box):
+def center_all(
+    list_text: list[Surface], color_box: Color | list[Color] = color_options_box
+) -> list[Rect]:
     """Write the texts in 'list_text' centered in the middle of the screen"""
     if type(color_box) == list:
         assert len(list_text) == len(
@@ -80,7 +86,12 @@ def center_all(list_text, color_box=color_options_box):
     return rect_boxes
 
 
-def create_options_text(text, color=color_options_text, font=text_font, size=text_size):
+def create_options_text(
+    text: str,
+    color: Color = color_options_text,
+    font: str = text_font,
+    size: int = text_size,
+) -> Surface:
     """Create text in the color, font, and size asked"""
     font = pg.font.SysFont(font, size)
     return font.render(text, 1, color)

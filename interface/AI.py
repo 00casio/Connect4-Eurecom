@@ -10,7 +10,7 @@ def reset_screen(color_screen, text, colors_text):
     center_all(text, colors_text)
 
 
-def options_1AI(text_options):
+def options_1AI(text_options: list[Surface | list[Surface]]) -> tuple[Any, int]:
     """Show the options for when there is only 1 AI in the game"""
     boxes_levels = center_all(text_options)
     box_clicked = boxAI_out
@@ -36,10 +36,10 @@ def options_1AI(text_options):
             else:
                 play_box = None
                 pg.display.update()
-    return symbol_player_2, difficulty_AI
+    return (symbol_player_2, difficulty_AI)
 
 
-def options_2AI(text_options):
+def options_2AI(text_options: list[Surface | list[Surface]]) -> tuple[int, int]:
     """Show the options for when there are 2 AIs in the game"""
     colors = [color_options_box, color_player_1, color_player_2]
     boxes_levels = center_all(text_options, colors)
@@ -81,14 +81,14 @@ def options_2AI(text_options):
                 diff_AI_2 = None
                 reset_screen(color_options_screen, text_options, colors)
             pg.display.update()
-    return diff_AI_1, diff_AI_2
+    return (diff_AI_1, diff_AI_2)
 
 
-def show_options_AI(number):
+def show_options_AI(number: int) -> None:
     """Show the options for the AIs according to the number given"""
     global player_AI, difficulty_AI_1, difficulty_AI_2
 
-    assert 0 < number < 3, f"number can be something other than 1 or 2"
+    assert 0 < number < 3, f"number can not be something other than 1 or 2"
 
     screen.fill(color_options_screen)
     texts_level = []

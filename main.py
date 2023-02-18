@@ -16,5 +16,5 @@ while True:
         if winner != symbol_no_player or event.type == pg.QUIT:
             pg.quit()
             sys.exit()
-    update_screen((0, 0, padding, width_screen))
+    update_screen()
     CLOCK.tick(fps)
