@@ -7,7 +7,7 @@ from interface.tools_boxes import *
 from interface.tools_writing import *
 from scores import who_is_winner
 import variables as var
-from var import Symbol, Color, Event, pg
+from variables import Symbol, Color, Event, pg
 
 def inverse_player(symbol_playing: Symbol) -> tuple[Symbol, Color]:
     """Return the symbols of the opponent of the player currently playing"""
@@ -56,15 +56,15 @@ def gaming(event: Event) -> Symbol:
         pos_click = pg.mouse.get_pos()
         if var.padding < pos_click[0] < var.width_board + var.padding:
             var.symbol_playing, var.color_playing = click(
-                symbol_playing, color_playing, pos_click[0] - var.padding
+                var.symbol_playing, var.color_playing, pos_click[0] - var.padding
             )
             var.num_turn += 1
-            winner = who_is_winner(board)
+            winner = who_is_winner(var.board)
             if winner == var.symbol_player_1:
                 print("Winner is player 1")
             elif winner == var.symbol_player_2:
                 print("Player 2 won this match")
-            elif num_turn == nbr_max_turn:
+            elif var.num_turn == var.nbr_max_turn:
                 winner = var.symbol_draw
                 print("It's a draw")
 

@@ -4,7 +4,7 @@
 from interface.tools_boxes import *
 from interface.tools_writing import *
 import variables as var
-from var import Color, Rect, Surface, Symbol, pg
+from variables import Color, Rect, Surface, Symbol, pg
 
 
 def reset_screen(
@@ -23,7 +23,7 @@ def options_1AI(text_options: list[list[Surface]]) -> tuple[Symbol, int]:
     cancel_box, quit_box = reset_screen(
         var.color_options_screen, text_options, var.color_options_box
     )
-    box_clicked = boxAI_out
+    box_clicked = var.boxAI_out
     play_box = None
     difficulty_AI = -1
     while box_clicked not in [var.boxAI_play, var.boxAI_cancel]:
@@ -52,7 +52,7 @@ def options_1AI(text_options: list[list[Surface]]) -> tuple[Symbol, int]:
             else:
                 play_box = None
                 pg.display.update()
-    return (symbol_player_2, difficulty_AI)
+    return (var.symbol_player_2, difficulty_AI)
 
 
 def options_2AI(text_options: list[list[Surface]]) -> tuple[int, int]:

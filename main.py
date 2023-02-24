@@ -23,4 +23,4 @@ while True:
             handle_quit(quit_box, pg.mouse.get_pos())
     quit_box = draw_quit_box()
     update_screen(Rect(0, 0, var.width_board + var.padding, var.width_screen))
-    CLOCK.tick(var.fps)
+    var.CLOCK.tick(var.fps)

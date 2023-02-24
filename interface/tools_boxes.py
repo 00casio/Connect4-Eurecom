@@ -7,7 +7,7 @@ from typing import Optional
 
 from interface.tools_writing import *
 import variables as var
-from var import Rect, Color, pg
+from variables import Rect, Color, pg
 
 def x_in_rect(rect: Rect, coor: tuple[int, int]) -> bool:
     """Return whether coor is in the rectangle 'rect'"""
@@ -26,7 +26,7 @@ def highlight_box(box: Rect, color_box: Color, text: str, color_text: Color) -> 
     """Highlight the clicked box to be in a color or another"""
     pg_text = create_text_rendered(text, color_text)
     pg.draw.rect(var.screen, color_box, box)
-    screen.blit(pg_text, (box.x + var.text_box_spacing, box.y + var.text_box_spacing))
+    var.screen.blit(pg_text, (box.x + var.text_box_spacing, box.y + var.text_box_spacing))
     pg.display.update()
 
 
@@ -63,7 +63,7 @@ def handle_quit(quit_box: Rect, mouse: tuple[int, int]) -> None:
 
 def update_screen(rect: Optional[Rect] = None, pause: float = 0.0) -> None:
     """Update the whole screen by default or only part of it"""
-    screen.blit(var.board_surface, (var.padding, var.padding))
+    var.screen.blit(var.board_surface, (var.padding, var.padding))
     if rect is not None:
         pg.display.update(rect)
     else:

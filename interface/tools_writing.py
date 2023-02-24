@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import variables as var
-from var import Surface, Color, Rect, pg
+from variables import Surface, Color, Rect, pg
 
 def compute_total_size(array_text: list[list[Surface]]) -> tuple[int, list[int]]:
     """Compute the height of a list of line of texts and the width of each line"""
@@ -92,7 +92,7 @@ def write_on_column(
 
 
 def center_all(
-    array_text: list[list[Surface]], color_box: Color | list[Color] = color_options_box
+    array_text: list[list[Surface]], color_box: Color | list[Color] = var.color_options_box
 ) -> list[list[Rect]]:
     """Write the texts in 'array_text' centered in the middle of the screen.
     If 'color_box' is a single element, then all boxes will have the same color"""

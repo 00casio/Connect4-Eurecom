@@ -45,7 +45,7 @@ def show_options_play() -> int:
 def start_screen() -> int:
     """Show the start screen.
     For now it is only the play button but soon there will be more options"""
-    var.screen.fill(color_options_screen)
+    var.screen.fill(var.color_options_screen)
     quit_box = draw_quit_box()
     text_play = create_text_rendered(var.text_options_play)
     boxes_options = center_all([[text_play]])
