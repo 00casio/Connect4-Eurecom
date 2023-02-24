@@ -117,7 +117,7 @@ def show_options_AI(number: int) -> None:
 
     assert 0 < number < 3, f"number can not be something other than 1 or 2"
 
-    screen.fill(var.color_options_screen)
+    var.screen.fill(var.color_options_screen)
     texts_level = []
     for i in range(len(var.boxAI_text_levels)):
         texts_level.append(create_text_rendered(f"Level {i}"))
