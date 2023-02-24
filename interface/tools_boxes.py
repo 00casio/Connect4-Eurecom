@@ -5,9 +5,10 @@ import sys
 from time import sleep
 from typing import Optional
 
-from interface.tools_writing import *
 import variables as var
-from variables import Rect, Color, pg
+from interface.tools_writing import *
+from variables import Color, Rect, pg
+
 
 def x_in_rect(rect: Rect, coor: tuple[int, int]) -> bool:
     """Return whether coor is in the rectangle 'rect'"""
@@ -26,7 +27,9 @@ def highlight_box(box: Rect, color_box: Color, text: str, color_text: Color) -> 
     """Highlight the clicked box to be in a color or another"""
     pg_text = create_text_rendered(text, color_text)
     pg.draw.rect(var.screen, color_box, box)
-    var.screen.blit(pg_text, (box.x + var.text_box_spacing, box.y + var.text_box_spacing))
+    var.screen.blit(
+        pg_text, (box.x + var.text_box_spacing, box.y + var.text_box_spacing)
+    )
     pg.display.update()
 
 

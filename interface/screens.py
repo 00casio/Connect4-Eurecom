@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import variables as var
 from interface.AI import *
 from interface.tools_boxes import *
 from interface.tools_writing import *
-import variables as var
 
 pg = var.pg
+
 
 def show_options_play() -> int:
     """Show the different options when choosing to play"""
@@ -66,7 +67,9 @@ def start_screen() -> int:
 def start_game() -> None:
     """Create the board to allow the game to start"""
     var.screen.fill(var.color_screen)
-    pg.draw.rect(var.board_surface, var.color_board, (0, 0, var.width_board, var.height_board))
+    pg.draw.rect(
+        var.board_surface, var.color_board, (0, 0, var.width_board, var.height_board)
+    )
     for i in range(7):
         for j in range(6):
             draw_circle(i, j, var.color_trans, var.radius_hole)

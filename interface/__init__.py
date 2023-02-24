@@ -1,13 +1,14 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import variables as var
 from interface.AI import *
 from interface.screens import *
 from interface.tools_boxes import *
 from interface.tools_writing import *
 from scores import who_is_winner
-import variables as var
-from variables import Symbol, Color, Event, pg
+from variables import Color, Event, Symbol, pg
+
 
 def inverse_player(symbol_playing: Symbol) -> tuple[Symbol, Color]:
     """Return the symbols of the opponent of the player currently playing"""
@@ -40,7 +41,9 @@ def click(
         return (symbol_player, color)
     var.board[i, num_col] = symbol_player
     x = var.padding + num_col * var.size_cell + var.size_cell // 2
-    for y in range(var.padding // 2, var.padding + i * var.size_cell + var.size_cell // 2, 5):
+    for y in range(
+        var.padding // 2, var.padding + i * var.size_cell + var.size_cell // 2, 5
+    ):
         var.screen.fill(var.white)
         pg.draw.circle(var.screen, color, (x, y), var.radius_disk)
         update_screen()
@@ -75,5 +78,7 @@ def gaming(event: Event) -> Symbol:
         elif mouse_x > var.pos_max_x:
             mouse_x = var.pos_max_x
         var.screen.fill(var.color_screen)
-        pg.draw.circle(var.screen, var.color_playing, (mouse_x, var.padding // 2), var.radius_disk)
+        pg.draw.circle(
+            var.screen, var.color_playing, (mouse_x, var.padding // 2), var.radius_disk
+        )
     return winner

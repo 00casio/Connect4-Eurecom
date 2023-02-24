@@ -2,14 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import variables as var
-from variables import Surface, Color, Rect, pg
+from variables import Color, Rect, Surface, pg
+
 
 def compute_total_size(array_text: list[list[Surface]]) -> tuple[int, list[int]]:
     """Compute the height of a list of line of texts and the width of each line"""
     total_height = 0
     total_width = []
     for line_text in array_text:
-        total_height += max([t.get_size()[1] for t in line_text]) + 2 * var.text_box_spacing
+        total_height += (
+            max([t.get_size()[1] for t in line_text]) + 2 * var.text_box_spacing
+        )
         width_now = (
             sum([t.get_size()[0] for t in line_text])
             + 2 * var.text_box_spacing * len(line_text)
@@ -92,7 +95,8 @@ def write_on_column(
 
 
 def center_all(
-    array_text: list[list[Surface]], color_box: Color | list[Color] = var.color_options_box
+    array_text: list[list[Surface]],
+    color_box: Color | list[Color] = var.color_options_box,
 ) -> list[list[Rect]]:
     """Write the texts in 'array_text' centered in the middle of the screen.
     If 'color_box' is a single element, then all boxes will have the same color"""
@@ -110,7 +114,9 @@ def center_all(
         else:
             color = color_box
         box_rect = write_on_line(line_text, color, var.width_screen, y_now)
-        y_now += line_text[0].get_size()[1] + 2 * var.text_box_spacing + var.options_spacing
+        y_now += (
+            line_text[0].get_size()[1] + 2 * var.text_box_spacing + var.options_spacing
+        )
         rect_boxes.append(box_rect)
     pg.display.update()
     return rect_boxes

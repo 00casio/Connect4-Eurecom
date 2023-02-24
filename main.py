@@ -3,10 +3,9 @@
 
 import sys
 
-from interface import *
 import variables as var
-
-pg = var.pg
+from interface import *
+from variables import Rect, pg
 
 status = start_screen()
 start_game()

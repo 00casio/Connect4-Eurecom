@@ -1,9 +1,9 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import variables as var
 from interface.tools_boxes import *
 from interface.tools_writing import *
-import variables as var
 from variables import Color, Rect, Surface, Symbol, pg
 
 
