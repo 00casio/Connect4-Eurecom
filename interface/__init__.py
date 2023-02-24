@@ -8,7 +8,7 @@ from interface.tools_writing import *
 from scores import who_is_winner
 
 
-def inverse_player(symbol_playing):
+def inverse_player(symbol_playing: Symbol) -> tuple[Symbol, Color]:
     """Return the symbols of the opponent of the player currently playing"""
     if symbol_playing == symbol_player_1:
         symbol_playing = symbol_player_2
@@ -16,10 +16,10 @@ def inverse_player(symbol_playing):
     else:
         symbol_playing = symbol_player_1
         color_playing = color_player_1
-    return symbol_playing, color_playing
+    return (symbol_playing, color_playing)
 
 
-def find_free_slot(i):
+def find_free_slot(i: int) -> int:
     """Return the index of the first free slot"""
     col = board[:, i]
     for j in range(len(col) - 1, -1, -1):
@@ -28,14 +28,16 @@ def find_free_slot(i):
     return -1
 
 
-def click(symbol_player, color, pos_click_x):
+def click(
+    symbol_player: Symbol, color: Color, pos_click_x: int
+) -> tuple[Symbol, Color]:
     """What happens when a player click in a row or an AI play"""
     global board
 
     num_col = pos_click_x // size_cell
     i = find_free_slot(num_col)
     if i == -1:
-        return symbol_player, color
+        return (symbol_player, color)
     board[i, num_col] = symbol_player
     x = padding + num_col * size_cell + size_cell // 2
     for y in range(padding // 2, padding + i * size_cell + size_cell // 2, 5):
@@ -46,7 +48,7 @@ def click(symbol_player, color, pos_click_x):
     return inverse_player(symbol_player)
 
 
-def gaming(event):
+def gaming(event: Event) -> Symbol:
     """The function that should handle all events in a turn"""
     global symbol_playing, color_playing, num_turn
 
