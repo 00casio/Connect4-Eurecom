@@ -10,7 +10,9 @@ def reset_screen(
 ) -> tuple[Rect, Rect]:
     screen.fill(color_screen)
     center_all(text, colors_boxes)
-    return (draw_cancel_box(), draw_quit_box())
+    a, b = draw_cancel_box(), draw_quit_box()
+    pg.display.update()
+    return (a, b)
 
 
 def options_1AI(text_options: list[list[Surface]]) -> tuple[Symbol, int]:
@@ -21,9 +23,8 @@ def options_1AI(text_options: list[list[Surface]]) -> tuple[Symbol, int]:
     )
     box_clicked = boxAI_out
     play_box = None
-    clicked_cancel = False
     difficulty_AI = -1
-    while box_clicked != boxAI_play and not clicked_cancel:
+    while box_clicked not in [boxAI_play, boxAI_cancel]:
         for event in pg.event.get():
             if event.type != pg.MOUSEBUTTONUP:
                 continue
@@ -32,7 +33,7 @@ def options_1AI(text_options: list[list[Surface]]) -> tuple[Symbol, int]:
             )
             mouse_click = pg.mouse.get_pos()
             if x_in_rect(cancel_box, mouse_click):
-                clicked_cancel = True
+                box_clicked = boxAI_cancel
             handle_quit(quit_box, mouse_click)
             index_box = handle_click(mouse_click, boxes_levels[1])
             if index_box != boxAI_out:
@@ -62,14 +63,13 @@ def options_2AI(text_options: list[list[Surface]]) -> tuple[int, int]:
     options_levels = [*boxes_levels[1], *boxes_levels[2]]
     nbr_levels_AI_1 = len(boxes_levels[1])
     cancel_box, quit_box = reset_screen(color_options_screen, text_options, colors)
-    cancel_clicked = False
-    while box_clicked != boxAI_play and not cancel_clicked:
+    while box_clicked not in [boxAI_play, boxAI_cancel]:
         for event in pg.event.get():
             if event.type != pg.MOUSEBUTTONUP:
                 continue
             mouse_click = pg.mouse.get_pos()
             if x_in_rect(cancel_box, mouse_click):
-                cancel_clicked = True
+                box_clicked = boxAI_cancel
             handle_quit(quit_box, mouse_click)
             index_box = handle_click(mouse_click, options_levels)
             if index_box != boxAI_out:

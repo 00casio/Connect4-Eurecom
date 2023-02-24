@@ -58,6 +58,7 @@ symbol_player_AI = symbol_no_player
 # Boxes for levels of AI
 boxAI_out = -1
 boxAI_play = -255
+boxAI_cancel = 255
 boxAI_text_levels = [
     "Start",
     "Start",
@@ -108,6 +109,7 @@ options_menu_play = 0
 options_play_HvH = 1
 options_play_HvAI = 2
 options_play_AIvAI = 3
+options_clicked_cancel = -255
 
 # Pygame
 fps = 30

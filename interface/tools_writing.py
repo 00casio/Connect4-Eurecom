@@ -60,7 +60,7 @@ def write_on_line(
     for text in list_text:
         boxes.append(write_text_box(text, color_box, write_x, y, space_x, space_y))
         write_x += text.get_size()[0] + 2 * space_x + space_box
-    pg.display.update()
+    # pg.display.update()
     return boxes
 
 
@@ -87,7 +87,7 @@ def write_on_column(
     for text in list_text:
         boxes.append(write_text_box(text, color_box, x, write_y))
         write_y += text.get_size()[1] + 2 * space_y + space_box
-    pg.display.update()
+    # pg.display.update()
     return boxes
 
 
