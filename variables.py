@@ -51,8 +51,8 @@ board = np.array(
 nbr_max_turn = board.size
 
 # AI
-difficulty_AI_1: int = 0
-difficulty_AI_2: int = 0
+difficulty_AI_1: int = -1
+difficulty_AI_2: int = -1
 symbol_player_AI = symbol_no_player
 
 # Boxes for levels of AI
@@ -126,6 +126,11 @@ text_options_difficulty_AIvAI = "How badly do you want this game to go ?"
 # Fonts
 main_font = pg.font.SysFont(text_font, text_size)
 
+# Quit and cancel
+text_cancel_box = "Cancel"
+coor_cancel_box = (10, 10)
+text_quit_box = "Quit"
+coor_quit_box = (width_screen - 10, 10)
 
 # Starting everything
 CLOCK = pg.time.Clock()

@@ -6,23 +6,34 @@ from interface.tools_writing import *
 
 
 def reset_screen(
-    color_screen: Color, text: list[list[Surface]], colors_text: Color | list[Color]
-) -> None:
+    color_screen: Color, text: list[list[Surface]], colors_boxes: Color | list[Color]
+) -> tuple[Rect, Rect]:
     screen.fill(color_screen)
-    center_all(text, colors_text)
+    center_all(text, colors_boxes)
+    return (draw_cancel_box(), draw_quit_box())
 
 
 def options_1AI(text_options: list[list[Surface]]) -> tuple[Symbol, int]:
     """Show the options for when there is only 1 AI in the game"""
     boxes_levels = center_all(text_options)
+    cancel_box, quit_box = reset_screen(
+        color_options_screen, text_options, color_options_box
+    )
     box_clicked = boxAI_out
     play_box = None
-    while box_clicked != boxAI_play:
+    clicked_cancel = False
+    difficulty_AI = -1
+    while box_clicked != boxAI_play and not clicked_cancel:
         for event in pg.event.get():
             if event.type != pg.MOUSEBUTTONUP:
                 continue
-            reset_screen(color_options_screen, text_options, color_options_box)
+            cancel_box, quit_box = reset_screen(
+                color_options_screen, text_options, color_options_box
+            )
             mouse_click = pg.mouse.get_pos()
+            if x_in_rect(cancel_box, mouse_click):
+                clicked_cancel = True
+            handle_quit(quit_box, mouse_click)
             index_box = handle_click(mouse_click, boxes_levels[1])
             if index_box != boxAI_out:
                 highlight_box(
@@ -50,11 +61,16 @@ def options_2AI(text_options: list[list[Surface]]) -> tuple[int, int]:
     diff_AI_1, diff_AI_2 = -1, -1
     options_levels = [*boxes_levels[1], *boxes_levels[2]]
     nbr_levels_AI_1 = len(boxes_levels[1])
-    while box_clicked != boxAI_play:
+    cancel_box, quit_box = reset_screen(color_options_screen, text_options, colors)
+    cancel_clicked = False
+    while box_clicked != boxAI_play and not cancel_clicked:
         for event in pg.event.get():
             if event.type != pg.MOUSEBUTTONUP:
                 continue
             mouse_click = pg.mouse.get_pos()
+            if x_in_rect(cancel_box, mouse_click):
+                cancel_clicked = True
+            handle_quit(quit_box, mouse_click)
             index_box = handle_click(mouse_click, options_levels)
             if index_box != boxAI_out:
                 if 0 <= index_box < nbr_levels_AI_1:
@@ -87,7 +103,9 @@ def options_2AI(text_options: list[list[Surface]]) -> tuple[int, int]:
                 play_box = None
                 diff_AI_1 = -1
                 diff_AI_2 = -1
-                reset_screen(color_options_screen, text_options, colors)
+                cancel_box, quit_box = reset_screen(
+                    color_options_screen, text_options, colors
+                )
             pg.display.update()
     return (diff_AI_1, diff_AI_2)
 
@@ -111,7 +129,7 @@ def show_options_AI(number: int) -> None:
     text_options = [[text_diff], texts_level]
 
     if number == 1:
-        symbol_player_AI, difficulty_AI_1 = options_1AI(text_options)
+        symbol_player_AI, difficulty_AI_2 = options_1AI(text_options)
     elif number == 2:
         text_options.append(texts_level)
         difficulty_AI_1, difficulty_AI_2 = options_2AI(text_options)

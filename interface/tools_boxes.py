@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+import sys
 from time import sleep
 from typing import Optional
 
@@ -34,14 +35,33 @@ def draw_agreement_box(text: str, position: float = 0.75) -> Rect:
     s = agreement.get_size()
     x = (width_screen - s[0]) // 2 - text_box_spacing
     y = int(position * height_screen)
-    box = Rect(x, y, s[0] + 2 * text_box_spacing, s[1] + 2 * text_box_spacing)
-    pg.draw.rect(screen, color_screen, box)
-    screen.blit(agreement, (x + text_box_spacing, y + text_box_spacing))
+    box = write_text_box(agreement, color_screen, x, y)
     pg.display.update()
     return box
 
 
+def draw_cancel_box() -> Rect:
+    """Draw the box that allow the user to take a step back"""
+    cancel = create_text_rendered(text_cancel_box, black)
+    return write_on_line([cancel], white, *coor_cancel_box, align=-1)[0]
+
+
+def draw_quit_box() -> Rect:
+    """Draw the box that allow the user to take a step back"""
+    quit_t = create_text_rendered(text_quit_box, black)
+    return write_on_line([quit_t], white, *coor_quit_box, align=1)[0]
+
+
+def handle_quit(quit_box: Rect, mouse: tuple[int, int]) -> None:
+    """Function to call when wanting to see if user clicked in the quitting box"""
+    if x_in_rect(quit_box, mouse):
+        print("You choose to quit the game\nYou are disapointing me")
+        pg.quit()
+        sys.exit()
+
+
 def update_screen(rect: Optional[Rect] = None, pause: float = 0.0) -> None:
+    """Update the whole screen by default or only part of it"""
     screen.blit(board_surface, (padding, padding))
     if rect is not None:
         pg.display.update(rect)
@@ -51,6 +71,7 @@ def update_screen(rect: Optional[Rect] = None, pause: float = 0.0) -> None:
 
 
 def draw_circle(n: int, m: int, color: Color, r: int) -> None:
+    """Draw a circle in the corresponding column, and row"""
     x = n * size_cell + size_cell // 2
     y = m * size_cell + size_cell // 2
     pg.draw.circle(board_surface, color, (x, y), r)

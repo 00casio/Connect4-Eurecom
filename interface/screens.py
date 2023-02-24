@@ -26,6 +26,8 @@ def show_options_play() -> int:
                 if x_in_rect(boxes[2][0], mouse):
                     status = options_play_AIvAI
                     show_options_AI(2)
+    if difficulty_AI_2 == -1 and status != options_play_HvH:
+        show_options_play()
     return status
 
 
