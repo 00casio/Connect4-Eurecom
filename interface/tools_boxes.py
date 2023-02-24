@@ -2,15 +2,14 @@
 # -*- coding: utf-8 -*-
 
 from time import sleep
+from typing import Optional
 
 from interface.tools_writing import *
 
 
 def x_in_rect(rect: Rect, coor: tuple[int, int]) -> bool:
     """Return whether coor is in the rectangle 'rect'"""
-    return (
-        rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
-    )
+    return rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
 
 
 def handle_click(click_coor: tuple[int, int], list_rect: list[Rect]) -> int:
@@ -42,7 +41,7 @@ def draw_agreement_box(text: str, position: float = 0.75) -> Rect:
     return box
 
 
-def update_screen(rect: Rect = None, pause: float = 0.0) -> None:
+def update_screen(rect: Optional[Rect] = None, pause: float = 0.0) -> None:
     screen.blit(board_surface, (padding, padding))
     if rect is not None:
         pg.display.update(rect)

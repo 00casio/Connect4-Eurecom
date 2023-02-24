@@ -5,12 +5,14 @@ from interface.tools_boxes import *
 from interface.tools_writing import *
 
 
-def reset_screen(color_screen, text, colors_text):
+def reset_screen(
+    color_screen: Color, text: list[list[Surface]], colors_text: Color | list[Color]
+) -> None:
     screen.fill(color_screen)
     center_all(text, colors_text)
 
 
-def options_1AI(text_options: list[list[Surface]]) -> tuple[Any, int]:
+def options_1AI(text_options: list[list[Surface]]) -> tuple[Symbol, int]:
     """Show the options for when there is only 1 AI in the game"""
     boxes_levels = center_all(text_options)
     box_clicked = boxAI_out
@@ -45,7 +47,7 @@ def options_2AI(text_options: list[list[Surface]]) -> tuple[int, int]:
     boxes_levels = center_all(text_options, colors)
     box_clicked = boxAI_out
     play_box = None
-    diff_AI_1, diff_AI_2 = None, None
+    diff_AI_1, diff_AI_2 = -1, -1
     options_levels = [*boxes_levels[1], *boxes_levels[2]]
     nbr_levels_AI_1 = len(boxes_levels[1])
     while box_clicked != boxAI_play:
@@ -71,7 +73,7 @@ def options_2AI(text_options: list[list[Surface]]) -> tuple[int, int]:
                         boxes_levels[2][0].top,
                     )
                     diff_AI_2 = index_box % nbr_levels_AI_1
-                if diff_AI_1 is not None and diff_AI_2 is not None:
+                if diff_AI_1 != -1 and diff_AI_2 != -1:
                     play_box = draw_agreement_box("Sarah Connor ?")
                 highlight_box(
                     options_levels[index_box],
@@ -83,8 +85,8 @@ def options_2AI(text_options: list[list[Surface]]) -> tuple[int, int]:
                 box_clicked = boxAI_play
             else:
                 play_box = None
-                diff_AI_1 = None
-                diff_AI_2 = None
+                diff_AI_1 = -1
+                diff_AI_2 = -1
                 reset_screen(color_options_screen, text_options, colors)
             pg.display.update()
     return (diff_AI_1, diff_AI_2)
@@ -92,7 +94,7 @@ def options_2AI(text_options: list[list[Surface]]) -> tuple[int, int]:
 
 def show_options_AI(number: int) -> None:
     """Show the options for the AIs according to the number given"""
-    global player_AI, difficulty_AI_1, difficulty_AI_2
+    global symbol_player_AI, difficulty_AI_1, difficulty_AI_2
 
     assert 0 < number < 3, f"number can not be something other than 1 or 2"
 
@@ -109,7 +111,7 @@ def show_options_AI(number: int) -> None:
     text_options = [[text_diff], texts_level]
 
     if number == 1:
-        player_AI, difficulty_AI_1 = options_1AI(text_options)
+        symbol_player_AI, difficulty_AI_1 = options_1AI(text_options)
     elif number == 2:
         text_options.append(texts_level)
         difficulty_AI_1, difficulty_AI_2 = options_2AI(text_options)

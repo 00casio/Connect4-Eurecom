@@ -4,7 +4,7 @@
 from variables import *
 
 
-def compute_total_size(array_text: list[list[Surface]]) -> tuple[float, list[float]]:
+def compute_total_size(array_text: list[list[Surface]]) -> tuple[int, list[int]]:
     """Compute the height of a list of line of texts and the width of each line"""
     total_height = 0
     total_width = []
@@ -44,7 +44,7 @@ def write_on_line(
     align: int = 0,
     space_x: int = text_box_spacing,
     space_y: int = text_box_spacing,
-    space_box: int = options_spacing
+    space_box: int = options_spacing,
 ) -> list[Rect]:
     """write 'list_text' on a single line. 'align' can take -1 for left, 0 for middle, and 1 for right"""
     boxes = []
@@ -72,7 +72,7 @@ def write_on_column(
     align: int = 0,
     space_x: int = text_box_spacing,
     space_y: int = text_box_spacing,
-    space_box: int = options_spacing
+    space_box: int = options_spacing,
 ) -> list[Rect]:
     boxes = []
     height_line = compute_total_size([list_text])[0]
@@ -123,5 +123,5 @@ def create_text_rendered(
     size: int = text_size,
 ) -> Surface:
     """Create text in the color, font, and size asked"""
-    font = pg.font.SysFont(font, size)
-    return font.render(text, 1, color)
+    pg_font = pg.font.SysFont(font, size)
+    return pg_font.render(text, True, color)

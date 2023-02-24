@@ -97,7 +97,10 @@ width_screen = 2 * padding + width_board
 height_screen = 2 * padding + height_board
 options_spacing = padding // 4
 text_box_spacing = padding // 10
-center_screen = (width_screen // 2, height_screen // 2, )
+center_screen = (
+    width_screen // 2,
+    height_screen // 2,
+)
 
 # Options
 options_menu_start = -1
