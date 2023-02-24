@@ -51,6 +51,7 @@ def options_1AI(text_options: list[list[Surface]]) -> tuple[Symbol, int]:
                 box_clicked = var.boxAI_play
             else:
                 play_box = None
+                difficulty_AI = -1
                 pg.display.update()
     return (var.symbol_player_2, difficulty_AI)
 
