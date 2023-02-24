@@ -15,12 +15,13 @@ Surface = pg.Surface
 Rect = pg.Rect
 Color = pg.Color
 Event = pg.event.Event
+Font = pg.font.Font
 
 
-# Symbols
+# Classes
 
 
-class Symbol(object):
+class Symbol:
     def __init__(self, value: Any) -> None:
         self.v = value
 
@@ -30,6 +31,7 @@ class Symbol(object):
         return o.v == self.v
 
 
+# Symbols
 symbol_draw = Symbol("-1")
 symbol_no_player = Symbol("0")
 symbol_player_1 = Symbol("1")
@@ -95,6 +97,7 @@ width_screen = 2 * padding + width_board
 height_screen = 2 * padding + height_board
 options_spacing = padding // 4
 text_box_spacing = padding // 10
+center_screen = (width_screen // 2, height_screen // 2, )
 
 # Options
 options_menu_start = -1
@@ -116,6 +119,9 @@ text_options_play_HvAI = "Human vs. IA"
 text_options_play_AIvAI = "Watch the world burn"
 text_options_difficulty_HvAI = "Choose your poison"
 text_options_difficulty_AIvAI = "How badly do you want this game to go ?"
+
+# Fonts
+main_font = pg.font.SysFont(text_font, text_size)
 
 
 # Starting everything
