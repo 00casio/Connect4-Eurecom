@@ -6,7 +6,7 @@ from interface.screens import *
 from interface.tools_boxes import *
 from interface.tools_writing import *
 from scores import who_is_winner
-
+import variables as var
 
 def inverse_player(symbol_playing: Symbol) -> tuple[Symbol, Color]:
     """Return the symbols of the opponent of the player currently playing"""

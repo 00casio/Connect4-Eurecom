@@ -3,7 +3,7 @@
 
 import numpy as np
 
-from variables import Any, symbol_no_player, symbol_player_1, symbol_player_2
+from variables import Symbol, symbol_no_player, symbol_player_1, symbol_player_2
 
 
 def state_to_bits(state: np.ndarray[np.dtype[np.float64], np.float64]) -> str:
@@ -39,7 +39,7 @@ def state_win(state: np.ndarray[np.float64]) -> bool:
     return False
 
 
-def who_is_winner(board: np.ndarray[np.float64]) -> Any:
+def who_is_winner(board: np.ndarray[np.float64]) -> Symbol:
     s = board.shape
     state_symbol_player_1 = np.zeros(s)
     state_symbol_player_2 = np.zeros(s)

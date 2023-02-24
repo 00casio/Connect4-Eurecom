@@ -1,22 +1,22 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from variables import *
-
+import variables as var
+from var import Surface, Color, Rect, pg
 
 def compute_total_size(array_text: list[list[Surface]]) -> tuple[int, list[int]]:
     """Compute the height of a list of line of texts and the width of each line"""
     total_height = 0
     total_width = []
     for line_text in array_text:
-        total_height += max([t.get_size()[1] for t in line_text]) + 2 * text_box_spacing
+        total_height += max([t.get_size()[1] for t in line_text]) + 2 * var.text_box_spacing
         width_now = (
             sum([t.get_size()[0] for t in line_text])
-            + 2 * text_box_spacing * len(line_text)
-            + (len(line_text) - 1) * options_spacing
+            + 2 * var.text_box_spacing * len(line_text)
+            + (len(line_text) - 1) * var.options_spacing
         )
         total_width.append(width_now)
-    total_height += (len(array_text) - 1) * options_spacing
+    total_height += (len(array_text) - 1) * var.options_spacing
     return (total_height, total_width)
 
 
@@ -25,14 +25,14 @@ def write_text_box(
     color_box: Color,
     x: int,
     y: int,
-    spacing_x: int = text_box_spacing,
-    spacing_y: int = text_box_spacing,
+    spacing_x: int = var.text_box_spacing,
+    spacing_y: int = var.text_box_spacing,
 ) -> Rect:
     """Write the text and create the box arround it"""
     size = text.get_size()
     b_rect = Rect(x, y, size[0] + 2 * spacing_x, size[1] + 2 * spacing_y)
-    pg.draw.rect(screen, color_box, b_rect)
-    screen.blit(text, (x + spacing_x, y + spacing_y))
+    pg.draw.rect(var.screen, color_box, b_rect)
+    var.screen.blit(text, (x + spacing_x, y + spacing_y))
     return b_rect
 
 
@@ -42,9 +42,9 @@ def write_on_line(
     x: int,
     y: int,
     align: int = 0,
-    space_x: int = text_box_spacing,
-    space_y: int = text_box_spacing,
-    space_box: int = options_spacing,
+    space_x: int = var.text_box_spacing,
+    space_y: int = var.text_box_spacing,
+    space_box: int = var.options_spacing,
 ) -> list[Rect]:
     """write 'list_text' on a single line. 'align' can take -1 for left, 0 for middle, and 1 for right"""
     boxes = []
@@ -70,9 +70,9 @@ def write_on_column(
     x: int,
     y: int,
     align: int = 0,
-    space_x: int = text_box_spacing,
-    space_y: int = text_box_spacing,
-    space_box: int = options_spacing,
+    space_x: int = var.text_box_spacing,
+    space_y: int = var.text_box_spacing,
+    space_box: int = var.options_spacing,
 ) -> list[Rect]:
     boxes = []
     height_line = compute_total_size([list_text])[0]
@@ -102,15 +102,15 @@ def center_all(
         ), f"array_text and color_box are not the same size ({len(array_text)} and {len(color_box)})"
     total_size = compute_total_size(array_text)
     rect_boxes = []
-    y_now = (height_screen - total_size[0]) // 2
+    y_now = (var.height_screen - total_size[0]) // 2
     for i in range(len(array_text)):
         line_text = array_text[i]
         if type(color_box) == list:
             color = color_box[i]
         else:
             color = color_box
-        box_rect = write_on_line(line_text, color, width_screen, y_now)
-        y_now += line_text[0].get_size()[1] + 2 * text_box_spacing + options_spacing
+        box_rect = write_on_line(line_text, color, var.width_screen, y_now)
+        y_now += line_text[0].get_size()[1] + 2 * var.text_box_spacing + var.options_spacing
         rect_boxes.append(box_rect)
     pg.display.update()
     return rect_boxes
@@ -118,9 +118,9 @@ def center_all(
 
 def create_text_rendered(
     text: str,
-    color: Color = color_options_text,
-    font: str = text_font,
-    size: int = text_size,
+    color: Color = var.color_options_text,
+    font: str = var.text_font,
+    size: int = var.text_size,
 ) -> Surface:
     """Create text in the color, font, and size asked"""
     pg_font = pg.font.SysFont(font, size)
