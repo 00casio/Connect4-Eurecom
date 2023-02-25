@@ -4,10 +4,10 @@ from interface import *
 from variables import *
 from scores import *
 
-difficulty = "easy" #add difficulty to varibales file
-depth_easy = 1 
-depth_normal = 5 #à changer
-depth_hard = 10 #à changer
+#difficulty = "easy" #add difficulty to varibales file
+#depth_easy = 1 
+#depth_normal = 5 #à changer
+#depth_hard = 10 #à changer
 symbol_player_1 = "1"
 symbol_player_2 = "2"
 
@@ -27,9 +27,8 @@ number_col = 7
 number_row = 6
 
 
-#enter here if playing (turn) = AI turn
 
-def AI(board, symbol_player):
+def AI(board, symbol_player): #enter here if playing (turn) = AI turn
     col = best_col_prediction(board, symbol_player)
     #print(board[:, col])
     row = find_free_row(board, col)
@@ -52,13 +51,13 @@ def AI(board, symbol_player):
 #    ##construct the score 
 #    pass #not finished
 
-def opponent(symbol_player):
+def opponent(symbol_player): # Gives symbol of the opponent
     if symbol_player == symbol_player_1:
         return symbol_player_2
     else:
         return symbol_player_1
 
-def count_points_buffer(buffer, symbol_player):
+def count_points_buffer(buffer, symbol_player): #pour des buffers de 4 éléments ayant des combinaisons verticales/horizontales/diagonales du tableau, on ajoute le nombre de point correspondant
     score = 0
     opp_player = opponent(symbol_player)
     #print(opp_player)
@@ -76,12 +75,12 @@ def count_points_buffer(buffer, symbol_player):
         score += opp_one_in_line
     return score
 
-def score_column_prediction(board, symbol_player): #symbol_player is the number of current player
+def score_column_prediction(board, symbol_player): #On calcule le score total pour une situation du jeu, on l'utilisera pour trouver dans quelle colonne il vaut mieux jouer
     score = 0
-    score_horiz = 0
-    score_vert = 0
-    score_diag_slash = 0
-    score_diag_backslash = 0
+    #score_horiz = 0
+    #score_vert = 0
+    #score_diag_slash = 0
+    #score_diag_backslash = 0
     opp = opponent(symbol_player) 
     for i in range(number_row): # for horizontal lines
         row = board[i, :]
@@ -127,7 +126,7 @@ def score_column_prediction(board, symbol_player): #symbol_player is the number 
 
     return score
 
-def drop_disk(board, col, symbol_player):
+def drop_disk(board, col, symbol_player): #on glisse un jeton
     free_slot = find_free_row(board, col)
     board[free_slot][col] = symbol_player
     #new_free_spot = find_free_slot(col)
@@ -136,21 +135,17 @@ def drop_disk(board, col, symbol_player):
     #print("\n")
     return board
 
-def drop_disk2(board, row, col, symbol_player):
-    board[row][col] = symbol_player
-    return board
-
-def is_valid_col(board, col):
+def is_valid_col(board, col): #on regarde si la colonne est pleine ou pas
     return board[0][col] == "0"
 
-def list_valid_col(board):
+def list_valid_col(board): #liste des colonnes où l'on peut jouer
     valid_col = []
     for col in range (number_col):
         if find_free_row(board, col) != -1:
             valid_col.append(col)
     return valid_col
 
-def find_free_row(board, colomn):
+def find_free_row(board, colomn): #on trouve la ligne ou le jeton va aller pour une colonne donnée
     col = board[:, colomn]
     #print(col)
     inv_col = col[::-1]
@@ -161,7 +156,7 @@ def find_free_row(board, colomn):
             return 6-(k+1)
     return -1
 
-def best_col_prediction(board, symbol_player):
+def best_col_prediction(board, symbol_player): #on cherche la meilleure colonne où jouer en faisant fictivement avance le jeu en jouant dans chaque colonne
     best_score = -100000
     list_potential_col = list_valid_col(board)
     #print(list_potential_col)
@@ -182,15 +177,6 @@ def best_col_prediction(board, symbol_player):
         if best_score == 0:
             best_col = 3
     return best_col
-
-
-def coord_availables(board):
-    valid_coord = []
-    valid_col = list_valid_col(board)
-    for k in valid_col:
-        valid_coord.append(board[find_free_row(k)][k])
-    return valid_coord
-
 
 
 #Just in order to run some tests
