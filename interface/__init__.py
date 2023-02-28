@@ -10,26 +10,6 @@ from scores import who_is_winner
 from variables import Color, Event, Symbol, pg
 
 
-def inverse_player(symbol_playing: Symbol) -> tuple[Symbol, Color]:
-    """Return the symbols of the opponent of the player currently playing"""
-    if symbol_playing == var.symbol_player_1:
-        symbol_playing = var.symbol_player_2
-        color_playing = var.color_player_2
-    else:
-        symbol_playing = var.symbol_player_1
-        color_playing = var.color_player_1
-    return (symbol_playing, color_playing)
-
-
-def find_free_slot(i: int) -> int:
-    """Return the index of the first free slot"""
-    col = var.board[:, i]
-    for j in range(len(col) - 1, -1, -1):
-        if col[j] == var.symbol_no_player:
-            return j
-    return -1
-
-
 def click(
     symbol_player: Symbol, color: Color, pos_click_x: int
 ) -> tuple[Symbol, Color]:
