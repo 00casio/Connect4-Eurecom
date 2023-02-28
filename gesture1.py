@@ -330,7 +330,7 @@ class Controller:
             if not Controller.grabflag : 
                 Controller.grabflag = True
                 pyautogui.click(button = "left")
-            pyautogui.moveTo(x, y, duration = 0.1)
+            # pyautogui.moveTo(x, y, duration = 0.1)
 
 
 class GestureController:
