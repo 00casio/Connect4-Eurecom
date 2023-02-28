@@ -8,6 +8,7 @@ from typing import Any
 from AI_test import best_col_prediction
 
 var = Variables()
+pg.init()
 
 class Symbol:
     """ The Symbol class is used to make the difference between two players """
@@ -21,17 +22,32 @@ class Symbol:
 
 class Element:
     """ An element is composed of a box and text """
-    def __init__(self, box, text, color_box, color_text):
-        raise NotImplementedError("Not finished")
-        self.box = box
-        self.text = text
+    def __init__(self, pos: tuple[int, int], text: str, screen: pg.Surface, text_color: pg.Color=var.black, box_color: pg.Color=var.color_options_box, font: pg.font.Font=var.main_font, padd_x: int=var.text_box_spacing, padd_y: int=var.text_box_spacing) -> None:
+        self.font = font
+        self.pos = pos
         self.color_box = color_box
         self.color_text = color_text
-    
-    def change_text_color(self, new_color):
-        raise NotImplementedError("Not for now")
-    def change_box_color(self):
-        raise NotImplementedError("Not for now")
+        self.screen = screen
+        self.padding = (padd_x, padd_y)
+        self.draw(text)
+
+    def draw(self, text) -> None:
+        self.text = self.font.render(text, True, self.text_color)
+        s = self.text.get_size()
+        self.box = Rect(self.pos[0], self.pos[1], s[0]+2*self.padding[0], s[1]+2*self.padding[1])
+        pg.draw.rect(self.screen, self.color_box, self.box)
+        self.screen.blit(self.text, (self.box.x, self.box.y))
+
+    def change_text(self, new_text: str= selt.text, new_color: pg.Color=self.text_color, new_font:pg.font.Font=self.font):
+        self.color_text = new_color
+        self.font = new_font
+        self.draw(new_text)
+
+    def change_box(self, new_color: pg.Color=self.color_box, new_pos:tuple[int, int]=self.pos, new_padding:tuple[int, int]=self.padding):
+        self.color_box = new_color
+        self.pos = new_pos
+        self.padding = new_padding
+        self.draw(self.text)
 
 class Screen:
     """ A screen is composed of what is shown to the user """
