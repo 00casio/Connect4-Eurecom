@@ -51,8 +51,7 @@ class Element:
 
 class Screen:
     """ A screen is composed of what is shown to the user """
-    def __init__(self, name: str, width: int, height: int):
-        self.name = name
+    def __init__(self, width: int, height: int):
         self.width = width
         self.height = height
         self.elements = []
@@ -72,8 +71,8 @@ class Screen:
 
 class GamingScreen(Screen):
     """ The gaming screen is used for the gaming part of the program """
-    def __init__(self, name: str, width: int, height: int) -> None:
-        Screen.__init__(self, name, width, height)
+    def __init__(self, width: int, height: int) -> None:
+        Screen.__init__(self, width, height)
         self.color_screen = var.white
         self.color_board = var.light_blue
         self.width_board = var.width_board
@@ -124,18 +123,27 @@ class Player:
         return col
     
     def __eq__(self, other: object) -> bool:
-        if not isinstance(other, Player):
-            return False
-        return self.symbol == other.symbol
+        if isinstance(other, Player):
+            return self.symbol == other.symbol
+        elif isinstance(other, Symbol):
+            return self.symbol.v == other.v
+        return False
 
 class Game:
     """ The big class that will regulate everything """
     def __init__(self):
+        # Players
         self.player_1: Player = None
         self.player_2: Player = None
         self.player_playing: Player = None
         self.player_null = Player(var.symbol_no_player, var.color_trans, False)
+
+        self.screen_size = (var.width_screen, var.height_screen)
         self.board = np.array([[symbol_no_player] * 7 for i in range(6)])
+        self.screen = pg.display.set_mode(self.screen_size, 0, 32)
+        self.CLOCK = pg.time.Clock()
+        self.screen.display.set_caption(var.screen_title)
+        self.num_turn = 0
 
     def inverse_player(self):
         """Return the symbols of the opponent of the player currently playing"""
@@ -191,10 +199,38 @@ class Game:
             return self.player_null.symbol
 
     def draw_winner(self):
-        raise NotImplementedError("Not for now")
+        winner = self.who_is_winner()
+        if winner == self.player_1:
+            print("Winner is the first player")
+        elif winner == self.player_2:
+            print("Winner is the second player")
+        else:
+            print("That is a draw")
+        print("Not finished")
+
     def start_game(self):
         raise NotImplementedError("Not for now")
-    def options_screen(self):
+    def draw_options_screen(self):
         raise NotImplementedError("Not for now")
-    def play_screen(self):
+    def draw_start_screen(self):
         raise NotImplementedError("Not for now")
+        """Show the start screen.
+        For now it is only the play button but soon there will be more options"""
+
+        self.start_screen = Screen(*self.screen_size)
+        self.screen.fill(var.color_options_screen)
+        quit_box = draw_quit_box()
+        text_play = create_text_rendered(var.text_options_play)
+        boxes_options = center_all([[text_play]])
+        rect_play = boxes_options[0][0]
+        status = var.options_menu_start
+        while status == var.options_menu_start:
+            for event in pg.event.get():
+                if event.type == pg.MOUSEBUTTONUP:
+                    mouse = pg.mouse.get_pos()
+                    handle_quit(quit_box, mouse)
+                    if x_in_rect(rect_play, mouse):
+                        status = show_options_play()
+        if status == var.options_clicked_cancel:
+            status = start_screen()
+        return status

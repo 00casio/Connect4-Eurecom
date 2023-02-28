@@ -136,11 +136,3 @@ class Variables:
         self.text_quit_box = "Quit"
         self.coor_quit_box = (width_screen - 10, 10)
 
-        # Starting everything
-        self.CLOCK = pg.time.Clock()
-        self.screen = pg.display.set_mode((width_screen, height_screen), 0, 32)
-        self.pg.display.set_caption(screen_title)
-        self.board_surface = pg.surface.Surface((width_board, height_board)).convert_alpha()
-        self.symbol_playing = symbol_player_1
-        self.color_playing = color_player_1
-        self.num_turn = 0
