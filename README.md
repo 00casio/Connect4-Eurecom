@@ -34,7 +34,7 @@ Optional:
 - Name
 - Options
 - Change theme
-- Background muic
+- Background music
 
 #### AI
 
@@ -60,5 +60,7 @@ Optional:
 
 - Choose the mean of communication
 - Choose the protocol
+- Communicate if rasp is human or AI
+- If AI: tell the level of difficulty
 - Make the differences between possible and definitive moves
 - Allow floating numbers
