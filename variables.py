@@ -1,16 +1,41 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import numpy as np
-import pygame as pg
+import typing as typ
 
+import numpy as np
+import pygame
+
+pg = pygame
 pg.init()
 
+# Types hints
+Any = typ.Any
+Surface = pg.Surface
+Rect = pg.Rect
+Color = pg.Color
+Event = pg.event.Event
+Font = pg.font.Font
+
+
+# Classes
+
+
+class Symbol:
+    def __init__(self, value: Any) -> None:
+        self.v = value
+
+    def __eq__(self, o: object) -> Any:
+        if not isinstance(o, Symbol):
+            return NotImplemented
+        return o.v == self.v
+
+
 # Symbols
-symbol_draw = "-1"
-symbol_no_player = "0"
-symbol_player_1 = "1"
-symbol_player_2 = "2"
+symbol_draw = Symbol("-1")
+symbol_no_player = Symbol("0")
+symbol_player_1 = Symbol("1")
+symbol_player_2 = Symbol("2")
 
 # Board
 board = np.array(
@@ -26,13 +51,14 @@ board = np.array(
 nbr_max_turn = board.size
 
 # AI
-difficulty_AI_1 = 0
-difficulty_AI_2 = 0
+difficulty_AI_1: int = -1
+difficulty_AI_2: int = -1
 symbol_player_AI = symbol_no_player
 
 # Boxes for levels of AI
 boxAI_out = -1
 boxAI_play = -255
+boxAI_cancel = 255
 boxAI_text_levels = [
     "Start",
     "Start",
@@ -42,15 +68,15 @@ boxAI_text_levels = [
 ]
 
 # Colors
-white = (255, 255, 255)
-black = (0, 0, 0)
-red = (255, 0, 0)
-green = (0, 255, 0)
-blue = (38, 60, 255)
-dark_blue = (0, 0, 229)
-light_blue = (30, 160, 255)
-cyan = (45, 245, 255)
-color_trans = (0, 0, 0, 0)
+white = Color(255, 255, 255)
+black = Color(0, 0, 0)
+red = Color(255, 0, 0)
+green = Color(0, 255, 0)
+blue = Color(38, 60, 255)
+dark_blue = Color(0, 0, 229)
+light_blue = Color(30, 160, 255)
+cyan = Color(45, 245, 255)
+color_trans = Color(0, 0, 0, 0)
 color_player_1 = red
 color_player_2 = green
 color_board = blue
@@ -72,6 +98,10 @@ width_screen = 2 * padding + width_board
 height_screen = 2 * padding + height_board
 options_spacing = padding // 4
 text_box_spacing = padding // 10
+center_screen = (
+    width_screen // 2,
+    height_screen // 2,
+)
 
 # Options
 options_menu_start = -1
@@ -79,6 +109,7 @@ options_menu_play = 0
 options_play_HvH = 1
 options_play_HvAI = 2
 options_play_AIvAI = 3
+options_clicked_cancel = -255
 
 # Pygame
 fps = 30
@@ -94,6 +125,14 @@ text_options_play_AIvAI = "Watch the world burn"
 text_options_difficulty_HvAI = "Choose your poison"
 text_options_difficulty_AIvAI = "How badly do you want this game to go ?"
 
+# Fonts
+main_font = pg.font.SysFont(text_font, text_size)
+
+# Quit and cancel
+text_cancel_box = "Cancel"
+coor_cancel_box = (10, 10)
+text_quit_box = "Quit"
+coor_quit_box = (width_screen - 10, 10)
 
 # Starting everything
 CLOCK = pg.time.Clock()

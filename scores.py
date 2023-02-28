@@ -1,12 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from numpy import ceil, where, zeros
+import numpy as np
 
-from variables import symbol_no_player, symbol_player_1, symbol_player_2
+from variables import Symbol, symbol_no_player, symbol_player_1, symbol_player_2
 
 
-def state_to_bits(state):
+def state_to_bits(state: np.ndarray[np.dtype[np.float64], np.float64]) -> str:
     """Convert the state of the game for a player into the bits representation of the game"""
     n = "0b"
     for j in range(len(state[0]) - 1, -1, -1):
@@ -16,7 +16,7 @@ def state_to_bits(state):
     return n
 
 
-def state_win(state):
+def state_win(state: np.ndarray[np.float64]) -> bool:
     bits = int(state_to_bits(state), 2)
 
     # Horizontal check
@@ -39,12 +39,12 @@ def state_win(state):
     return False
 
 
-def who_is_winner(board):
+def who_is_winner(board: np.ndarray[np.float64]) -> Symbol:
     s = board.shape
-    state_symbol_player_1 = zeros(s)
-    state_symbol_player_2 = zeros(s)
-    state_symbol_player_1[where(board == symbol_player_1)] = 1
-    state_symbol_player_2[where(board == symbol_player_2)] = 1
+    state_symbol_player_1 = np.zeros(s)
+    state_symbol_player_2 = np.zeros(s)
+    state_symbol_player_1[np.where(board == symbol_player_1)] = 1
+    state_symbol_player_2[np.where(board == symbol_player_2)] = 1
     if state_win(state_symbol_player_1):
         return symbol_player_1
     elif state_win(state_symbol_player_2):

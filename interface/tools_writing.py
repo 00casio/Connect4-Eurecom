@@ -1,86 +1,133 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from variables import *
+import variables as var
+from variables import Color, Rect, Surface, pg
 
 
-def compute_total_height(list_text):
-    """ Calculate the total height of a list of text """
-    total_size = 0
-    for text in list_text:
-        total_size += 2 * text_box_spacing
-        if type(text) == list:
-            total_size += max([t.get_size()[1] for t in text])
-        else:
-            total_size += text.get_size()[1]
-    return total_size + (len(list_text) - 1) * options_spacing
-
-
-def write_same_line(list_text, y, color_box):
-    """ Write on the same line centered in the middle all elements in 'list_text' in the color 'color_box'.
-    'color_box' can be list, but it must be the same size as 'list_text' """
-    box_rect = []
-    n = list_text
-    x_tot = 0
-    for text in list_text:
-        x_tot += 2 * text_box_spacing + options_spacing + text.get_size()[0]
-    x_tot -= options_spacing
-    x_now = (width_screen - x_tot) // 2 - text_box_spacing
-
-    for text in list_text:
-        size = text.get_size()
-        b_rect = (
-            x_now,
-            y,
-            size[0] + 2 * text_box_spacing,
-            size[1] + 2 * text_box_spacing,
+def compute_total_size(array_text: list[list[Surface]]) -> tuple[int, list[int]]:
+    """Compute the height of a list of line of texts and the width of each line"""
+    total_height = 0
+    total_width = []
+    for line_text in array_text:
+        total_height += (
+            max([t.get_size()[1] for t in line_text]) + 2 * var.text_box_spacing
         )
-        pg.draw.rect(screen, color_box, b_rect)
-        screen.blit(text, (x_now + text_box_spacing, y + text_box_spacing))
-        box_rect.append(b_rect)
-        x_now += 2 * text_box_spacing + size[0] + options_spacing
-
-    new_y = (
-        y
-        + max([t.get_size()[1] for t in list_text])
-        + 2 * text_box_spacing
-        + options_spacing
-    )
-    return new_y, box_rect
+        width_now = (
+            sum([t.get_size()[0] for t in line_text])
+            + 2 * var.text_box_spacing * len(line_text)
+            + (len(line_text) - 1) * var.options_spacing
+        )
+        total_width.append(width_now)
+    total_height += (len(array_text) - 1) * var.options_spacing
+    return (total_height, total_width)
 
 
-def write_to_screen(text, y_now, color_box):
-    """ Write 'text' on the screen in the color 'color_box' """
-    if type(text) == list:
-        new_y, box_rect = write_same_line(text, y_now, color_box)
+def write_text_box(
+    text: Surface,
+    color_box: Color,
+    x: int,
+    y: int,
+    spacing_x: int = var.text_box_spacing,
+    spacing_y: int = var.text_box_spacing,
+) -> Rect:
+    """Write the text and create the box arround it"""
+    size = text.get_size()
+    b_rect = Rect(x, y, size[0] + 2 * spacing_x, size[1] + 2 * spacing_y)
+    pg.draw.rect(var.screen, color_box, b_rect)
+    var.screen.blit(text, (x + spacing_x, y + spacing_y))
+    return b_rect
+
+
+def write_on_line(
+    list_text: list[Surface],
+    color_box: Color,
+    x: int,
+    y: int,
+    align: int = 0,
+    space_x: int = var.text_box_spacing,
+    space_y: int = var.text_box_spacing,
+    space_box: int = var.options_spacing,
+) -> list[Rect]:
+    """write 'list_text' on a single line. 'align' can take -1 for left, 0 for middle, and 1 for right"""
+    boxes = []
+    width_line = compute_total_size([list_text])[1][0]
+    if align == -1:
+        write_x = x
+    elif align == 0:
+        write_x = (x - width_line) // 2
+    elif align == 1:
+        write_x = x - width_line
     else:
-        new_y, box_rect = write_same_line([text], y_now, color_box)
-        box_rect = box_rect[0]
-    return new_y, box_rect
+        raise ValueError("align is not -1, 0, or 1. Correct this")
+    for text in list_text:
+        boxes.append(write_text_box(text, color_box, write_x, y, space_x, space_y))
+        write_x += text.get_size()[0] + 2 * space_x + space_box
+    # pg.display.update()
+    return boxes
 
 
-def center_all(list_text, color_box=color_options_box):
-    """ Write the texts in 'list_text' centered in the middle of the screen """
+def write_on_column(
+    list_text: list[Surface],
+    color_box: Color,
+    x: int,
+    y: int,
+    align: int = 0,
+    space_x: int = var.text_box_spacing,
+    space_y: int = var.text_box_spacing,
+    space_box: int = var.options_spacing,
+) -> list[Rect]:
+    boxes = []
+    height_line = compute_total_size([list_text])[0]
+    if align == -1:
+        write_y = y
+    elif align == 0:
+        write_y = (y - height_line) // 2
+    elif align == 1:
+        write_y = y - height_line
+    else:
+        raise ValueError("align is not -1, 0, or 1. Correct this")
+    for text in list_text:
+        boxes.append(write_text_box(text, color_box, x, write_y))
+        write_y += text.get_size()[1] + 2 * space_y + space_box
+    # pg.display.update()
+    return boxes
+
+
+def center_all(
+    array_text: list[list[Surface]],
+    color_box: Color | list[Color] = var.color_options_box,
+) -> list[list[Rect]]:
+    """Write the texts in 'array_text' centered in the middle of the screen.
+    If 'color_box' is a single element, then all boxes will have the same color"""
     if type(color_box) == list:
-        assert len(list_text) == len(
+        assert len(array_text) == len(
             color_box
-        ), f"list_text and color_box are not the same size ({len(list_text)} and {len(color_box)})"
-    total_size = compute_total_height(list_text)
+        ), f"array_text and color_box are not the same size ({len(array_text)} and {len(color_box)})"
+    total_size = compute_total_size(array_text)
     rect_boxes = []
-    y_now = (height_screen - total_size) // 2
-    for i in range(len(list_text)):
-        text = list_text[i]
+    y_now = (var.height_screen - total_size[0]) // 2
+    for i in range(len(array_text)):
+        line_text = array_text[i]
         if type(color_box) == list:
             color = color_box[i]
         else:
             color = color_box
-        y_now, box_rect = write_to_screen(text, y_now, color)
+        box_rect = write_on_line(line_text, color, var.width_screen, y_now)
+        y_now += (
+            line_text[0].get_size()[1] + 2 * var.text_box_spacing + var.options_spacing
+        )
         rect_boxes.append(box_rect)
     pg.display.update()
     return rect_boxes
 
 
-def create_options_text(text, color=color_options_text, font=text_font, size=text_size):
-    """ Create text in the color, font, and size asked """
-    font = pg.font.SysFont(font, size)
-    return font.render(text, 1, color)
+def create_text_rendered(
+    text: str,
+    color: Color = var.color_options_text,
+    font: str = var.text_font,
+    size: int = var.text_size,
+) -> Surface:
+    """Create text in the color, font, and size asked"""
+    pg_font = pg.font.SysFont(font, size)
+    return pg_font.render(text, True, color)
