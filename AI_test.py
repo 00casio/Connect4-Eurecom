@@ -1,5 +1,6 @@
 import numpy as np
 import random
+import math
 from interface import *
 #from variables import *
 from scores import *
@@ -31,12 +32,13 @@ number_row = 6
 
 
 def AI(board, symbol_player): #enter here if playing (turn) = AI turn
-    col = best_col_prediction(board, symbol_player)
+    #col = best_col_prediction(board, symbol_player)
+    col = minimax_no_pruning(board, 2, True, "1")
     #print(board[:, col])
     row = find_free_row(board, col)
     #print(row)
-    print("we are going to play in (row, col) = ", (row, col))
     print("\n")
+    print("we are going to play in (row, col) = ", (row, col))
     #print(is_valid_col(board, col))
     if is_valid_col(board, col): #devrait toujours être bon mais par précaution
         #print("i'm here !")
@@ -58,6 +60,42 @@ def opponent(symbol_player): # Gives symbol of the opponent
         return symbol_player_2
     else:
         return symbol_player_1
+    
+def minimax_no_pruning(board, depth, maximizing_player, symbol_player): #returns the column where the AI will play, I tried without any success to follow and adapt the pseudo code in wikipedia
+    valid_col = list_valid_col(board)
+    if depth == 0 or who_is_winner(board) != symbol_no_player:
+        if who_is_winner(board) == symbol_player_1:
+            return (None, math.inf)
+        elif who_is_winner(board) == symbol_player_2:
+            return (None, - math.inf)
+        elif who_is_winner(board) == symbol_draw:
+            print("It is a draw, game is over")
+            return (None, 0)
+        else:
+            return (None, score_column_prediction(board, symbol_player)) # depth = 0
+        
+    if maximizing_player: 
+        best_score = -math.inf
+        best_col = random.choice(valid_col)
+        for col in valid_col:
+            potential_board = board.copy()
+            drop_disk(board, col, symbol_player)
+            score_calculated = minimax_no_pruning(potential_board, depth-1, False)[1]
+            if score_calculated > best_score:
+                best_score = score_calculated
+                best_col = col
+        return best_col, best_score
+    else:
+        best_score = math.inf
+        best_col = random.choice(valid_col)
+        for col in valid_col:
+            potential_board = board.copy()
+            drop_disk(board, col, symbol_player)
+            score_calculated = minimax_no_pruning(potential_board, depth-1, True)[1]
+            if score_calculated < best_score:
+                best_score = score_calculated
+                best_col = col
+        return best_col, best_score
 
 def count_points_buffer(buffer, symbol_player): #pour des buffers de 4 éléments ayant des combinaisons verticales/horizontales/diagonales du tableau, on ajoute le nombre de point correspondant
     score = 0
