@@ -156,7 +156,7 @@ class HandRecog:
             try:
                 ratio = round(dist/dist2,1)
             except:
-                ratio = round(dist1/0.01,1)
+                ratio = round(dist/0.01,1)
 
             self.finger = self.finger << 1
             if ratio > 0.5 :
@@ -410,8 +410,8 @@ class GestureController:
         handmajor = HandRecog(HLabel.MAJOR)
         handminor = HandRecog(HLabel.MINOR)
 
-        with mp_hands.Hands(max_num_hands = 2,min_detection_confidence=0.5, min_tracking_confidence=0.5) as hands:
-            while GestureController.cap.isOpened() and GestureController.gc_mode:
+        hands = mp_hands.Hands(max_num_hands = 2,min_detection_confidence=0.5, min_tracking_confidence=0.5)
+        while GestureController.cap.isOpened() and GestureController.gc_mode:
                 success, image = GestureController.cap.read()
 
                 if not success:
@@ -451,9 +451,6 @@ class GestureController:
         cv2.destroyAllWindows()
 
 # uncomment to run directly
-gc1 = GestureController()
-gc1.start()
-
 
 
         
