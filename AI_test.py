@@ -32,8 +32,8 @@ number_row = 6
 
 
 def AI(board, symbol_player): #enter here if playing (turn) = AI turn
-    #col = best_col_prediction(board, symbol_player)
-    col = minimax_no_pruning(board, 2, True, "1")
+    col = best_col_prediction(board, symbol_player)
+    #col = minimax_no_pruning(board, 2, True, "1")
     #print(board[:, col])
     row = find_free_row(board, col)
     #print(row)
@@ -46,14 +46,6 @@ def AI(board, symbol_player): #enter here if playing (turn) = AI turn
         board = drop_disk(board, col, symbol_player)
     #symbol_playing = opponent(symbol_player) # change to other player the global variable
     return board
-
-#def minimax(board, depth = 1): #returns the column where the AI will play
-#    if difficulty == "normal":
-#        depth = depth_normal
-#    elif difficulty == "hard":
-#        depth = depth_hard
-#    ##construct the score 
-#    pass #not finished
 
 def opponent(symbol_player): # Gives symbol of the opponent
     if symbol_player == symbol_player_1:
