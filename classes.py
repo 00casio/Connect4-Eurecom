@@ -34,32 +34,38 @@ class Element:
     def draw(self, text) -> None:
         self.text = self.font.render(text, True, self.text_color)
         s = self.text.get_size()
-        self.box = Rect(self.pos[0], self.pos[1], s[0]+2*self.padding[0], s[1]+2*self.padding[1])
+        self.box = pg.Rect(self.pos[0], self.pos[1], s[0]+2*self.padding[0], s[1]+2*self.padding[1])
         pg.draw.rect(self.screen, self.color_box, self.box)
         self.screen.blit(self.text, (self.box.x, self.box.y))
+        self.screen.update(self.box)
 
-    def change_text(self, new_text: str= selt.text, new_color: pg.Color=self.text_color, new_font:pg.font.Font=self.font):
-        self.color_text = new_color
-        self.font = new_font
-        self.draw(new_text)
+class Line:
+    def __init__(self):
+        self.elements: list[Element] = []
+        self.width = 0
+        self.spacing = var.options_spacing
 
-    def change_box(self, new_color: pg.Color=self.color_box, new_pos:tuple[int, int]=self.pos, new_padding:tuple[int, int]=self.padding):
-        self.color_box = new_color
-        self.pos = new_pos
-        self.padding = new_padding
-        self.draw(self.text)
+    def add_element(self, e: Element):
+        self.elements.append(e)
+        self.width = sum([ele.box.w for ele in self.elements]) + (len(self.elements)-1)*self.spacing
 
 class Screen:
     """ A screen is composed of what is shown to the user """
     def __init__(self, width: int, height: int):
         self.width = width
         self.height = height
-        self.elements = []
+        self.lines: list[Line] = []
+        self.columns = []
         self.screen = None
 
     def add_box_text(self, position, text, color_box, color_text):
         raise NotImplementedError("Not for now")
         self.elements.append(Element(box, text, color_box, color_text))
+
+    def add_line(self, line: Line):
+        self.lines.append(line)
+        for e in line.elements:
+            e.draw(e.text)
 
     def get_mouse_pos(self):
         raise NotImplementedError("Not for now")
@@ -139,11 +145,6 @@ class Game:
         self.player_null = Player(var.symbol_no_player, var.color_trans, False)
 
         self.screen_size = (var.width_screen, var.height_screen)
-        self.board = np.array([[symbol_no_player] * 7 for i in range(6)])
-        self.screen = pg.display.set_mode(self.screen_size, 0, 32)
-        self.CLOCK = pg.time.Clock()
-        self.screen.display.set_caption(var.screen_title)
-        self.num_turn = 0
 
     def inverse_player(self):
         """Return the symbols of the opponent of the player currently playing"""
@@ -210,6 +211,11 @@ class Game:
 
     def start_game(self):
         raise NotImplementedError("Not for now")
+        self.board = np.array([[symbol_no_player] * 7 for i in range(6)])
+        self.screen = pg.display.set_mode(self.screen_size, 0, 32)
+        self.CLOCK = pg.time.Clock()
+        self.screen.display.set_caption(var.screen_title)
+        self.num_turn = 0
     def draw_options_screen(self):
         raise NotImplementedError("Not for now")
     def draw_start_screen(self):
