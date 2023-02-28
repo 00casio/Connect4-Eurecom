@@ -1,7 +1,7 @@
 import numpy as np
 import random
 from interface import *
-from variables import *
+#from variables import *
 from scores import *
 
 #difficulty = "easy" #add difficulty to varibales file
@@ -10,6 +10,8 @@ from scores import *
 #depth_hard = 10 #à changer
 symbol_player_1 = "1"
 symbol_player_2 = "2"
+symbol_no_player = "0"
+symbol_draw = "-1"
 
 ##Variables describing points given 
 
@@ -77,16 +79,16 @@ def count_points_buffer(buffer, symbol_player): #pour des buffers de 4 élément
 
 def score_column_prediction(board, symbol_player): #On calcule le score total pour une situation du jeu, on l'utilisera pour trouver dans quelle colonne il vaut mieux jouer
     score = 0
-    #score_horiz = 0
-    #score_vert = 0
-    #score_diag_slash = 0
-    #score_diag_backslash = 0
+    # score_horiz = 0
+    # score_vert = 0
+    # score_diag_slash = 0
+    # score_diag_backslash = 0
     opp = opponent(symbol_player) 
     for i in range(number_row): # for horizontal lines
         row = board[i, :]
         for j in range(number_col - 3):
             buffer_row = row[j: j + 4] #buffer of 4 length to check for disks in horizontal lines
-            #if count_points_buffer(list(buffer_row), symbol_player) != 0:
+            # if count_points_buffer(list(buffer_row), symbol_player) != 0:
             #    print("buffer_row is", buffer_row)
             #    print("score added is : ", count_points_buffer(list(buffer_row), symbol_player))
             score += count_points_buffer(list(buffer_row), symbol_player)
@@ -97,7 +99,7 @@ def score_column_prediction(board, symbol_player): #On calcule le score total po
         col = board[:, j]
         for i in range(number_row - 3):
             buffer_col = col[i: i + 4] #buffer of 4 length to check for disks in vertical lines
-            #if count_points_buffer(list(buffer_col), symbol_player) != 0:
+            # if count_points_buffer(list(buffer_col), symbol_player) != 0:
             #    print("buffer_col is", buffer_col)
             #    print("score added is : ", count_points_buffer(list(buffer_col), symbol_player))
             score += count_points_buffer(list(buffer_col), symbol_player)
@@ -107,22 +109,22 @@ def score_column_prediction(board, symbol_player): #On calcule le score total po
     for i in range(number_row - 3): # for slash digonal 
         for j in range(number_col - 3):
             buffer_slash = [board[i+k][j+k] for k in range(4)]
-            #if count_points_buffer(list(buffer_row), symbol_player) != 0:
+            # if count_points_buffer(list(buffer_row), symbol_player) != 0:
             #    print("buffer_slash is", buffer_slash)
             #    print("score added is : ", count_points_buffer(list(buffer_slash), symbol_player))
             score += count_points_buffer(list(buffer_slash), symbol_player)
-    #score_diag_slash = score -(score_horiz + score_vert)
-    #print("diag slash score is : ", score_diag_slash )
+    # score_diag_slash = score -(score_horiz + score_vert)
+    # print("diag slash score is : ", score_diag_slash )
 
     for i in range(number_row - 3): # for backslash diagonal
         for j in range(number_col - 3):
             buffer_backslash = [board[i+3-k][j+k] for k in range(4)]
-            #if count_points_buffer(list(buffer_backslash), symbol_player) != 0:
+            # if count_points_buffer(list(buffer_backslash), symbol_player) != 0:
             #    print("buffer_backslash is", buffer_backslash)
             #    print("score added is : ", count_points_buffer(list(buffer_backslash), symbol_player))
             score += count_points_buffer(list(buffer_backslash), symbol_player)
-    #score_diag_backslash = score - (score_horiz + score_vert + score_diag_slash)
-    #print("diag_backslash score is : ", score_diag_backslash )
+    # score_diag_backslash = score - (score_horiz + score_vert + score_diag_slash)
+    # print("diag_backslash score is : ", score_diag_backslash )
 
     return score
 
@@ -168,8 +170,8 @@ def best_col_prediction(board, symbol_player): #on cherche la meilleure colonne 
         #print("to the row", row)
         drop_disk(potential_board, col, symbol_player)
         score = score_column_prediction(potential_board, symbol_player)
-        #print("the current best score is", best_score)
-        #print("the score calculated is", score)
+        print("the current best score is", best_score)
+        print("the score calculated is", score)
         #print("\n")
         if score >= best_score:
             best_score = score
@@ -185,6 +187,19 @@ empty_line = ["0", "0", "0", "0", "0", "0", "0"]
 board1 = np.array([empty_line, empty_line, empty_line, empty_line, empty_line, empty_line])
 board2 = np.array([empty_line, empty_line, ["0","0", "0" ,"0", "0" ,"0" ,"0"], ["1","0", "0" ,"0", "0" ,"0" ,"0"], ["1","0", "1" ,"0", "0" ,"0" ,"0"], ["1","0", "1" ,"0", "0" ,"2" ,"2"]])
  
+def who_is_winner2(board: np.ndarray[np.float64]) -> str:
+    s = board.shape
+    state_symbol_player_1 = np.zeros(s)
+    state_symbol_player_2 = np.zeros(s)
+    state_symbol_player_1[np.where(board == symbol_player_1)] = 1
+    state_symbol_player_2[np.where(board == symbol_player_2)] = 1
+    if state_win(state_symbol_player_1):
+        return symbol_player_1
+    elif state_win(state_symbol_player_2):
+        return symbol_player_2
+    else:
+        return symbol_no_player
+
 def Ia_vs_Ia():
     print(board1)
     turn = 0
@@ -193,7 +208,7 @@ def Ia_vs_Ia():
         current_board = AI(board1, "1")
         turn += 1
         print(current_board)
-        winner = who_is_winner(current_board)
+        winner = who_is_winner2(current_board)
         if winner != symbol_no_player:
             print("And the winner is: player ", winner)
             break
@@ -202,7 +217,7 @@ def Ia_vs_Ia():
         current_board = AI(current_board, "2")
         turn += 1
         print(current_board)
-        winner = who_is_winner(current_board)
+        winner = who_is_winner2(current_board)
         if winner != symbol_no_player:
             print("And the winner is: player ", winner)
             break
@@ -218,9 +233,10 @@ def Human_play(board):
 
 def play_vs_IA():
     print(board1)
-    while who_is_winner(board) == "0":
-        Human_play(board)
-    print("The winner is ", who_is_winner(board))
+    while who_is_winner2(board1) == "0":
+        Human_play(board1)
+    print("The winner is ", who_is_winner2(board1))
 
-#play_vs_IA() #elle est toute bête mais j'ai un peu galéré avant de la battre
-Ia_vs_Ia() # l'ia 1 bat la 2 en 32 tours sachant que je les fais jouer défensivement
+play_vs_IA() #elle est toute bête mais j'ai un peu galéré avant de la battre
+#Ia_vs_Ia() # l'ia 1 bat la 2 en 32 tours sachant que je les fais jouer défensivement
+
