@@ -264,7 +264,7 @@ class Screen(Tools):
         print("Change this to have the positon from the camera")
         return pg.mouse.get_pos()
 
-    def click(self, f=None):
+    def click(self, rect_play=None, f=None):
         """Quit the function only when there is a click. Return the position of the click.
         If f is not None, then the function is called whith the argument 'event' at every iteration"""
         allow_quit = False
@@ -275,6 +275,9 @@ class Screen(Tools):
                 if f is not None:
                     f(event)
         click = self.get_mouse_pos()
+        if rect_play is not None:
+            while not self.x_in_rect(click, rect_play):
+                click = self.click()
         if self.is_canceled(click):
             self.box_clicked = var.boxAI_cancel
         self.handle_quit(click)
@@ -379,6 +382,12 @@ class GamingScreen(Screen):
             (self.width_board, self.height_board)
         ).convert_alpha()
 
+    def draw_circle(self, n: int, m: int, color: Color, r: int) -> None:
+        """Draw a circle in the corresponding column, and row"""
+        x = n * var.size_cell + var.size_cell // 2
+        y = m * var.size_cell + var.size_cell // 2
+        pg.draw.circle(self.board_surface, color, (x, y), r)
+
     def draw_board():
         self.screen.fill(self.color_screen)
         pg.draw.rect(
@@ -388,16 +397,8 @@ class GamingScreen(Screen):
         )
         for i in range(7):
             for j in range(6):
-                draw_circle(i, j, var.color_trans, var.radius_hole)
+                self.draw_circle(i, j, var.color_trans, var.radius_hole)
         update_screen()
-
-    def find_free_slot(self, board, i: int) -> int:
-        """Return the index of the first free slot"""
-        col = board[:, i]
-        for j in range(len(col) - 1, -1, -1):
-            if col[j] == var.symbol_no_player:
-                return j
-        return -1
 
     def animate_fall(self, col: int, row: int, color_player: pg.Color) -> None:
         for y in range(var.padding + num_col * var.size_cell + var.size_cell // 2, 5):
@@ -405,12 +406,19 @@ class GamingScreen(Screen):
             pg.draw.circle(self.screen, color_player, (x, y), var.radius_disk)
             update_screen()
         pg.draw.circle(self.board_surface, color, (x, y), var.radius_hole)
-
-    def player_move(self, board, col: int) -> None:
-        row = find_free_slot(board)
-        self.animate_fall()
-        raise NotImplementedError("Not finished")
-
+    
+    def human_move(self, color):
+        mouse_x, mouse_y = self.get_mouse_pos()
+        if mouse_x < var.pos_min_x:
+            mouse_x = var.pos_min_x
+        elif mouse_x > var.pos_max_x:
+            mouse_x = var.pos_max_x
+        self.screen.fill(var.color_screen)
+        p = var.padding // 2
+        pg.draw.circle(
+            self.screen, color, (mouse_x, p), var.radius_disk
+        )
+        pg.display.update((mouse_x-p, 0, 2*p, 2*p))
 
 class Player:
     """The class that keep all the options for a player"""
@@ -421,13 +429,24 @@ class Player:
         self.is_ai = AI
         self.ai_difficulty = -1
 
+    def find_free_slot(self, board, i: int) -> int:
+        """Return the index of the first free slot"""
+        col = board[:, i]
+        for j in range(len(col) - 1, -1, -1):
+            if col[j] == var.symbol_no_player:
+                return j
+        return -1
+
     def play(self, board, screen):
         if self.is_ai:
             col = best_col_prediction(board, self.symbol)
         else:
-            click = screen.get_mouse_pos()
+            click = screen.click()
             col = (click[0] - padding) // var.size_cell
-        return col
+        row = self.find_free_slot(board, col)
+        if row == -1:
+            col, row = self.play(board, screen)
+        return (col, row)
 
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Player):
@@ -448,6 +467,8 @@ class Game:
         self.player_null = Player(var.symbol_no_player, var.color_trans, False)
 
         self.screen_size = (var.width_screen, var.height_screen)
+        self.screen = pg.display.set_mode(self.screen_size, 0, 32)
+        self.screen.display.set_caption(var.screen_title)
 
     def inverse_player(self):
         """Return the symbols of the opponent of the player currently playing"""
@@ -470,7 +491,7 @@ class Game:
         return n
 
     def state_win(self, state: np.ndarray[np.float64]) -> bool:
-        bits = int(state_to_bits(state), 2)
+        bits = int(self.state_to_bits(state), 2)
 
         # Horizontal check
         m = bits & (bits >> 7)
@@ -498,11 +519,11 @@ class Game:
         state_symbol_player_1[np.where(self.board == self.player_1.symbol)] = 1
         state_symbol_player_2[np.where(self.board == self.player_2.symbol)] = 1
         if self.state_win(state_symbol_player_1):
-            return self.player_1.symbol
+            return self.player_1
         elif self.state_win(state_symbol_player_2):
-            return self.player_2.symbol
+            return self.player_2
         else:
-            return self.player_null.symbol
+            return self.player_null
 
     def draw_winner(self):
         winner = self.who_is_winner()
@@ -514,14 +535,28 @@ class Game:
             print("That is a draw")
         print("Not finished")
 
-    def start_game(self):
-        raise NotImplementedError("Not for now")
+    def start(self):
         self.draw_start_screen()
         self.board = np.array([[symbol_no_player] * 7 for i in range(6)])
-        self.screen = pg.display.set_mode(self.screen_size, 0, 32)
         self.CLOCK = pg.time.Clock()
-        self.screen.display.set_caption(var.screen_title)
         self.num_turn = 0
+        self.start_game()
+    
+    def start_game(self):
+        gaming = GamingScreen(self.screen, *self.screen_size)
+        gaming.draw_board()
+        self.player_playing = self.player_1
+        while self.who_is_winner() == self.player_null or self.num_turn < self.board.size:
+            if self.player_playing == self.player_1:
+                play = self.player_1.play(self.board, gaming)
+            else:
+                play = self.player_2.play(self.board, gaming)
+            gaming.animate_fall(play[0], play[1], self.player_playing.color)
+            self.board[play[1], play[0]] = self.player_playing.symbol
+            gaming.draw_circle(play[0], play[1], color, var.radius_hole)
+            self.inverse_player()
+            self.num_turn += 1
+        self.draw_winner()
 
     def draw_options_screen(self):
         raise NotImplementedError("Not for now")
@@ -535,6 +570,7 @@ class Game:
         text_options = [[text_HvH], [text_HvAI], [text_AIvAI]]
         boxes = screen.center_all(text_options)
         self.status = var.options_menu_play
+        self.screen_AI = None
         while self.status == var.options_menu_play:
             mouse = screen.click()
             screen.handle_quit(quit_box, mouse)
@@ -544,17 +580,21 @@ class Game:
                 self.player_2 = Player(var.symbol_player_2, var.color_player_2, False)
             elif screen.x_in_rect(mouse, boxes[1][0]):
                 self.status = var.options_play_HvAI
-                self.show_options_AI(1)
+                self.screen_AI = Screen_AI(self.screen, *self.screen_size, number_AI=1)
+                self.player_1 = Player(var.symbol_player_1, var.color_player_1, False)
+                self.player_2 = Player(var.symbol_player_2, var.color_player_2, True)
             elif screen.x_in_rect(mouse, boxes[2][0]):
                 self.status = var.options_play_AIvAI
-                self.show_options_AI(2)
+                self.screen_AI = Screen_AI(self.screen, *self.screen_size, number_AI=1)
+                self.player_1 = Player(var.symbol_player_1, var.color_player_1, True)
+                self.player_2 = Player(var.symbol_player_2, var.color_player_2, True)
             elif screen.x_in_rect(mouse, cancel_box):
                 self.status = var.options_clicked_cancel
-        if self.difficulty_AI_2 == -1 and self.status not in [
+        if self.player_2.ai_difficulty == -1 and self.status not in [
             var.options_play_HvH,
             var.options_clicked_cancel,
         ]:
-            self.status = show_options_play()
+            self.draw_play_options()
 
     def draw_start_screen(self):
         raise NotImplementedError("Not for now")
@@ -567,11 +607,8 @@ class Game:
         rect_play = boxes_options[0][0]
         self.status = var.options_menu_start
         while self.status == var.options_menu_start:
-            for event in pg.event.get():
-                if event.type == pg.MOUSEBUTTONUP:
-                    mouse = pg.mouse.get_pos()
-                    start_screen.handle_quit(quit_box, mouse)
-                    if start_screen.x_in_rect(mouse, rect_play):
-                        self.draw_play_options()
+            mouse = start_screen.click()
+            if start_screen.x_in_rect(mouse, rect_play):
+                self.draw_play_options()
         if self.status == var.options_clicked_cancel:
             self.draw_start_screen()
