@@ -231,6 +231,14 @@ class Screen(Tools):
             [quit_t], var.white, *var.coor_quit_box, align=1
         )[0]
 
+    def reset_screen(self,
+        color_screen: pg.Color, text: list[list[pg.Surface]], colors_boxes: pg.Color | list[pg.Color]
+    ) -> tuple[pg.Rect, pg.Rect]:
+        self.screen.fill(color_screen)
+        self.center_all(text, colors_boxes)
+        self.draw_cancel_box(), self.draw_quit_box()
+        pg.display.update()
+
     def get_mouse_pos(self):
         raise NotImplementedError("Not for now")
         """ Return the mouse position if conditions are met """
@@ -248,6 +256,11 @@ class Screen(Tools):
             if self.x_in_rect(list_rect[i], click_coor):
                 return i
         return -1
+
+class Screen_AI(Screen):
+    def __init__(self, screen, width, height, texts, colors):
+        Screen.__init__(self, screen, width, height)
+        boxes_levels = self.center_all(texts, colors)
 
 
 class GamingScreen(Screen):
@@ -303,6 +316,7 @@ class Player:
         self.symbol = Symbol(symbol)
         self.color = color
         self.is_ai = AI
+        self.ai_difficulty = -1
 
     def play(self, board, screen):
         if self.is_ai:
@@ -410,25 +424,53 @@ class Game:
         raise NotImplementedError("Not for now")
 
     def draw_play_options(self):
-        raise NotImplementedError("Not for now")
+        """Show the different options when choosing to play"""
+        screen = Screen(self.screen, *self.screen_size)
+        text_HvH = screen.create_text_rendered(var.text_options_play_HvH)
+        text_HvAI = screen.create_text_rendered(var.text_options_play_HvAI)
+        text_AIvAI = screen.create_text_rendered(var.text_options_play_AIvAI)
+        text_options = [[text_HvH], [text_HvAI], [text_AIvAI]]
+        boxes = screen.center_all(text_options)
+        self.status = var.options_menu_play
+        while self.status == var.options_menu_play:
+            for event in pg.event.get():
+                if event.type == pg.MOUSEBUTTONUP:
+                    mouse = pg.mouse.get_pos()
+                    screen.handle_quit(quit_box, mouse)
+                    if screen.x_in_rect(boxes[0][0], mouse):
+                        self.status = var.options_play_HvH
+                        self.player_1 = Player(var.symbol_player_1, var.color_player_1, False)
+                        self.player_2 = Player(var.symbol_player_2, var.color_player_2, False)
+                    elif screen.x_in_rect(boxes[1][0], mouse):
+                        self.status = var.options_play_HvAI
+                        self.show_options_AI(1)
+                    elif screen.x_in_rect(boxes[2][0], mouse):
+                        self.status = var.options_play_AIvAI
+                        self.show_options_AI(2)
+                    elif screen.x_in_rect(cancel_box, mouse):
+                        self.status = var.options_clicked_cancel
+        if self.difficulty_AI_2 == -1 and self.status not in [
+            var.options_play_HvH,
+            var.options_clicked_cancel,
+        ]:
+            self.status = show_options_play()
 
     def draw_start_screen(self):
         raise NotImplementedError("Not for now")
         """Show the start screen.
         For now it is only the play button but soon there will be more options"""
 
-        self.start_screen = Screen(self.screen, *self.screen_size, cancel_box=False)
-        screen = self.start_screen
-        text_play = screen.create_text_rendered(var.text_options_play)
-        boxes_options = screen.center_all([[text_play]])
+        start_screen = Screen(self.screen, *self.screen_size, cancel_box=False)
+        text_play = start_screen.create_text_rendered(var.text_options_play)
+        boxes_options = start_screen.center_all([[text_play]])
         rect_play = boxes_options[0][0]
         self.status = var.options_menu_start
         while self.status == var.options_menu_start:
             for event in pg.event.get():
                 if event.type == pg.MOUSEBUTTONUP:
                     mouse = pg.mouse.get_pos()
-                    screen.handle_quit(quit_box, mouse)
-                    if screen.x_in_rect(rect_play, mouse):
+                    start_screen.handle_quit(quit_box, mouse)
+                    if start_screen.x_in_rect(rect_play, mouse):
                         self.draw_play_options()
         if self.status == var.options_clicked_cancel:
             self.draw_start_screen()

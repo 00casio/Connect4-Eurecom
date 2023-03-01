@@ -7,16 +7,6 @@ from interface.tools_writing import *
 from variables import Color, Rect, Surface, Symbol, pg
 
 
-def reset_screen(
-    color_screen: Color, text: list[list[Surface]], colors_boxes: Color | list[Color]
-) -> tuple[Rect, Rect]:
-    var.screen.fill(color_screen)
-    center_all(text, colors_boxes)
-    a, b = draw_cancel_box(), draw_quit_box()
-    pg.display.update()
-    return (a, b)
-
-
 def options_1AI(text_options: list[list[Surface]]) -> tuple[Symbol, int]:
     """Show the options for when there is only 1 AI in the game"""
     boxes_levels = center_all(text_options)
