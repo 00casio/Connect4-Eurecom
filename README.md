@@ -10,9 +10,9 @@ The project S6 of:
 
 ### This week objectives
 
-[ ] Contact the tutor
-[ ] Know what we have to do
-[ ] Maybe prototyping
+- [x] Contact the tutor
+- [x] Know what we have to do
+- [x] Maybe prototyping
 
 ### Objectives
 
@@ -25,43 +25,43 @@ The objectives of this project are the following:
 
 #### Interface
 
-[x] Choose mode
-[x] Grid
-[ ] Play sound
-[ ] Highlight selected column
+- [x] Choose mode
+- [x] Grid
+- [ ] Play sound
+- [ ] Highlight selected column
 
 Optional:
 
-[ ] Name
-[ ] Options
-[ ] Change theme
-[ ] Background music
+- [ ] Name
+- [ ] Options
+- [ ] Change theme
+- [ ] Background music
 
 #### AI
 
-[ ] Use minimax algorithm
+- [ ] Use minimax algorithm
 
 Optional:
 
-[ ] Change difficulty
-[ ] Different gameplay
-[ ] Choose algorithms
+- [ ] Change difficulty
+- [ ] Different gameplay
+- [ ] Choose algorithms
 
 #### Hands gesture
 
-[ ] Choose gestures
-[ ] Continuous or discrete gesture
+- [ ] Choose gestures
+- [ ] Continuous or discrete gesture
 
 Optional:
 
-[ ] Change on the fly
-[ ] Detect shapes
+- [ ] Change on the fly
+- [ ] Detect shapes
 
 #### Communication
 
-[ ] Choose the mean of communication
-[ ] Choose the protocol
-[ ] Communicate if rasp is human or AI
-[ ] If AI: tell the level of difficulty
-[ ] Make the differences between possible and definitive moves
-[ ] Allow floating numbers
+- [ ] Choose the mean of communication
+- [ ] Choose the protocol
+- [ ] Communicate if rasp is human or AI
+- [ ] If AI: tell the level of difficulty
+- [ ] Make the differences between possible and definitive moves
+- [ ] Allow floating numbers
