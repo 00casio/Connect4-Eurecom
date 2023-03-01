@@ -387,6 +387,7 @@ class GamingScreen(Screen):
         x = n * var.size_cell + var.size_cell // 2
         y = m * var.size_cell + var.size_cell // 2
         pg.draw.circle(self.board_surface, color, (x, y), r)
+        pg.display.update((x, y, var.size_cell, var.size_cell))
 
     def draw_board():
         self.screen.fill(self.color_screen)
@@ -556,6 +557,7 @@ class Game:
             gaming.draw_circle(play[0], play[1], color, var.radius_hole)
             self.inverse_player()
             self.num_turn += 1
+            self.CLOCK.tick(var.fps)
         self.draw_winner()
 
     def draw_options_screen(self):
