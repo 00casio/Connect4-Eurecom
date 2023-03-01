@@ -19,7 +19,7 @@ The project S6 of:
 The objectives of this project are the following:
 
 - Building a Connect-4 game playable on a Raspberry Pi board
-- Setting up a protocol to play with two differents Raspberry Pi
+- Setting up a protocol to play with two difference Raspberry Pi
 - Building an AI capable of playing the game
 - Building a program allowing a human to play the game with hand gestures using the Raspberry Pi camera module
 
@@ -49,7 +49,7 @@ Optional:
 #### Hands gesture
 
 - Choose gestures
-- Continuous or discrere gesture
+- Continuous or discrete gesture
 
 Optional:
 
