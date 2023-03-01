@@ -6,6 +6,10 @@ import sys
 import variables as var
 from interface import *
 from variables import Rect, pg
+from classes import Game
+
+game = Game()
+game.start_game()
 
 status = start_screen()
 start_game()

@@ -59,53 +59,202 @@ class Element:
         self.screen.update(self.box)
 
 
-class Line:
-    def __init__(self):
-        self.elements: list[Element] = []
-        self.width = 0
-        self.spacing = var.options_spacing
+class Tools:
+    def compute_total_size(
+        self, array_text: list[list[pg.Surface]]
+    ) -> tuple[int, list[int]]:
+        """Compute the height of a list of line of texts and the width of each line"""
+        total_height = 0
+        total_width = []
+        for line_text in array_text:
+            total_height += (
+                max([t.get_size()[1] for t in line_text]) + 2 * var.text_box_spacing
+            )
+            width_now = (
+                sum([t.get_size()[0] for t in line_text])
+                + 2 * var.text_box_spacing * len(line_text)
+                + (len(line_text) - 1) * var.options_spacing
+            )
+            total_width.append(width_now)
+        total_height += (len(array_text) - 1) * var.options_spacing
+        return (total_height, total_width)
 
-    def add_element(self, e: Element):
-        self.elements.append(e)
-        self.width = (
-            sum([ele.box.w for ele in self.elements])
-            + (len(self.elements) - 1) * self.spacing
-        )
+    def write_text_box(
+        self,
+        text: pg.Surface,
+        color_box: pg.Color,
+        x: int,
+        y: int,
+        spacing_x: int = var.text_box_spacing,
+        spacing_y: int = var.text_box_spacing,
+    ) -> pg.Rect:
+        """Write the text and create the box arround it"""
+        size = text.get_size()
+        b_rect = pg.Rect(x, y, size[0] + 2 * spacing_x, size[1] + 2 * spacing_y)
+        pg.draw.rect(var.screen, color_box, b_rect)
+        var.screen.blit(text, (x + spacing_x, y + spacing_y))
+        return b_rect
+
+    def write_on_line(
+        self,
+        list_text: list[pg.Surface],
+        color_box: pg.Color,
+        x: int,
+        y: int,
+        align: int = 0,
+        space_x: int = var.text_box_spacing,
+        space_y: int = var.text_box_spacing,
+        space_box: int = var.options_spacing,
+    ) -> list[pg.Rect]:
+        """write 'list_text' on a single line. 'align' can take -1 for left, 0 for middle, and 1 for right"""
+        boxes = []
+        width_line = self.compute_total_size([list_text])[1][0]
+        if align == -1:
+            write_x = x
+        elif align == 0:
+            write_x = (x - width_line) // 2
+        elif align == 1:
+            write_x = x - width_line
+        else:
+            raise ValueError("align is not -1, 0, or 1. Correct this")
+        for text in list_text:
+            boxes.append(
+                self.write_text_box(text, color_box, write_x, y, space_x, space_y)
+            )
+            write_x += text.get_size()[0] + 2 * space_x + space_box
+        # pg.display.update()
+        return boxes
+
+    def write_on_column(
+        list_text: list[Surface],
+        color_box: Color,
+        x: int,
+        y: int,
+        align: int = 0,
+        space_x: int = var.text_box_spacing,
+        space_y: int = var.text_box_spacing,
+        space_box: int = var.options_spacing,
+    ) -> list[Rect]:
+        boxes = []
+        height_line = compute_total_size([list_text])[0]
+        if align == -1:
+            write_y = y
+        elif align == 0:
+            write_y = (y - height_line) // 2
+        elif align == 1:
+            write_y = y - height_line
+        else:
+            raise ValueError("align is not -1, 0, or 1. Correct this")
+        for text in list_text:
+            boxes.append(write_text_box(text, color_box, x, write_y))
+            write_y += text.get_size()[1] + 2 * space_y + space_box
+        # pg.display.update()
+        return boxes
+
+    def center_all(
+        array_text: list[list[pg.Surface]],
+        color_box: pg.Color | list[pg.Color] = var.color_options_box,
+    ) -> list[list[pg.Rect]]:
+        """Write the texts in 'array_text' centered in the middle of the screen.
+        If 'color_box' is a single element, then all boxes will have the same color"""
+        if type(color_box) == list:
+            assert len(array_text) == len(
+                color_box
+            ), f"array_text and color_box are not the same size ({len(array_text)} and {len(color_box)})"
+        total_size = compute_total_size(array_text)
+        rect_boxes = []
+        y_now = (var.height_screen - total_size[0]) // 2
+        for i in range(len(array_text)):
+            line_text = array_text[i]
+            if type(color_box) == list:
+                color = color_box[i]
+            else:
+                color = color_box
+            box_rect = write_on_line(line_text, color, var.width_screen, y_now)
+            y_now += (
+                line_text[0].get_size()[1]
+                + 2 * var.text_box_spacing
+                + var.options_spacing
+            )
+            rect_boxes.append(box_rect)
+        pg.display.update()
+        return rect_boxes
+
+    def create_text_rendered(
+        self,
+        text: str,
+        color: Color = var.color_options_text,
+        font: str = var.text_font,
+        size: int = var.text_size,
+    ) -> Surface:
+        """Create text in the color, font, and size asked"""
+        pg_font = pg.font.SysFont(font, size)
+        return pg_font.render(text, True, color)
 
 
-class Screen:
+class Screen(Tools):
     """A screen is composed of what is shown to the user"""
 
-    def __init__(self, width: int, height: int):
+    def __init__(
+        self,
+        screen,
+        width: int,
+        height: int,
+        cancel_box: bool = True,
+        quit_box: bool = True,
+        color_fill: pg.Color = var.color_options_screen,
+    ):
+        self.screen = screen
         self.width = width
         self.height = height
-        self.lines: list[Line] = []
-        self.columns = []
+        self.elements = []
         self.screen = None
+        self.cancel_box = None
+        self.suit_box = None
+        self.screen.fill(color_fill)
+        if cancel_box:
+            self.draw_cancel_box()
+        if quit_box:
+            self.draw_quit_box()
 
-    def add_box_text(self, position, text, color_box, color_text):
-        raise NotImplementedError("Not for now")
-        self.elements.append(Element(box, text, color_box, color_text))
+    def draw_cancel_box(self) -> None:
+        """Draw the box that allow the user to take a step back"""
+        cancel = self.create_text_rendered(var.text_cancel_box, var.black)
+        self.cancel_box = self.write_on_line(
+            [cancel], var.white, *var.coor_cancel_box, align=-1
+        )[0]
 
-    def add_line(self, line: Line):
-        self.lines.append(line)
-        for e in line.elements:
-            e.draw(e.text)
+    def draw_quit_box(self) -> None:
+        """Draw the box that allow the user to take a step back"""
+        quit_t = self.create_text_rendered(var.text_quit_box, var.black)
+        self.quit_box = self.write_on_line(
+            [quit_t], var.white, *var.coor_quit_box, align=1
+        )[0]
 
     def get_mouse_pos(self):
         raise NotImplementedError("Not for now")
         """ Return the mouse position if conditions are met """
         return pg.mouse.get_pos()
 
-    def draw_all_centered(self, list_text):
-        raise NotImplementedError("Not for now")
+    def x_in_rect(self, rect: pg.Rect, coor: tuple[int, int]) -> bool:
+        """Return whether coor is in the rectangle 'rect'"""
+        return rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
+
+    def handle_click(
+        self, click_coor: tuple[int, int], list_rect: list[pg.Rect]
+    ) -> int:
+        """Return the index of the box the click was in"""
+        for i in range(len(list_rect)):
+            if self.x_in_rect(list_rect[i], click_coor):
+                return i
+        return -1
 
 
 class GamingScreen(Screen):
     """The gaming screen is used for the gaming part of the program"""
 
-    def __init__(self, width: int, height: int) -> None:
-        Screen.__init__(self, width, height)
+    def __init__(self, screen: pg.Surface, width: int, height: int) -> None:
+        Screen.__init__(self, screen, width, height)
         self.color_screen = var.white
         self.color_board = var.light_blue
         self.width_board = var.width_board
@@ -250,6 +399,7 @@ class Game:
 
     def start_game(self):
         raise NotImplementedError("Not for now")
+        self.draw_start_screen()
         self.board = np.array([[symbol_no_player] * 7 for i in range(6)])
         self.screen = pg.display.set_mode(self.screen_size, 0, 32)
         self.CLOCK = pg.time.Clock()
@@ -259,25 +409,26 @@ class Game:
     def draw_options_screen(self):
         raise NotImplementedError("Not for now")
 
+    def draw_play_options(self):
+        raise NotImplementedError("Not for now")
+
     def draw_start_screen(self):
         raise NotImplementedError("Not for now")
         """Show the start screen.
         For now it is only the play button but soon there will be more options"""
 
-        self.start_screen = Screen(*self.screen_size)
-        self.screen.fill(var.color_options_screen)
-        quit_box = draw_quit_box()
-        text_play = create_text_rendered(var.text_options_play)
-        boxes_options = center_all([[text_play]])
+        self.start_screen = Screen(self.screen, *self.screen_size, cancel_box=False)
+        screen = self.start_screen
+        text_play = screen.create_text_rendered(var.text_options_play)
+        boxes_options = screen.center_all([[text_play]])
         rect_play = boxes_options[0][0]
-        status = var.options_menu_start
-        while status == var.options_menu_start:
+        self.status = var.options_menu_start
+        while self.status == var.options_menu_start:
             for event in pg.event.get():
                 if event.type == pg.MOUSEBUTTONUP:
                     mouse = pg.mouse.get_pos()
-                    handle_quit(quit_box, mouse)
-                    if x_in_rect(rect_play, mouse):
-                        status = show_options_play()
-        if status == var.options_clicked_cancel:
-            status = start_screen()
-        return status
+                    screen.handle_quit(quit_box, mouse)
+                    if screen.x_in_rect(rect_play, mouse):
+                        self.draw_play_options()
+        if self.status == var.options_clicked_cancel:
+            self.draw_start_screen()

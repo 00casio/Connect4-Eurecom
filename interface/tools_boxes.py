@@ -10,18 +10,6 @@ from interface.tools_writing import *
 from variables import Color, Rect, pg
 
 
-def x_in_rect(rect: Rect, coor: tuple[int, int]) -> bool:
-    """Return whether coor is in the rectangle 'rect'"""
-    return rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
-
-
-def handle_click(click_coor: tuple[int, int], list_rect: list[Rect]) -> int:
-    """Return the index of the box the click was in"""
-    for i in range(len(list_rect)):
-        if x_in_rect(list_rect[i], click_coor):
-            return i
-    return -1
-
 
 def highlight_box(box: Rect, color_box: Color, text: str, color_text: Color) -> None:
     """Highlight the clicked box to be in a color or another"""
@@ -44,34 +32,12 @@ def draw_agreement_box(text: str, position: float = 0.75) -> Rect:
     return box
 
 
-def draw_cancel_box() -> Rect:
-    """Draw the box that allow the user to take a step back"""
-    cancel = create_text_rendered(var.text_cancel_box, var.black)
-    return write_on_line([cancel], var.white, *var.coor_cancel_box, align=-1)[0]
-
-
-def draw_quit_box() -> Rect:
-    """Draw the box that allow the user to take a step back"""
-    quit_t = create_text_rendered(var.text_quit_box, var.black)
-    return write_on_line([quit_t], var.white, *var.coor_quit_box, align=1)[0]
-
-
 def handle_quit(quit_box: Rect, mouse: tuple[int, int]) -> None:
     """Function to call when wanting to see if user clicked in the quitting box"""
     if x_in_rect(quit_box, mouse):
         print("You choose to quit the game\nYou are disapointing me")
         pg.quit()
         sys.exit()
-
-
-def update_screen(rect: Optional[Rect] = None, pause: float = 0.0) -> None:
-    """Update the whole screen by default or only part of it"""
-    var.screen.blit(var.board_surface, (var.padding, var.padding))
-    if rect is not None:
-        pg.display.update(rect)
-    else:
-        pg.display.update()
-    sleep(pause)
 
 
 def draw_circle(n: int, m: int, color: Color, r: int) -> None:
