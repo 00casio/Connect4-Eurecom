@@ -1,7 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from typing import Any
+import sys
+from typing import Any, Callable, Optional
 
 import numpy as np
 import pygame as pg
@@ -13,8 +14,8 @@ var = Variables()
 pg.init()
 
 Color = pg.Color
-Rect = Rect
-Surface = Surface
+Rect = pg.Rect
+Surface = pg.Surface
 
 
 class Element:
@@ -32,9 +33,10 @@ class Element:
     ) -> None:
         self.font = font
         self.pos = pos
-        self.color_box = color_box
+        self.text_color = text_color
+        self.color_box = box_color
         self.screen = screen
-        self.padding = (padd_x, padd_y)
+        self.padding = padd
         self.draw(text)
 
     def draw(self, text: str) -> None:
@@ -48,10 +50,13 @@ class Element:
         )
         pg.draw.rect(self.screen, self.color_box, self.box)
         self.screen.blit(self.text, (self.box.x, self.box.y))
-        self.screen.update(self.box)
+        pg.display.update(self.box)
 
 
 class Tools:
+    def __init__(self, screen: Surface) -> None:
+        self.screen = screen
+
     def compute_total_size(
         self, array_text: list[list[Surface]]
     ) -> tuple[int, list[int]]:
@@ -75,7 +80,6 @@ class Tools:
         self,
         text: Surface,
         color_box: Color,
-        screen,
         x: int,
         y: int,
         spacing_x: int = var.text_box_spacing,
@@ -84,15 +88,14 @@ class Tools:
         """Write the text and create the box arround it"""
         size = text.get_size()
         b_rect = Rect(x, y, size[0] + 2 * spacing_x, size[1] + 2 * spacing_y)
-        pg.draw.rect(screen, color_box, b_rect)
-        screen.blit(text, (x + spacing_x, y + spacing_y))
+        pg.draw.rect(self.screen, color_box, b_rect)
+        self.screen.blit(text, (x + spacing_x, y + spacing_y))
         return b_rect
 
     def write_on_line(
         self,
         list_text: list[Surface],
         color_box: Color,
-        screen,
         x: int,
         y: int,
         align: int = 0,
@@ -113,60 +116,29 @@ class Tools:
             raise ValueError("align is not -1, 0, or 1. Correct this")
         for text in list_text:
             boxes.append(
-                self.write_text_box(
-                    text, color_box, screen, write_x, y, space_x, space_y
-                )
+                self.write_text_box(text, color_box, write_x, y, space_x, space_y)
             )
             write_x += text.get_size()[0] + 2 * space_x + space_box
         # pg.display.update()
         return boxes
 
-    def write_on_column(
-        list_text: list[Surface],
-        color_box: Color,
-        x: int,
-        y: int,
-        align: int = 0,
-        space_x: int = var.text_box_spacing,
-        space_y: int = var.text_box_spacing,
-        space_box: int = var.options_spacing,
-    ) -> list[Rect]:
-        boxes = []
-        height_line = compute_total_size([list_text])[0]
-        if align == -1:
-            write_y = y
-        elif align == 0:
-            write_y = (y - height_line) // 2
-        elif align == 1:
-            write_y = y - height_line
-        else:
-            raise ValueError("align is not -1, 0, or 1. Correct this")
-        for text in list_text:
-            boxes.append(write_text_box(text, color_box, x, write_y))
-            write_y += text.get_size()[1] + 2 * space_y + space_box
-        # pg.display.update()
-        return boxes
-
     def center_all(
+        self,
         array_text: list[list[Surface]],
-        color_box: Color | list[Color] = var.color_options_box,
+        color_box: list[Color] = [var.color_options_box],
     ) -> list[list[Rect]]:
         """Write the texts in 'array_text' centered in the middle of the screen.
         If 'color_box' is a single element, then all boxes will have the same color"""
-        if type(color_box) == list:
-            assert len(array_text) == len(
-                color_box
-            ), f"array_text and color_box are not the same size ({len(array_text)} and {len(color_box)})"
-        total_size = compute_total_size(array_text)
+
+        color = [
+            color_box[i] for i in range(len(array_text) - len(color_box))
+        ] + color_box
+        total_size = self.compute_total_size(array_text)
         rect_boxes = []
         y_now = (var.height_screen - total_size[0]) // 2
         for i in range(len(array_text)):
             line_text = array_text[i]
-            if type(color_box) == list:
-                color = color_box[i]
-            else:
-                color = color_box
-            box_rect = write_on_line(line_text, color, var.width_screen, y_now)
+            box_rect = self.write_on_line(line_text, color[i], var.width_screen, y_now)
             y_now += (
                 line_text[0].get_size()[1]
                 + 2 * var.text_box_spacing
@@ -188,12 +160,12 @@ class Tools:
         return pg_font.render(text, True, color)
 
     def highlight_box(
-        self, box: Rect, color_box: Color, text: str, color_text: Color
+        self, box: Rect, color_box: Color, screen, text: str, color_text: Color
     ) -> None:
         """Highlight the clicked box to be in a color or another"""
         pg_text = self.create_text_rendered(text, color_text)
-        pg.draw.rect(self.screen, color_box, box)
-        self.screen.blit(
+        pg.draw.rect(screen, color_box, box)
+        screen.blit(
             pg_text, (box.x + var.text_box_spacing, box.y + var.text_box_spacing)
         )
         pg.display.update()
@@ -214,19 +186,14 @@ class Screen(Tools):
 
     def __init__(
         self,
-        screen,
-        width: int,
-        height: int,
+        screen: Surface,
         cancel_box: bool = True,
         quit_box: bool = True,
         color_fill: Color = var.color_options_screen,
-    ):
-        self.screen = screen
-        self.width = width
-        self.height = height
-        self.elements = []
-        self.cancel_box = None
-        self.suit_box = None
+    ) -> None:
+        Tools.__init__(self, screen)
+        self.elements: list[Element] = []
+        self.cancel_box: Optional[Rect] = None
         self.box_clicked = var.box_out
         self.screen.fill(color_fill)
         if cancel_box:
@@ -238,33 +205,40 @@ class Screen(Tools):
         """Draw the box that allow the user to take a step back"""
         cancel = self.create_text_rendered(var.text_cancel_box, var.black)
         self.cancel_box = self.write_on_line(
-            [cancel], var.white, self.screen, *var.coor_cancel_box, align=-1
+            [cancel],
+            var.white,
+            var.coor_cancel_box[0],
+            var.coor_cancel_box[1],
+            align=-1,
         )[0]
 
     def draw_quit_box(self) -> None:
         """Draw the box that allow the user to take a step back"""
         quit_t = self.create_text_rendered(var.text_quit_box, var.black)
         self.quit_box = self.write_on_line(
-            [quit_t], var.white, self.screen, *var.coor_quit_box, align=1
+            [quit_t], var.white, var.coor_cancel_box[0], var.coor_cancel_box[1], align=1
         )[0]
 
     def reset_screen(
         self,
         color_screen: Color,
         text: list[list[Surface]],
-        colors_boxes: Color | list[Color],
-    ) -> tuple[Rect, Rect]:
+        colors_boxes: list[Color],
+    ) -> None:
         self.screen.fill(color_screen)
         self.center_all(text, colors_boxes)
-        self.draw_cancel_box(), self.draw_quit_box()
+        self.draw_cancel_box()
+        self.draw_quit_box()
         pg.display.update()
 
-    def get_mouse_pos(self):
+    def get_mouse_pos(self) -> tuple[int, int]:
         """Return the mouse position"""
         print("Change this to have the positon from the camera")
         return pg.mouse.get_pos()
 
-    def click(self, rect_play=None, f=None):
+    def click(
+        self, rect_play: Optional[Rect] = None, f: Optional[Callable] = None
+    ) -> tuple[int, int]:
         """Quit the function only when there is a click. Return the position of the click.
         If f is not None, then the function is called whith the argument 'event' at every iteration"""
         allow_quit = False
@@ -283,20 +257,22 @@ class Screen(Tools):
         self.handle_quit(click)
         return click
 
-    def is_canceled(self, click):
+    def is_canceled(self, click: tuple[int, int]) -> bool:
         if self.cancel_box is None:
             return False
         return self.x_in_rect(click, self.cancel_box)
 
-    def handle_quit(self, click):
+    def handle_quit(self, click: tuple[int, int]) -> None:
         """Function to call when wanting to see if user clicked in the quitting box"""
         if self.quit_box is not None and self.x_in_rect(click, self.quit_box):
             print("You choose to quit the game\nYou are disapointing me")
             pg.quit()
             sys.exit()
 
-    def x_in_rect(self, coor: tuple[int, int], rect: Rect) -> bool:
+    def x_in_rect(self, coor: tuple[int, int], rect: Optional[Rect]) -> bool:
         """Return whether coor is in the rectangle 'rect'"""
+        if rect is None:
+            return False
         return rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
 
     def handle_click(self, click_coor: tuple[int, int], list_rect: list[Rect]) -> int:
@@ -308,53 +284,53 @@ class Screen(Tools):
 
 
 class Screen_AI(Screen):
-    def __init__(self, screen, width, height, number_AI=1):
-        Screen.__init__(self, screen, width, height)
+    def __init__(self, screen: Surface, number_AI: int = 1) -> None:
+        Screen.__init__(self, screen)
+        self.number_AI = number_AI
 
         texts_level = [
-            create_text_rendered(f"Level {i}")
+            self.create_text_rendered(f"Level {i}")
             for i in range(len(var.boxAI_text_levels))
         ]
 
         self.text_options = [
-            [create_text_rendered(var.text_difficulty_options[number])],
+            [self.create_text_rendered(var.text_difficulty_options[number_AI])],
             texts_level,
         ]
-        self.options_colors = colors = [var.color_options_box, var.color_player_1]
+        self.options_colors = [var.color_options_box, var.color_player_1]
         if self.number_AI == 2:
             self.options_colors.append(var.color_player_2)
-        self.boxes_levels = self.center_all(texts, colors)
-        self.reset_screen(var.color_options_screen, texts, colors)
+        self.boxes_levels = self.center_all(self.text_options, self.options_colors)
+        self.reset_screen(
+            var.color_options_screen, self.text_options, self.options_colors
+        )
         self.play_box = None
         self.diff_AI_1, self.diff_AI_1 = -1, -1
-        self.nbr_levels_AI_1 = len(boxes_levels[1])
-        self.number_AI = number_AI
+        self.nbr_levels_AI_1 = len(self.boxes_levels[1])
         if self.number_AI == 2:
             self.text_options.append(texts_level)
-            self.options_levels = [*boxes_levels[1], *boxes_levels[2]]
+            self.options_levels = [*self.boxes_levels[1], *self.boxes_levels[2]]
         else:
-            self.options_levels = [*boxes_levels[1]]
+            self.options_levels = [*self.boxes_levels[1]]
         self.screen_loop()
 
-    def screen_loop(self):
+    def screen_loop(self) -> None:
         while self.box_clicked not in [var.boxAI_play, var.boxAI_cancel]:
             mouse_click = self.click()
-            index_box = handle_click(mouse_click, self.boxes_levels)
+            index_box = self.handle_click(mouse_click, self.options_levels)
             if index_box != var.box_out:
                 if 0 <= index_box < self.nbr_levels_AI_1:
                     self.write_on_line(
                         self.text_options[1],
                         var.color_player_1,
-                        self.screen,
                         var.width_screen,
-                        boxes_levels[1][0].top,
+                        self.boxes_levels[1][0].top,
                     )
                     self.diff_AI_1 = index_box
-                elif nbr_levels_AI_1 <= index_box < len(options_levels):
+                elif self.nbr_levels_AI_1 <= index_box < len(self.options_levels):
                     self.write_on_line(
                         self.text_options[2],
                         var.color_player_2,
-                        self.screen,
                         var.width_screen,
                         self.boxes_levels[2][0].top,
                     )
@@ -362,21 +338,22 @@ class Screen_AI(Screen):
                 if self.diff_AI_1 != -1 and (
                     self.diff_AI_2 != -1 or self.number_AI == 1
                 ):
-                    play_box = draw_agreement_box("Sarah Connor ?")
+                    play_box = self.draw_agreement_box("Sarah Connor ?")
                 self.highlight_box(
                     self.options_levels[index_box],
                     var.color_options_highlight_box,
+                    self.screen,
                     f"Level {index_box % self.nbr_levels_AI_1}",
                     var.color_options_highlight_text,
                 )
-            elif play_box is not None and self.x_in_rect(play_box, mouse_click):
+            elif play_box is not None and self.x_in_rect(mouse_click, play_box):
                 self.box_clicked = var.boxAI_play
             else:
                 self.play_box = None
                 self.diff_AI_1 = -1
                 self.diff_AI_2 = -1
                 self.reset_screen(
-                    var.color_options_screen, self.text_options, self.colors
+                    var.color_options_screen, self.text_options, self.options_colors
                 )
                 pg.display.update()
 
@@ -384,13 +361,13 @@ class Screen_AI(Screen):
 class GamingScreen(Screen):
     """The gaming screen is used for the gaming part of the program"""
 
-    def __init__(self, screen: Surface, width: int, height: int) -> None:
-        Screen.__init__(self, screen, width, height)
+    def __init__(self, screen: Surface) -> None:
+        Screen.__init__(self, screen)
         self.color_screen = var.white
         self.color_board = var.light_blue
         self.width_board = var.width_board
         self.height_board = var.height_board
-        self.board_surface = Surface.Surface(
+        self.board_surface = Surface(
             (self.width_board, self.height_board)
         ).convert_alpha()
 
@@ -401,7 +378,7 @@ class GamingScreen(Screen):
         pg.draw.circle(self.board_surface, color, (x, y), r)
         pg.display.update((x, y, var.size_cell, var.size_cell))
 
-    def draw_board():
+    def draw_board(self) -> None:
         self.screen.fill(self.color_screen)
         pg.draw.rect(
             self.board_surface,
@@ -411,16 +388,17 @@ class GamingScreen(Screen):
         for i in range(7):
             for j in range(6):
                 self.draw_circle(i, j, var.color_trans, var.radius_hole)
-        update_screen()
+        pg.display.update()
 
     def animate_fall(self, col: int, row: int, color_player: Color) -> None:
-        for y in range(var.padding + num_col * var.size_cell + var.size_cell // 2, 5):
+        x = var.padding + col * var.size_cell + var.size_cell // 2
+        for y in range(var.padding + row * var.size_cell + var.size_cell // 2, 5):
             self.screen.fill(var.white)
             pg.draw.circle(self.screen, color_player, (x, y), var.radius_disk)
-            update_screen()
-        pg.draw.circle(self.board_surface, color, (x, y), var.radius_hole)
+            pg.display.update()
+        pg.draw.circle(self.board_surface, color_player, (x, y), var.radius_hole)
 
-    def human_move(self, color):
+    def human_move(self, color: Color) -> None:
         mouse_x, mouse_y = self.get_mouse_pos()
         if mouse_x < var.pos_min_x:
             mouse_x = var.pos_min_x
@@ -432,30 +410,45 @@ class GamingScreen(Screen):
         pg.display.update((mouse_x - p, 0, 2 * p, 2 * p))
 
 
-class Player:
-    """The class that keep all the options for a player"""
+class Board(np.ndarray):
+    def __init__(self):
+        np.ndarray.__init__()
+        self = np.array([[symbol_no_player] * 7 for i in range(6)])
 
-    def __init__(self, symbol: Any, color: Color, AI: bool):
-        self.symbol = Symbol(symbol)
-        self.color = color
-        self.is_ai = AI
-        self.ai_difficulty = -1
-
-    def find_free_slot(self, board, i: int) -> int:
+    def find_free_slot(self, i: int) -> int:
         """Return the index of the first free slot"""
-        col = board[:, i]
+        col = self[:, i]
         for j in range(len(col) - 1, -1, -1):
             if col[j] == var.symbol_no_player:
                 return j
         return -1
 
-    def play(self, board, screen):
+
+class Player:
+    """The class that keep all the options for a player"""
+
+    def __init__(self, number: int, AI: bool, difficulty: int = -1) -> None:
+        if number == 0:
+            self.symbol = Symbol(var.symbol_no_player)
+            self.color = var.color_trans
+        if number == 1:
+            self.symbol = Symbol(var.symbol_player_1)
+            self.color = var.color_player_1
+        elif number == 2:
+            self.symbol = Symbol(var.symbol_player_2)
+            self.color = var.color_player_2
+        else:
+            raise ValueError("There can not be more than 2 players")
+        self.is_ai = AI
+        self.ai_difficulty = difficulty
+
+    def play(self, board: Board, screen: Screen):
         if self.is_ai:
             col = best_col_prediction(board, self.symbol)
         else:
             click = screen.click()
-            col = (click[0] - padding) // var.size_cell
-        row = self.find_free_slot(board, col)
+            col = (click[0] - var.padding) // var.size_cell
+        row = board.find_free_slot(col)
         if row == -1:
             col, row = self.play(board, screen)
         return (col, row)
@@ -473,13 +466,12 @@ class Game:
 
     def __init__(self):
         # Players
-        self.player_1: Player = None
-        self.player_2: Player = None
-        self.player_playing: Player = None
-        self.player_null = Player(var.symbol_no_player, var.color_trans, False)
+        self.player_1 = Player(1, False)
+        self.player_2 = Player(2, False)
+        self.player_playing = self.player_1
+        self.player_null = Player(0, False)
+        self.screen = pg.display.set_mode((var.width_screen, var.height_screen), 0, 32)
 
-        self.screen_size = (var.width_screen, var.height_screen)
-        self.screen = pg.display.set_mode(self.screen_size, 0, 32)
         print(self.screen)
         pg.display.set_caption(var.screen_title)
 
@@ -525,7 +517,7 @@ class Game:
         # Nothing found
         return False
 
-    def who_is_winner(self):
+    def who_is_winner(self) -> Player:
         s = self.board.shape
         state_symbol_player_1 = np.zeros(s)
         state_symbol_player_2 = np.zeros(s)
@@ -538,7 +530,7 @@ class Game:
         else:
             return self.player_null
 
-    def draw_winner(self):
+    def draw_winner(self) -> None:
         winner = self.who_is_winner()
         if winner == self.player_1:
             print("Winner is the first player")
@@ -548,15 +540,15 @@ class Game:
             print("That is a draw")
         print("Not finished")
 
-    def start(self):
+    def start(self) -> None:
         self.draw_start_screen()
-        self.board = np.array([[symbol_no_player] * 7 for i in range(6)])
+        self.board = Board()
         self.CLOCK = pg.time.Clock()
         self.num_turn = 0
         self.start_game()
 
-    def start_game(self):
-        gaming = GamingScreen(self.screen, *self.screen_size)
+    def start_game(self) -> None:
+        gaming = GamingScreen(self.screen)
         gaming.draw_board()
         self.player_playing = self.player_1
         while (
@@ -568,18 +560,20 @@ class Game:
                 play = self.player_2.play(self.board, gaming)
             gaming.animate_fall(play[0], play[1], self.player_playing.color)
             self.board[play[1], play[0]] = self.player_playing.symbol
-            gaming.draw_circle(play[0], play[1], color, var.radius_hole)
+            gaming.draw_circle(
+                play[0], play[1], self.player_playing.color, var.radius_hole
+            )
             self.inverse_player()
             self.num_turn += 1
             self.CLOCK.tick(var.fps)
         self.draw_winner()
 
-    def draw_options_screen(self):
+    def draw_options_screen(self) -> None:
         raise NotImplementedError("Not for now")
 
-    def draw_play_options(self):
+    def draw_play_options(self) -> None:
         """Show the different options when choosing to play"""
-        screen = Screen(self.screen, *self.screen_size)
+        screen = Screen(self.screen)
         text_HvH = screen.create_text_rendered(var.text_options_play_HvH)
         text_HvAI = screen.create_text_rendered(var.text_options_play_HvAI)
         text_AIvAI = screen.create_text_rendered(var.text_options_play_AIvAI)
@@ -589,22 +583,18 @@ class Game:
         self.screen_AI = None
         while self.status == var.options_menu_play:
             mouse = screen.click()
-            screen.handle_quit(quit_box, mouse)
             if screen.x_in_rect(mouse, boxes[0][0]):
                 self.status = var.options_play_HvH
-                self.player_1 = Player(var.symbol_player_1, var.color_player_1, False)
-                self.player_2 = Player(var.symbol_player_2, var.color_player_2, False)
             elif screen.x_in_rect(mouse, boxes[1][0]):
                 self.status = var.options_play_HvAI
-                self.screen_AI = Screen_AI(self.screen, *self.screen_size, number_AI=1)
-                self.player_1 = Player(var.symbol_player_1, var.color_player_1, False)
-                self.player_2 = Player(var.symbol_player_2, var.color_player_2, True)
+                self.screen_AI = Screen_AI(self.screen, number_AI=1)
+                self.player_2 = Player(2, True, self.screen_AI.diff_AI_1)
             elif screen.x_in_rect(mouse, boxes[2][0]):
                 self.status = var.options_play_AIvAI
-                self.screen_AI = Screen_AI(self.screen, *self.screen_size, number_AI=1)
-                self.player_1 = Player(var.symbol_player_1, var.color_player_1, True)
-                self.player_2 = Player(var.symbol_player_2, var.color_player_2, True)
-            elif screen.x_in_rect(mouse, cancel_box):
+                self.screen_AI = Screen_AI(self.screen, number_AI=2)
+                self.player_1 = Player(1, True, self.screen_AI.diff_AI_1)
+                self.player_2 = Player(2, True, self.screen_AI.diff_AI_2)
+            elif screen.x_in_rect(mouse, screen.cancel_box):
                 self.status = var.options_clicked_cancel
         if self.player_2.ai_difficulty == -1 and self.status not in [
             var.options_play_HvH,
@@ -612,11 +602,11 @@ class Game:
         ]:
             self.draw_play_options()
 
-    def draw_start_screen(self):
+    def draw_start_screen(self) -> None:
         """Show the start screen.
         For now it is only the play button but soon there will be more options"""
 
-        start_screen = Screen(self.screen, *self.screen_size, cancel_box=False)
+        start_screen = Screen(self.screen, cancel_box=False)
         text_play = start_screen.create_text_rendered(var.text_options_play)
         boxes_options = start_screen.center_all([[text_play]])
         rect_play = boxes_options[0][0]
