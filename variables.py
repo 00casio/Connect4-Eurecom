@@ -1,61 +1,36 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import typing as typ
+from typing import Any
 
-import numpy as np
-import pygame
+import pygame as pg
 
-pg = pygame
 pg.init()
 
-# Types hints
-Any = typ.Any
-Surface = pg.Surface
-Rect = pg.Rect
 Color = pg.Color
-Event = pg.event.Event
-Font = pg.font.Font
-
-
-# Classes
 
 
 class Symbol:
+    """The Symbol class is used to make the difference between two players"""
+
     def __init__(self, value: Any) -> None:
         self.v = value
 
     def __eq__(self, o: object) -> Any:
-        if not isinstance(o, Symbol):
+        if isinstance(o, Symbol):
+            return o.v == self.v
+        elif isinstance(o, type(self.v)):
+            return o == self.v
+        else:
             return NotImplemented
-        return o.v == self.v
 
 
 class Variables:
     def __init__(self):
         # Symbols
-        self.symbol_draw = Symbol("-1")
         self.symbol_no_player = Symbol("0")
         self.symbol_player_1 = Symbol("1")
         self.symbol_player_2 = Symbol("2")
-
-        # Board
-        self.board = np.array(
-            [
-                [symbol_no_player] * 7,
-                [symbol_no_player] * 7,
-                [symbol_no_player] * 7,
-                [symbol_no_player] * 7,
-                [symbol_no_player] * 7,
-                [symbol_no_player] * 7,
-            ]
-        )
-        self.nbr_max_turn = board.size
-
-        # AI
-        self.difficulty_AI_1: int = -1
-        self.difficulty_AI_2: int = -1
-        self.symbol_player_AI = symbol_no_player
 
         # Boxes for levels of AI
         self.box_out = 0
@@ -80,30 +55,30 @@ class Variables:
         self.light_blue = Color(30, 160, 255)
         self.cyan = Color(45, 245, 255)
         self.color_trans = Color(0, 0, 0, 0)
-        self.color_player_1 = red
-        self.color_player_2 = green
-        self.color_board = blue
-        self.color_screen = white
-        self.color_options_screen = light_blue
-        self.color_options_highlight_box = cyan
-        self.color_options_highlight_text = black
-        self.color_options_box = blue
-        self.color_options_text = white
+        self.color_player_1 = self.red
+        self.color_player_2 = self.green
+        self.color_board = self.blue
+        self.color_screen = self.white
+        self.color_options_screen = self.light_blue
+        self.color_options_highlight_box = self.cyan
+        self.color_options_highlight_text = self.black
+        self.color_options_box = self.blue
+        self.color_options_text = self.white
 
         # Size
         self.size_cell = 100
-        self.padding = int(size_cell * 1.5)
-        self.width_board = 7 * size_cell
-        self.height_board = 6 * size_cell
+        self.padding = int(self.size_cell * 1.5)
+        self.width_board = 7 * self.size_cell
+        self.height_board = 6 * self.size_cell
         self.radius_hole = 40
         self.radius_disk = 49
-        self.width_screen = 2 * padding + width_board
-        self.height_screen = 2 * padding + height_board
-        self.options_spacing = padding // 4
-        self.text_box_spacing = padding // 10
+        self.width_screen = 2 * self.padding + self.width_board
+        self.height_screen = 2 * self.padding + self.height_board
+        self.options_spacing = self.padding // 4
+        self.text_box_spacing = self.padding // 10
         self.center_screen = (
-            width_screen // 2,
-            height_screen // 2,
+            self.width_screen // 2,
+            self.height_screen // 2,
         )
 
         # Options
@@ -117,8 +92,8 @@ class Variables:
         # Pygame
         self.fps = 30
         self.screen_title = "Connect 4"
-        self.pos_min_x = padding + size_cell // 2
-        self.pos_max_x = padding + width_board - size_cell // 2
+        self.pos_min_x = self.padding + self.size_cell // 2
+        self.pos_max_x = self.padding + self.width_board - self.size_cell // 2
         self.text_size = 30
         self.text_font = "monospace"
         self.text_options_play = "Play"
@@ -134,11 +109,10 @@ class Variables:
         ]
 
         # Fonts
-        self.main_font = pg.font.SysFont(text_font, text_size)
+        self.main_font = pg.font.SysFont(self.text_font, self.text_size)
 
         # Quit and cancel
         self.text_cancel_box = "Cancel"
         self.coor_cancel_box = (10, 10)
         self.text_quit_box = "Quit"
-        self.coor_quit_box = (width_screen - 10, 10)
-
+        self.coor_quit_box = (self.width_screen - 10, 10)
