@@ -4,6 +4,10 @@ import pyautogui
 import math
 from enum import IntEnum
 from google.protobuf.json_format import MessageToDict
+import sys
+import variables as var
+from interface import *
+from variables import Rect, pg
 
 pyautogui.FAILSAFE = False
 mp_drawing = mp.solutions.drawing_utils
@@ -447,10 +451,21 @@ class GestureController:
                 cv2.imshow('Gesture Controller', image)
                 if cv2.waitKey(5) & 0xFF == 13:
                     break
+                for event in pg.event.get():
+                    winner = gaming(event)
+                    if winner != var.symbol_no_player or event.type == pg.QUIT:
+                        pg.quit()
+                        sys.exit()
+                    if event.type == pg.MOUSEBUTTONUP:
+                        handle_quit(quit_box, pg.mouse.get_pos())
+                quit_box = draw_quit_box()
+                update_screen(Rect(0, 0, var.width_board + var.padding, var.width_screen))
+                var.CLOCK.tick(var.fps)
         GestureController.cap.release()
         cv2.destroyAllWindows()
 
 # uncomment to run directly
+
 
 
         
