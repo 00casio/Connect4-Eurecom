@@ -320,24 +320,26 @@ class Screen_AI(Screen):
         if self.number_AI == 2:
             self.options_colors.append(var.color_player_2)
         self.boxes_levels = self.center_all(self.text_options, self.options_colors)
-        self.reset_screen(
-            var.color_options_screen, self.text_options, self.options_colors
-        )
         self.play_box = None
-        self.diff_AI_1, self.diff_AI_1 = -1, -1
+        self.diff_AI_1, self.diff_AI_2 = -1, -1
         self.nbr_levels_AI_1 = len(self.boxes_levels[1])
         if self.number_AI == 2:
             self.text_options.append(texts_level)
+            self.boxes_levels = self.center_all(self.text_options, self.options_colors)
             self.options_levels = [*self.boxes_levels[1], *self.boxes_levels[2]]
         else:
             self.options_levels = [*self.boxes_levels[1]]
+        self.reset_screen(
+            var.color_options_screen, self.text_options, self.options_colors
+        )
         self.screen_loop()
 
     def screen_loop(self) -> None:
         while self.box_clicked not in [var.boxAI_play, var.boxAI_cancel]:
             mouse_click = self.click()
             index_box = self.handle_click(mouse_click, self.options_levels)
-            if index_box != var.box_out:
+            print(index_box)
+            if index_box != -1:
                 if 0 <= index_box < self.nbr_levels_AI_1:
                     self.write_on_line(
                         self.text_options[1],
@@ -357,7 +359,7 @@ class Screen_AI(Screen):
                 if self.diff_AI_1 != -1 and (
                     self.diff_AI_2 != -1 or self.number_AI == 1
                 ):
-                    play_box = self.draw_agreement_box("Sarah Connor ?")
+                    self.play_box = self.draw_agreement_box("Sarah Connor ?")
                 self.highlight_box(
                     self.options_levels[index_box],
                     var.color_options_highlight_box,
@@ -365,7 +367,7 @@ class Screen_AI(Screen):
                     f"Level {index_box % self.nbr_levels_AI_1}",
                     var.color_options_highlight_text,
                 )
-            elif play_box is not None and self.x_in_rect(mouse_click, play_box):
+            elif self.play_box is not None and self.x_in_rect(mouse_click, self.play_box):
                 self.box_clicked = var.boxAI_play
             else:
                 self.play_box = None
