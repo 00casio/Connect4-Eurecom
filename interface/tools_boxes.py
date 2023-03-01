@@ -32,14 +32,6 @@ def draw_agreement_box(text: str, position: float = 0.75) -> Rect:
     return box
 
 
-def handle_quit(quit_box: Rect, mouse: tuple[int, int]) -> None:
-    """Function to call when wanting to see if user clicked in the quitting box"""
-    if x_in_rect(quit_box, mouse):
-        print("You choose to quit the game\nYou are disapointing me")
-        pg.quit()
-        sys.exit()
-
-
 def draw_circle(n: int, m: int, color: Color, r: int) -> None:
     """Draw a circle in the corresponding column, and row"""
     x = n * var.size_cell + var.size_cell // 2

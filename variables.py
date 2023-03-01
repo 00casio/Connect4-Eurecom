@@ -58,6 +58,7 @@ class Variables:
         self.symbol_player_AI = symbol_no_player
 
         # Boxes for levels of AI
+        self.box_out = 0
         self.boxAI_out = -1
         self.boxAI_play = -255
         self.boxAI_cancel = 255
@@ -126,6 +127,11 @@ class Variables:
         self.text_options_play_AIvAI = "Watch the world burn"
         self.text_options_difficulty_HvAI = "Choose your poison"
         self.text_options_difficulty_AIvAI = "How badly do you want this game to go ?"
+        self.text_difficulty_options = [
+            "",
+            self.text_options_difficulty_HvAI,
+            self.text_options_difficulty_AIvAI,
+        ]
 
         # Fonts
         self.main_font = pg.font.SysFont(text_font, text_size)

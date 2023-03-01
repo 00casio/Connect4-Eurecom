@@ -191,6 +191,25 @@ class Tools:
         pg_font = pg.font.SysFont(font, size)
         return pg_font.render(text, True, color)
 
+    def highlight_box(self, box: pg.Rect, color_box: pg.Color, text: str, color_text: pg.Color) -> None:
+        """Highlight the clicked box to be in a color or another"""
+        pg_text = self.create_text_rendered(text, color_text)
+        pg.draw.rect(self.screen, color_box, box)
+        self.screen.blit(
+            pg_text, (box.x + var.text_box_spacing, box.y + var.text_box_spacing)
+        )
+        pg.display.update()
+
+    def draw_agreement_box(self, text: str, position: float = 0.75) -> pg.Rect:
+        """Draw a agreement box in the center of the screen at position (in %) of the height of the screen"""
+        agreement = self.create_text_rendered(text, var.black)
+        s = agreement.get_size()
+        x = (var.width_screen - s[0]) // 2 - var.text_box_spacing
+        y = int(position * var.height_screen)
+        box = self.write_text_box(agreement, var.color_screen, x, y)
+        pg.display.update()
+        return box
+
 
 class Screen(Tools):
     """A screen is composed of what is shown to the user"""
@@ -211,6 +230,7 @@ class Screen(Tools):
         self.screen = None
         self.cancel_box = None
         self.suit_box = None
+        self.box_clicked = var.box_out
         self.screen.fill(color_fill)
         if cancel_box:
             self.draw_cancel_box()
@@ -240,11 +260,39 @@ class Screen(Tools):
         pg.display.update()
 
     def get_mouse_pos(self):
-        raise NotImplementedError("Not for now")
-        """ Return the mouse position if conditions are met """
+        """ Return the mouse position"""
+        print("Change this to have the positon from the camera")
         return pg.mouse.get_pos()
 
-    def x_in_rect(self, rect: pg.Rect, coor: tuple[int, int]) -> bool:
+    def click(self, f=None):
+        """Quit the function only when there is a click. Return the position of the click.
+        If f is not None, then the function is called whith the argument 'event' at every iteration"""
+        allow_quit = False
+        while not allow_quit:
+            for event in pg.event.get():
+                if event.type != pg.MOUSEBUTTONUP:
+                    allow_quit = True
+                if f is not None:
+                    f(event)
+        click = self.get_mouse_pos()
+        if self.is_canceled(click):
+            self.box_clicked = var.boxAI_cancel
+        self.handle_quit(click)
+        return click
+
+    def is_canceled(self, click):
+        if self.cancel_box is None:
+            return False
+        return self.x_in_rect(click, self.cancel_box)
+    
+    def handle_quit(self, click):
+        """Function to call when wanting to see if user clicked in the quitting box"""
+        if self.quit_box is not None and self.x_in_rect(click, self.quit_box):
+            print("You choose to quit the game\nYou are disapointing me")
+            pg.quit()
+            sys.exit()
+
+    def x_in_rect(self, coor: tuple[int, int], rect: pg.Rect) -> bool:
         """Return whether coor is in the rectangle 'rect'"""
         return rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
 
@@ -253,15 +301,70 @@ class Screen(Tools):
     ) -> int:
         """Return the index of the box the click was in"""
         for i in range(len(list_rect)):
-            if self.x_in_rect(list_rect[i], click_coor):
+            if self.x_in_rect(click_coor, list_rect[i]):
                 return i
         return -1
 
 class Screen_AI(Screen):
-    def __init__(self, screen, width, height, texts, colors):
+    def __init__(self, screen, width, height, number_AI=1):
         Screen.__init__(self, screen, width, height)
-        boxes_levels = self.center_all(texts, colors)
 
+        texts_level = [create_text_rendered(f"Level {i}") for i in range(len(var.boxAI_text_levels))]
+
+        self.text_options = [[create_text_rendered(var.text_difficulty_options[number])], texts_level]
+        self.options_colors = colors = [var.color_options_box, var.color_player_1]
+        if self.number_AI == 2:
+            self.options_colors.append(var.color_player_2)
+        self.boxes_levels = self.center_all(texts, colors)
+        self.reset_screen(var.color_options_screen, texts, colors)
+        self.play_box = None
+        self.diff_AI_1, self.diff_AI_1 = -1, -1
+        self.nbr_levels_AI_1 = len(boxes_levels[1])
+        self.number_AI = number_AI
+        if self.number_AI == 2:
+            self.text_options.append(texts_level)
+            self.options_levels = [*boxes_levels[1], *boxes_levels[2]]
+        else:
+            self.options_levels = [*boxes_levels[1]]
+        self.screen_loop()
+
+    def screen_loop(self):
+        while self.box_clicked not in [var.boxAI_play, var.boxAI_cancel]:
+            mouse_click = self.click()
+            index_box = handle_click(mouse_click, self.boxes_levels)
+            if index_box != var.box_out:
+                if 0 <= index_box < self.nbr_levels_AI_1:
+                    self.write_on_line(
+                        self.text_options[1],
+                        var.color_player_1,
+                        var.width_screen,
+                        boxes_levels[1][0].top,
+                    )
+                    self.diff_AI_1 = index_box
+                elif nbr_levels_AI_1 <= index_box < len(options_levels):
+                    self.write_on_line(
+                        self.text_options[2],
+                        var.color_player_2,
+                        var.width_screen,
+                        self.boxes_levels[2][0].top,
+                    )
+                    self.diff_AI_2 = index_box % self.nbr_levels_AI_1
+                if self.diff_AI_1 != -1 and (self.diff_AI_2 != -1 or self.number_AI == 1):
+                    play_box = draw_agreement_box("Sarah Connor ?")
+                self.highlight_box(
+                    self.options_levels[index_box],
+                    var.color_options_highlight_box,
+                    f"Level {index_box % self.nbr_levels_AI_1}",
+                    var.color_options_highlight_text,
+                )
+            elif play_box is not None and self.x_in_rect(play_box, mouse_click):
+                self.box_clicked = var.boxAI_play
+            else:
+                self.play_box = None
+                self.diff_AI_1 = -1
+                self.diff_AI_2 = -1
+                self.reset_screen(var.color_options_screen, self.text_options, self.colors)
+                pg.display.update()
 
 class GamingScreen(Screen):
     """The gaming screen is used for the gaming part of the program"""
@@ -433,22 +536,20 @@ class Game:
         boxes = screen.center_all(text_options)
         self.status = var.options_menu_play
         while self.status == var.options_menu_play:
-            for event in pg.event.get():
-                if event.type == pg.MOUSEBUTTONUP:
-                    mouse = pg.mouse.get_pos()
-                    screen.handle_quit(quit_box, mouse)
-                    if screen.x_in_rect(boxes[0][0], mouse):
-                        self.status = var.options_play_HvH
-                        self.player_1 = Player(var.symbol_player_1, var.color_player_1, False)
-                        self.player_2 = Player(var.symbol_player_2, var.color_player_2, False)
-                    elif screen.x_in_rect(boxes[1][0], mouse):
-                        self.status = var.options_play_HvAI
-                        self.show_options_AI(1)
-                    elif screen.x_in_rect(boxes[2][0], mouse):
-                        self.status = var.options_play_AIvAI
-                        self.show_options_AI(2)
-                    elif screen.x_in_rect(cancel_box, mouse):
-                        self.status = var.options_clicked_cancel
+            mouse = screen.click()
+            screen.handle_quit(quit_box, mouse)
+            if screen.x_in_rect(mouse, boxes[0][0]):
+                self.status = var.options_play_HvH
+                self.player_1 = Player(var.symbol_player_1, var.color_player_1, False)
+                self.player_2 = Player(var.symbol_player_2, var.color_player_2, False)
+            elif screen.x_in_rect(mouse, boxes[1][0]):
+                self.status = var.options_play_HvAI
+                self.show_options_AI(1)
+            elif screen.x_in_rect(mouse, boxes[2][0]):
+                self.status = var.options_play_AIvAI
+                self.show_options_AI(2)
+            elif screen.x_in_rect(mouse, cancel_box):
+                self.status = var.options_clicked_cancel
         if self.difficulty_AI_2 == -1 and self.status not in [
             var.options_play_HvH,
             var.options_clicked_cancel,
@@ -470,7 +571,7 @@ class Game:
                 if event.type == pg.MOUSEBUTTONUP:
                     mouse = pg.mouse.get_pos()
                     start_screen.handle_quit(quit_box, mouse)
-                    if start_screen.x_in_rect(rect_play, mouse):
+                    if start_screen.x_in_rect(mouse, rect_play):
                         self.draw_play_options()
         if self.status == var.options_clicked_cancel:
             self.draw_start_screen()
