@@ -1,17 +1,21 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import pygame as pg
-from variables import Variables
-import numpy as np
 from typing import Any
+
+import numpy as np
+import pygame as pg
+
 from AI_test import best_col_prediction
+from variables import Variables
 
 var = Variables()
 pg.init()
 
+
 class Symbol:
-    """ The Symbol class is used to make the difference between two players """
+    """The Symbol class is used to make the difference between two players"""
+
     def __init__(self, value: Any) -> None:
         self.v = value
 
@@ -20,24 +24,40 @@ class Symbol:
             return NotImplemented
         return o.v == self.v
 
+
 class Element:
-    """ An element is composed of a box and text """
-    def __init__(self, pos: tuple[int, int], text: str, screen: pg.Surface, text_color: pg.Color=var.black, box_color: pg.Color=var.color_options_box, font: pg.font.Font=var.main_font, padd_x: int=var.text_box_spacing, padd_y: int=var.text_box_spacing) -> None:
+    """An element is composed of a box and text"""
+
+    def __init__(
+        self,
+        pos: tuple[int, int],
+        text: str,
+        screen: pg.Surface,
+        text_color: pg.Color = var.black,
+        box_color: pg.Color = var.color_options_box,
+        font: pg.font.Font = var.main_font,
+        padd: tuple[int, int] = (var.text_box_spacing, var.text_box_spacing),
+    ) -> None:
         self.font = font
         self.pos = pos
         self.color_box = color_box
-        self.color_text = color_text
         self.screen = screen
         self.padding = (padd_x, padd_y)
         self.draw(text)
 
-    def draw(self, text) -> None:
+    def draw(self, text: str) -> None:
         self.text = self.font.render(text, True, self.text_color)
         s = self.text.get_size()
-        self.box = pg.Rect(self.pos[0], self.pos[1], s[0]+2*self.padding[0], s[1]+2*self.padding[1])
+        self.box = pg.Rect(
+            self.pos[0],
+            self.pos[1],
+            s[0] + 2 * self.padding[0],
+            s[1] + 2 * self.padding[1],
+        )
         pg.draw.rect(self.screen, self.color_box, self.box)
         self.screen.blit(self.text, (self.box.x, self.box.y))
         self.screen.update(self.box)
+
 
 class Line:
     def __init__(self):
@@ -47,10 +67,15 @@ class Line:
 
     def add_element(self, e: Element):
         self.elements.append(e)
-        self.width = sum([ele.box.w for ele in self.elements]) + (len(self.elements)-1)*self.spacing
+        self.width = (
+            sum([ele.box.w for ele in self.elements])
+            + (len(self.elements) - 1) * self.spacing
+        )
+
 
 class Screen:
-    """ A screen is composed of what is shown to the user """
+    """A screen is composed of what is shown to the user"""
+
     def __init__(self, width: int, height: int):
         self.width = width
         self.height = height
@@ -75,19 +100,27 @@ class Screen:
     def draw_all_centered(self, list_text):
         raise NotImplementedError("Not for now")
 
+
 class GamingScreen(Screen):
-    """ The gaming screen is used for the gaming part of the program """
+    """The gaming screen is used for the gaming part of the program"""
+
     def __init__(self, width: int, height: int) -> None:
         Screen.__init__(self, width, height)
         self.color_screen = var.white
         self.color_board = var.light_blue
         self.width_board = var.width_board
         self.height_board = var.height_board
-        self.board_surface = pg.surface.Surface((self.width_board, self.height_board)).convert_alpha()
+        self.board_surface = pg.surface.Surface(
+            (self.width_board, self.height_board)
+        ).convert_alpha()
 
     def draw_board():
         self.screen.fill(self.color_screen)
-        pg.draw.rect(self.board_surface, self.color_board, (0, 0, self.width_board, self.height_board))
+        pg.draw.rect(
+            self.board_surface,
+            self.color_board,
+            (0, 0, self.width_board, self.height_board),
+        )
         for i in range(7):
             for j in range(6):
                 draw_circle(i, j, var.color_trans, var.radius_hole)
@@ -102,7 +135,7 @@ class GamingScreen(Screen):
         return -1
 
     def animate_fall(self, col: int, row: int, color_player: pg.Color) -> None:
-        for y in range(var.padding+num_col*var.size_cell+ var.size_cell//2, 5):
+        for y in range(var.padding + num_col * var.size_cell + var.size_cell // 2, 5):
             self.screen.fill(var.white)
             pg.draw.circle(self.screen, color_player, (x, y), var.radius_disk)
             update_screen()
@@ -113,8 +146,10 @@ class GamingScreen(Screen):
         self.animate_fall()
         raise NotImplementedError("Not finished")
 
+
 class Player:
-    """ The class that keep all the options for a player """
+    """The class that keep all the options for a player"""
+
     def __init__(self, symbol: Any, color: pg.Color, AI: bool):
         self.symbol = Symbol(symbol)
         self.color = color
@@ -127,7 +162,7 @@ class Player:
             click = screen.get_mouse_pos()
             col = (click[0] - padding) // var.size_cell
         return col
-    
+
     def __eq__(self, other: object) -> bool:
         if isinstance(other, Player):
             return self.symbol == other.symbol
@@ -135,8 +170,10 @@ class Player:
             return self.symbol.v == other.v
         return False
 
+
 class Game:
-    """ The big class that will regulate everything """
+    """The big class that will regulate everything"""
+
     def __init__(self):
         # Players
         self.player_1: Player = None
@@ -153,7 +190,9 @@ class Game:
         elif self.player_playing == self.player_2:
             self.player_playing = self.player_1
         else:
-            raise ValueError("How is that possible ? Read carefully the log and send me everything")
+            raise ValueError(
+                "How is that possible ? Read carefully the log and send me everything"
+            )
 
     def state_to_bits(self, state: np.ndarray[np.dtype[np.float64], np.float64]) -> str:
         """Convert the state of the game for a player into the bits representation of the game"""
@@ -216,8 +255,10 @@ class Game:
         self.CLOCK = pg.time.Clock()
         self.screen.display.set_caption(var.screen_title)
         self.num_turn = 0
+
     def draw_options_screen(self):
         raise NotImplementedError("Not for now")
+
     def draw_start_screen(self):
         raise NotImplementedError("Not for now")
         """Show the start screen.
