@@ -28,9 +28,9 @@ class Symbol:
 class Variables:
     def __init__(self):
         # Symbols
-        self.symbol_no_player = Symbol("0")
-        self.symbol_player_1 = Symbol("1")
-        self.symbol_player_2 = Symbol("2")
+        self.symbol_no_player = "0"
+        self.symbol_player_1 = "1"
+        self.symbol_player_2 = "2"
 
         # Boxes for levels of AI
         self.box_out = 0
@@ -54,11 +54,13 @@ class Variables:
         self.dark_blue = Color(0, 0, 229)
         self.light_blue = Color(30, 160, 255)
         self.cyan = Color(45, 245, 255)
+        self.grey = Color(200, 200, 200)
         self.color_trans = Color(0, 0, 0, 0)
         self.color_player_1 = self.red
         self.color_player_2 = self.green
         self.color_board = self.blue
         self.color_screen = self.white
+        self.color_highlight_column = self.grey
         self.color_options_screen = self.light_blue
         self.color_options_highlight_box = self.cyan
         self.color_options_highlight_text = self.black

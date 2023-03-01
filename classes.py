@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
+from time import sleep
 from typing import Any, Callable, Optional
 
 import numpy as np
@@ -130,9 +131,7 @@ class Tools:
         """Write the texts in 'array_text' centered in the middle of the screen.
         If 'color_box' is a single element, then all boxes will have the same color"""
 
-        color = [
-            color_box[i] for i in range(len(array_text) - len(color_box))
-        ] + color_box
+        color = [color_box[-1]] * (len(array_text) - len(color_box)) + color_box
         total_size = self.compute_total_size(array_text)
         rect_boxes = []
         y_now = (var.height_screen - total_size[0]) // 2
@@ -216,7 +215,7 @@ class Screen(Tools):
         """Draw the box that allow the user to take a step back"""
         quit_t = self.create_text_rendered(var.text_quit_box, var.black)
         self.quit_box = self.write_on_line(
-            [quit_t], var.white, var.coor_cancel_box[0], var.coor_cancel_box[1], align=1
+            [quit_t], var.white, var.coor_quit_box[0], var.coor_quit_box[1], align=1
         )[0]
 
     def reset_screen(
@@ -233,28 +232,48 @@ class Screen(Tools):
 
     def get_mouse_pos(self) -> tuple[int, int]:
         """Return the mouse position"""
-        print("Change this to have the positon from the camera")
+        # print("Change this to have the position from the camera")
         return pg.mouse.get_pos()
 
+    def human_move(self, color: Color) -> None:
+        self.screen.fill(var.color_screen)
+        mouse_x, mouse_y = self.get_mouse_pos()
+        if mouse_x < var.pos_min_x:
+            mouse_x = var.pos_min_x
+        elif mouse_x > var.pos_max_x:
+            mouse_x = var.pos_max_x
+
+        p = var.padding
+        if p < mouse_x < p + var.width_board:
+            col = (mouse_x - p) // var.size_cell
+            rect_col = Rect(p + col * var.size_cell, 0, var.size_cell, p)
+            pg.draw.rect(self.screen, var.color_highlight_column, rect_col)
+        self.draw_quit_box()
+        pg.draw.circle(self.screen, color, (mouse_x, p // 2), var.radius_disk)
+        pg.display.update((mouse_x - p // 2, 0, p, p))
+
     def click(
-        self, rect_play: Optional[Rect] = None, f: Optional[Callable] = None
+        self,
+        rect_play: Optional[Rect] = None,
+        print_disk: bool = False,
+        color_disk: Color = var.white,
     ) -> tuple[int, int]:
         """Quit the function only when there is a click. Return the position of the click.
         If f is not None, then the function is called whith the argument 'event' at every iteration"""
         allow_quit = False
         while not allow_quit:
             for event in pg.event.get():
-                if event.type != pg.MOUSEBUTTONUP:
+                if event.type == pg.MOUSEBUTTONUP:
                     allow_quit = True
-                if f is not None:
-                    f(event)
+                if print_disk:
+                    self.human_move(color_disk)
         click = self.get_mouse_pos()
-        if rect_play is not None:
-            while not self.x_in_rect(click, rect_play):
-                click = self.click()
         if self.is_canceled(click):
             self.box_clicked = var.boxAI_cancel
         self.handle_quit(click)
+        if rect_play is not None:
+            while not self.x_in_rect(click, rect_play):
+                click = self.click(rect_play, print_disk, color_disk)
         return click
 
     def is_canceled(self, click: tuple[int, int]) -> bool:
@@ -364,7 +383,7 @@ class GamingScreen(Screen):
     def __init__(self, screen: Surface) -> None:
         Screen.__init__(self, screen)
         self.color_screen = var.white
-        self.color_board = var.light_blue
+        self.color_board = var.blue
         self.width_board = var.width_board
         self.height_board = var.height_board
         self.board_surface = Surface(
@@ -376,7 +395,10 @@ class GamingScreen(Screen):
         x = n * var.size_cell + var.size_cell // 2
         y = m * var.size_cell + var.size_cell // 2
         pg.draw.circle(self.board_surface, color, (x, y), r)
-        pg.display.update((x, y, var.size_cell, var.size_cell))
+
+    def blit_board(self) -> None:
+        self.screen.blit(self.board_surface, (var.padding, var.padding))
+        self.draw_quit_box()
 
     def draw_board(self) -> None:
         self.screen.fill(self.color_screen)
@@ -388,32 +410,25 @@ class GamingScreen(Screen):
         for i in range(7):
             for j in range(6):
                 self.draw_circle(i, j, var.color_trans, var.radius_hole)
+        self.blit_board()
         pg.display.update()
 
     def animate_fall(self, col: int, row: int, color_player: Color) -> None:
         x = var.padding + col * var.size_cell + var.size_cell // 2
-        for y in range(var.padding + row * var.size_cell + var.size_cell // 2, 5):
+        for y in range(
+            var.padding // 2, var.padding + row * var.size_cell + var.size_cell // 2, 5
+        ):
             self.screen.fill(var.white)
             pg.draw.circle(self.screen, color_player, (x, y), var.radius_disk)
+            self.blit_board()
             pg.display.update()
-        pg.draw.circle(self.board_surface, color_player, (x, y), var.radius_hole)
-
-    def human_move(self, color: Color) -> None:
-        mouse_x, mouse_y = self.get_mouse_pos()
-        if mouse_x < var.pos_min_x:
-            mouse_x = var.pos_min_x
-        elif mouse_x > var.pos_max_x:
-            mouse_x = var.pos_max_x
-        self.screen.fill(var.color_screen)
-        p = var.padding // 2
-        pg.draw.circle(self.screen, color, (mouse_x, p), var.radius_disk)
-        pg.display.update((mouse_x - p, 0, 2 * p, 2 * p))
+        self.draw_circle(col, row, color_player, var.radius_hole)
 
 
 class Board(np.ndarray):
-    def __init__(self):
-        np.ndarray.__init__()
-        self = np.array([[symbol_no_player] * 7 for i in range(6)])
+    def __new__(cls):
+        self = np.array([[var.symbol_no_player] * 7 for i in range(6)]).view(cls)
+        return self
 
     def find_free_slot(self, i: int) -> int:
         """Return the index of the first free slot"""
@@ -431,7 +446,7 @@ class Player:
         if number == 0:
             self.symbol = Symbol(var.symbol_no_player)
             self.color = var.color_trans
-        if number == 1:
+        elif number == 1:
             self.symbol = Symbol(var.symbol_player_1)
             self.color = var.color_player_1
         elif number == 2:
@@ -446,7 +461,9 @@ class Player:
         if self.is_ai:
             col = best_col_prediction(board, self.symbol)
         else:
-            click = screen.click()
+            p = var.padding
+            box_allowed = Rect(p, p, var.width_board, var.height_board)
+            click = screen.click(box_allowed, print_disk=True, color_disk=self.color)
             col = (click[0] - var.padding) // var.size_cell
         row = board.find_free_slot(col)
         if row == -1:
@@ -471,8 +488,6 @@ class Game:
         self.player_playing = self.player_1
         self.player_null = Player(0, False)
         self.screen = pg.display.set_mode((var.width_screen, var.height_screen), 0, 32)
-
-        print(self.screen)
         pg.display.set_caption(var.screen_title)
 
     def inverse_player(self):
@@ -483,7 +498,7 @@ class Game:
             self.player_playing = self.player_1
         else:
             raise ValueError(
-                "How is that possible ? Read carefully the log and send me everything"
+                "How is that possible ? Read carefully the error and send me everything"
             )
 
     def state_to_bits(self, state: np.ndarray[np.dtype[np.float64], np.float64]) -> str:
@@ -519,8 +534,8 @@ class Game:
 
     def who_is_winner(self) -> Player:
         s = self.board.shape
-        state_symbol_player_1 = np.zeros(s)
-        state_symbol_player_2 = np.zeros(s)
+        state_symbol_player_1 = np.zeros(s, dtype=bool)
+        state_symbol_player_2 = np.zeros(s, dtype=bool)
         state_symbol_player_1[np.where(self.board == self.player_1.symbol)] = 1
         state_symbol_player_2[np.where(self.board == self.player_2.symbol)] = 1
         if self.state_win(state_symbol_player_1):
@@ -552,20 +567,16 @@ class Game:
         gaming.draw_board()
         self.player_playing = self.player_1
         while (
-            self.who_is_winner() == self.player_null or self.num_turn < self.board.size
+            self.who_is_winner() == self.player_null and self.num_turn < self.board.size
         ):
             if self.player_playing == self.player_1:
                 play = self.player_1.play(self.board, gaming)
             else:
                 play = self.player_2.play(self.board, gaming)
             gaming.animate_fall(play[0], play[1], self.player_playing.color)
-            self.board[play[1], play[0]] = self.player_playing.symbol
-            gaming.draw_circle(
-                play[0], play[1], self.player_playing.color, var.radius_hole
-            )
+            self.board[play[1], play[0]] = self.player_playing.symbol.v
             self.inverse_player()
             self.num_turn += 1
-            self.CLOCK.tick(var.fps)
         self.draw_winner()
 
     def draw_options_screen(self) -> None:
