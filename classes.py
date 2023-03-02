@@ -367,7 +367,9 @@ class Screen_AI(Screen):
                     f"Level {index_box % self.nbr_levels_AI_1}",
                     var.color_options_highlight_text,
                 )
-            elif self.play_box is not None and self.x_in_rect(mouse_click, self.play_box):
+            elif self.play_box is not None and self.x_in_rect(
+                mouse_click, self.play_box
+            ):
                 self.box_clicked = var.boxAI_play
             else:
                 self.play_box = None
