@@ -611,7 +611,7 @@ class Game:
             if cv2.waitKey(5) & 0xFF == 13:
                 break
             if self.player_playing == self.player_1:
-                play = self.player_1.play(self.board, gaming)
+                play = self.player_1.play(self.board, gaming) #game is stopping here, it is not going back into the loop to take the frame 
             else:
                 play = self.player_2.play(self.board, gaming)
             gaming.animate_fall(play[0], play[1], self.player_playing.color)
