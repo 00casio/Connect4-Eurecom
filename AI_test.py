@@ -31,6 +31,7 @@ number_row = 6
 
 
 def AI(board, symbol_player):  # enter here if playing (turn) = AI turn
+    print(board)
     col = best_col_prediction(board, symbol_player)
     #minimax = minimax_no_pruning(board, 2, symbol_player)
     #col = minimax[0]
@@ -40,7 +41,7 @@ def AI(board, symbol_player):  # enter here if playing (turn) = AI turn
     # print(board[:, col])
     #print(col)
     #print(score)
-    row = find_free_row(board, col)
+    row = board.find_free_slot(col)
     # print(row)
     print("\n")
     print("we are going to play in (row, col) = ", (row, col))
@@ -166,7 +167,7 @@ def score_column_prediction(
     #print("horizontal score is : ", score_horiz)
 
     for j in range(number_col):  # for vertical lines
-        print(board)
+        #print(board)
         col = board[:, j]
         for i in range(number_row - 3):
             buffer_col = col[
@@ -205,7 +206,7 @@ def score_column_prediction(
 
 
 def drop_disk(board, col, symbol_player):  # on glisse un jeton
-    free_slot = find_free_row(board, col)
+    free_slot = board.find_free_slot(col)
     board[free_slot][col] = symbol_player
     # new_free_spot = find_free_slot(col)
     # print(free_slot)
@@ -215,13 +216,13 @@ def drop_disk(board, col, symbol_player):  # on glisse un jeton
 
 
 def is_valid_col(board, col):  # on regarde si la colonne est pleine ou pas
-    return board[0][col] == "0"
+    return board[0][col] == symbol_no_player
 
 
 def list_valid_col(board):  # liste des colonnes où l'on peut jouer
     valid_col = []
     for col in range(number_col):
-        if find_free_row(board, col) != -1:
+        if is_valid_col(board, col):
             valid_col.append(col)
     return valid_col
 
@@ -243,13 +244,14 @@ def find_free_row(
 def best_col_prediction(
     board, symbol_player
 ):  # on cherche la meilleure colonne où jouer en faisant fictivement avance le jeu en jouant dans chaque colonne
+    #print(board)
     best_score = -100000
     list_potential_col = list_valid_col(board)
     # print(list_potential_col)
     best_col = random.choice(list_potential_col)
     for col in list_potential_col:
         potential_board = board.copy()
-        row = find_free_row(potential_board, col)
+        row = potential_board.find_free_slot(col)
         print("for col", col)
         # print("to the row", row)
         drop_disk(potential_board, col, symbol_player)

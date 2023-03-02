@@ -528,7 +528,7 @@ class Player:
 
     def play(self, board: Board, screen: Screen) -> tuple[int, int]:
         if self.is_ai:
-            col = best_col_prediction(board, self.symbol)
+            col = best_col_prediction(board, self.symbol.v)
         else:
             p = var.padding
             box_allowed = Rect(p, p, var.width_board, var.height_board)
