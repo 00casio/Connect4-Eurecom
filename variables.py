@@ -26,7 +26,7 @@ class Symbol:
 
 
 class Variables:
-    def __init__(self):
+    def __init__(self) -> None:
         # Symbols
         self.symbol_no_player = "0"
         self.symbol_player_1 = "1"

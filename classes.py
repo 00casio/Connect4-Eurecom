@@ -159,7 +159,7 @@ class Tools:
         return pg_font.render(text, True, color)
 
     def highlight_box(
-        self, box: Rect, color_box: Color, screen, text: str, color_text: Color
+        self, box: Rect, color_box: Color, screen: Surface, text: str, color_text: Color
     ) -> None:
         """Highlight the clicked box to be in a color or another"""
         pg_text = self.create_text_rendered(text, color_text)
@@ -320,7 +320,7 @@ class Screen_AI(Screen):
         if self.number_AI == 2:
             self.options_colors.append(var.color_player_2)
         self.boxes_levels = self.center_all(self.text_options, self.options_colors)
-        self.play_box = None
+        self.play_box: Optional[Rect] = None
         self.diff_AI_1, self.diff_AI_2 = -1, -1
         self.nbr_levels_AI_1 = len(self.boxes_levels[1])
         if self.number_AI == 2:
@@ -427,8 +427,8 @@ class GamingScreen(Screen):
         self.draw_circle(col, row, color_player, var.radius_hole)
 
 
-class Board(np.ndarray):
-    def __new__(cls):
+class Board(np.ndarray[Any, np.dtype[Any]]):
+    def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
         self = np.array([[var.symbol_no_player] * 7 for i in range(6)]).view(cls)
         return self
 
@@ -459,7 +459,7 @@ class Player:
         self.is_ai = AI
         self.ai_difficulty = difficulty
 
-    def play(self, board: Board, screen: Screen):
+    def play(self, board: Board, screen: Screen) -> tuple[int, int]:
         if self.is_ai:
             col = best_col_prediction(board, self.symbol)
         else:
@@ -473,17 +473,18 @@ class Player:
         return (col, row)
 
     def __eq__(self, other: object) -> bool:
+        eq: bool = False
         if isinstance(other, Player):
-            return self.symbol == other.symbol
+            eq = self.symbol == other.symbol
         elif isinstance(other, Symbol):
-            return self.symbol.v == other.v
-        return False
+            eq = self.symbol == other
+        return eq
 
 
 class Game:
     """The big class that will regulate everything"""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Players
         self.player_1 = Player(1, False)
         self.player_2 = Player(2, False)
@@ -492,7 +493,7 @@ class Game:
         self.screen = pg.display.set_mode((var.width_screen, var.height_screen), 0, 32)
         pg.display.set_caption(var.screen_title)
 
-    def inverse_player(self):
+    def inverse_player(self) -> None:
         """Return the symbols of the opponent of the player currently playing"""
         if self.player_playing == self.player_1:
             self.player_playing = self.player_2
@@ -503,7 +504,7 @@ class Game:
                 "How is that possible ? Read carefully the error and send me everything"
             )
 
-    def state_to_bits(self, state: np.ndarray[np.dtype[np.float64], np.float64]) -> str:
+    def state_to_bits(self, state: np.ndarray[np.uint8, np.dtype[np.uint8]]) -> str:
         """Convert the state of the game for a player into the bits representation of the game"""
         n = "0b"
         for j in range(len(state[0]) - 1, -1, -1):
@@ -512,7 +513,7 @@ class Game:
                 n += f"{int(state[i, j])}"  # <==> n += str(b)
         return n
 
-    def state_win(self, state: np.ndarray[np.float64]) -> bool:
+    def state_win(self, state: np.ndarray[Any, np.dtype[Any]]) -> bool:
         bits = int(self.state_to_bits(state), 2)
 
         # Horizontal check
@@ -536,8 +537,8 @@ class Game:
 
     def who_is_winner(self) -> Player:
         s = self.board.shape
-        state_symbol_player_1 = np.zeros(s, dtype=bool)
-        state_symbol_player_2 = np.zeros(s, dtype=bool)
+        state_symbol_player_1 = np.zeros(s, dtype=np.uint8)
+        state_symbol_player_2 = np.zeros(s, dtype=np.uint8)
         state_symbol_player_1[np.where(self.board == self.player_1.symbol)] = 1
         state_symbol_player_2[np.where(self.board == self.player_2.symbol)] = 1
         if self.state_win(state_symbol_player_1):
