@@ -338,7 +338,6 @@ class Screen_AI(Screen):
         while self.box_clicked not in [var.boxAI_play, var.boxAI_cancel]:
             mouse_click = self.click()
             index_box = self.handle_click(mouse_click, self.options_levels)
-            print(index_box)
             if index_box != -1:
                 if 0 <= index_box < self.nbr_levels_AI_1:
                     self.write_on_line(
@@ -432,6 +431,7 @@ class GamingScreen(Screen):
 class Board(np.ndarray[Any, np.dtype[Any]]):
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
         self = np.array([[var.symbol_no_player] * 7 for i in range(6)]).view(cls)
+        self.state: Optional[np.ndarray[np.uint8, np.dtype[np.uint8]]] = None
         return self
 
     def find_free_slot(self, i: int) -> int:
@@ -441,6 +441,39 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
             if col[j] == var.symbol_no_player:
                 return j
         return -1
+
+    def state_to_bits(self) -> str:
+        """Convert the state of the game for a player into the bits representation of the game"""
+        n = "0b"
+        for j in range(len(self.state[0]) - 1, -1, -1):
+            n += "0"
+            for i in range(len(self.state)):
+                n += f"{int(self.state[i, j])}"  # <==> n += str(b)
+        return n
+
+    def state_win(self, symbol: Symbol) -> bool:
+        self.state = np.zeros(self.shape, dtype=np.uint8)
+        self.state[np.where(self == symbol)] = 1
+        bits = int(self.state_to_bits(), 2)
+
+        # Horizontal check
+        m = bits & (bits >> 7)
+        if m & (m >> 14):
+            return True
+        # Vertical
+        m = bits & (bits >> 1)
+        if m & (m >> 2):
+            return True
+        # Diagonal \
+        m = bits & (bits >> 6)
+        if m & (m >> 12):
+            return True
+        # Diagonal /
+        m = bits & (bits >> 8)
+        if m & (m >> 16):
+            return True
+        # Nothing found
+        return False
 
 
 class Player:
@@ -506,46 +539,10 @@ class Game:
                 "How is that possible ? Read carefully the error and send me everything"
             )
 
-    def state_to_bits(self, state: np.ndarray[np.uint8, np.dtype[np.uint8]]) -> str:
-        """Convert the state of the game for a player into the bits representation of the game"""
-        n = "0b"
-        for j in range(len(state[0]) - 1, -1, -1):
-            n += "0"
-            for i in range(len(state)):
-                n += f"{int(state[i, j])}"  # <==> n += str(b)
-        return n
-
-    def state_win(self, state: np.ndarray[Any, np.dtype[Any]]) -> bool:
-        bits = int(self.state_to_bits(state), 2)
-
-        # Horizontal check
-        m = bits & (bits >> 7)
-        if m & (m >> 14):
-            return True
-        # Vertical
-        m = bits & (bits >> 1)
-        if m & (m >> 2):
-            return True
-        # Diagonal \
-        m = bits & (bits >> 6)
-        if m & (m >> 12):
-            return True
-        # Diagonal /
-        m = bits & (bits >> 8)
-        if m & (m >> 16):
-            return True
-        # Nothing found
-        return False
-
     def who_is_winner(self) -> Player:
-        s = self.board.shape
-        state_symbol_player_1 = np.zeros(s, dtype=np.uint8)
-        state_symbol_player_2 = np.zeros(s, dtype=np.uint8)
-        state_symbol_player_1[np.where(self.board == self.player_1.symbol)] = 1
-        state_symbol_player_2[np.where(self.board == self.player_2.symbol)] = 1
-        if self.state_win(state_symbol_player_1):
+        if self.board.state_win(self.player_1.symbol):
             return self.player_1
-        elif self.state_win(state_symbol_player_2):
+        elif self.board.state_win(self.player_2.symbol):
             return self.player_2
         else:
             return self.player_null
