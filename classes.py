@@ -338,7 +338,6 @@ class Screen_AI(Screen):
         while self.box_clicked not in [var.boxAI_play, var.boxAI_cancel]:
             mouse_click = self.click()
             index_box = self.handle_click(mouse_click, self.options_levels)
-            print(index_box)
             if index_box != -1:
                 if 0 <= index_box < self.nbr_levels_AI_1:
                     self.write_on_line(
