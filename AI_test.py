@@ -31,15 +31,15 @@ number_row = 6
 
 
 def AI(board, symbol_player):  # enter here if playing (turn) = AI turn
-    # col = best_col_prediction(board, symbol_player)
-    minimax = minimax_no_pruning(board, 2, symbol_player)
-    col = minimax[0]
-    score = minimax[1]
-    print("The best score is", score)
-    print("the best col is", col)
+    col = best_col_prediction(board, symbol_player)
+    #minimax = minimax_no_pruning(board, 2, symbol_player)
+    #col = minimax[0]
+    #score = minimax[1]
+    #print("The best score is", score)
+    #print("the best col is", col)
     # print(board[:, col])
-    print(col)
-    print(score)
+    #print(col)
+    #print(score)
     row = find_free_row(board, col)
     # print(row)
     print("\n")
@@ -60,60 +60,60 @@ def opponent(symbol_player):  # Gives symbol of the opponent
         return symbol_player_1
 
 
-def minimax_no_pruning(
-    board, depth, symbol_player
-):  # returns the column where the AI will play, I tried without any success to follow and adapt the pseudo code in wikipedia
-    valid_col = list_valid_col(board)
-    if depth == 0 or who_is_winner2(board) != symbol_no_player:
-        if who_is_winner2(board) == symbol_player_1:
-            # print("test 1")
-            return (None, math.inf)
-        elif who_is_winner2(board) == symbol_player_2:
-            # print("test 2")
-            return (None, -math.inf)
-        elif who_is_winner2(board) == symbol_draw:
-            print("It is a draw, game is over")
-            return (None, 0)
-        else:
-            # print("test 3")
-            # print("the score is", score_column_prediction(board, symbol_player))
-            return (None, score_column_prediction(board, symbol_player))  # depth = 0
+# def minimax_no_pruning(
+#     board, depth, symbol_player
+# ):  # returns the column where the AI will play, I tried without any success to follow and adapt the pseudo code in wikipedia
+#     valid_col = list_valid_col(board)
+#     if depth == 0 or who_is_winner2(board) != symbol_no_player:
+#         if who_is_winner2(board) == symbol_player_1:
+#             # print("test 1")
+#             return (None, math.inf)
+#         elif who_is_winner2(board) == symbol_player_2:
+#             # print("test 2")
+#             return (None, -math.inf)
+#         elif who_is_winner2(board) == symbol_draw:
+#             print("It is a draw, game is over")
+#             return (None, 0)
+#         else:
+#             # print("test 3")
+#             # print("the score is", score_column_prediction(board, symbol_player))
+#             return (None, score_column_prediction(board, symbol_player))  # depth = 0
 
-    if symbol_player == "2":  # on cherche à maximiser le score du joueur 2 ici
-        best_score = -math.inf
-        best_col = random.choice(valid_col)
-        for col in valid_col:
-            potential_board = board.copy()
-            drop_disk(potential_board, col, symbol_player)
-            print(" IA turn, Here is for col", col)
-            print(potential_board)
-            print("\n")
-            score_calculated = minimax_no_pruning(
-                potential_board, depth - 1, symbol_player
-            )[1]
-            if score_calculated >= best_score:
-                best_score = score_calculated
-                best_col = col
-        if best_score == 0:
-            return 3, best_score
-        print("best score, best col : ", best_score, best_col)
-        return best_col, best_score
-    else:
-        best_score = math.inf
-        best_col = random.choice(valid_col)
-        for col in valid_col:
-            potential_board = board.copy()
-            drop_disk(board, col, opponent(symbol_player))
-            print(" hypothesis player turn, Here is for col", col)
-            print(potential_board)
-            print("\n")
-            score_calculated = minimax_no_pruning(
-                potential_board, depth - 1, opponent(symbol_player)
-            )[1]
-            if score_calculated <= best_score:
-                best_score = score_calculated
-                best_col = col
-        return best_col, best_score
+#     if symbol_player == "2":  # on cherche à maximiser le score du joueur 2 ici
+#         best_score = -math.inf
+#         best_col = random.choice(valid_col)
+#         for col in valid_col:
+#             potential_board = board.copy()
+#             drop_disk(potential_board, col, symbol_player)
+#             print(" IA turn, Here is for col", col)
+#             print(potential_board)
+#             print("\n")
+#             score_calculated = minimax_no_pruning(
+#                 potential_board, depth - 1, symbol_player
+#             )[1]
+#             if score_calculated >= best_score:
+#                 best_score = score_calculated
+#                 best_col = col
+#         if best_score == 0:
+#             return 3, best_score
+#         print("best score, best col : ", best_score, best_col)
+#         return best_col, best_score
+#     else:
+#         best_score = math.inf
+#         best_col = random.choice(valid_col)
+#         for col in valid_col:
+#             potential_board = board.copy()
+#             drop_disk(board, col, opponent(symbol_player))
+#             print(" hypothesis player turn, Here is for col", col)
+#             print(potential_board)
+#             print("\n")
+#             score_calculated = minimax_no_pruning(
+#                 potential_board, depth - 1, opponent(symbol_player)
+#             )[1]
+#             if score_calculated <= best_score:
+#                 best_score = score_calculated
+#                 best_col = col
+#         return best_col, best_score
 
 
 def count_points_buffer(
@@ -147,8 +147,8 @@ def score_column_prediction(
     board, symbol_player
 ):  # On calcule le score total pour une situation du jeu, on l'utilisera pour trouver dans quelle colonne il vaut mieux jouer
     score = 0
-    # score_horiz = 0
-    # score_vert = 0
+    score_horiz = 0
+    score_vert = 0
     # score_diag_slash = 0
     # score_diag_backslash = 0
     opp = opponent(symbol_player)
@@ -163,20 +163,23 @@ def score_column_prediction(
             #    print("score added is : ", count_points_buffer(list(buffer_row), symbol_player))
             score += count_points_buffer(list(buffer_row), symbol_player)
     score_horiz = score
-    print("horizontal score is : ", score_horiz)
+    #print("horizontal score is : ", score_horiz)
 
     for j in range(number_col):  # for vertical lines
+        print(board)
         col = board[:, j]
         for i in range(number_row - 3):
             buffer_col = col[
                 i : i + 4
             ]  # buffer of 4 length to check for disks in vertical lines
-            # if count_points_buffer(list(buffer_col), symbol_player) != 0:
-            #    print("buffer_col is", buffer_col)
-            #    print("score added is : ", count_points_buffer(list(buffer_col), symbol_player))
+            print("buffer_col is", buffer_col)
+            print(count_points_buffer(list(buffer_col), symbol_player))
+            if count_points_buffer(list(buffer_col), symbol_player) != 0:
+               print("buffer_col is", buffer_col)
+               print("score added is : ", count_points_buffer(list(buffer_col), symbol_player))
             score += count_points_buffer(list(buffer_col), symbol_player)
-    # score_vert = score - score_horiz
-    # print("vertical score is : ", score_vert)
+    score_vert = score - score_horiz
+    print("vertical score is : ", score_vert)
 
     for i in range(number_row - 3):  # for slash digonal
         for j in range(number_col - 3):
@@ -247,7 +250,7 @@ def best_col_prediction(
     for col in list_potential_col:
         potential_board = board.copy()
         row = find_free_row(potential_board, col)
-        # print("for col", col)
+        print("for col", col)
         # print("to the row", row)
         drop_disk(potential_board, col, symbol_player)
         score = score_column_prediction(potential_board, symbol_player)
@@ -260,3 +263,4 @@ def best_col_prediction(
         if best_score == 0:
             best_col = 3
     return best_col
+
