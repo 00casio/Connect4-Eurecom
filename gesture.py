@@ -371,6 +371,9 @@ class GestureController:
         GestureController.cap = cv2.VideoCapture(0)
         GestureController.CAM_HEIGHT = GestureController.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         GestureController.CAM_WIDTH = GestureController.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
+        self.handmajor = HandRecog(HLabel.MAJOR)
+        self.handminor = HandRecog(HLabel.MINOR)
+        self.hands = mp_hands.Hands(max_num_hands = 2,min_detection_confidence=0.5, min_tracking_confidence=0.5)
     
     def classify_hands(results):
         """
@@ -404,7 +407,7 @@ class GestureController:
             GestureController.hr_major = left
             GestureController.hr_minor = right
 
-    def start(self):
+    def start_gestures(self):
         """
         Entry point of whole programm, caputres video frame and passes, obtains
         landmark from mediapipe and passes it to 'handmajor' and 'handminor' for

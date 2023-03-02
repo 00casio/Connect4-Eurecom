@@ -7,7 +7,7 @@ test() {
     fi
 }
 
-to_install="pygame numpy mediapipe pyautogui"
+to_install="pygame numpy mediapipe pyautogui random math"
 
 for module in ${to_install}; do
     test ${module}
