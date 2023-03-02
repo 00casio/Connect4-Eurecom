@@ -3,10 +3,9 @@
 
 from classes import Game
 
-from gesture import GestureController
+game = Game()
+game.start()
 
-gc1 = GestureController()
-gc1.start()
 
 # quit_box = draw_quit_box()
 # # Run the game loop forever
@@ -21,5 +20,4 @@ gc1.start()
 #     quit_box = draw_quit_box()
 #     update_screen(Rect(0, 0, var.width_board + var.padding, var.width_screen))
 #     var.CLOCK.tick(var.fps)
-game = Game()
-game.start()
+

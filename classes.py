@@ -619,6 +619,8 @@ class Game:
             self.inverse_player()
             self.num_turn += 1
         self.draw_winner()
+        self.ge.cap.release()
+        cv2.destroyAllWindows()
 
     def draw_options_screen(self) -> None:
         raise NotImplementedError("Not for now")

@@ -4,10 +4,6 @@ import pyautogui
 import math
 from enum import IntEnum
 from google.protobuf.json_format import MessageToDict
-import sys
-import variables as var
-from interface import *
-from variables import Rect, pg
 
 pyautogui.FAILSAFE = False
 mp_drawing = mp.solutions.drawing_utils
