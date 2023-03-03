@@ -29,30 +29,6 @@ opp_one_in_line = 3
 number_col = 7
 number_row = 6
 
-
-def AI(board, symbol_player):  # enter here if playing (turn) = AI turn
-    col = best_col_prediction(board, symbol_player)
-    #minimax = minimax_no_pruning(board, 2, symbol_player)
-    #col = minimax[0]
-    #score = minimax[1]
-    #print("The best score is", score)
-    #print("the best col is", col)
-    # print(board[:, col])
-    #print(col)
-    #print(score)
-    row = find_free_row(board, col)
-    # print(row)
-    print("\n")
-    print("we are going to play in (row, col) = ", (row, col))
-    # print(is_valid_col(board, col))
-    if is_valid_col(board, col):  # devrait toujours être bon mais par précaution
-        # print("i'm here !")
-        # board = drop_disk(board, col, symbol_player)
-        board = drop_disk(board, col, symbol_player)
-    # symbol_playing = opponent(symbol_player) # change to other player the global variable
-    return board
-
-
 def opponent(symbol_player):  # Gives symbol of the opponent
     if symbol_player == symbol_player_1:
         return symbol_player_2
@@ -163,7 +139,7 @@ def score_column_prediction(
             #    print("score added is : ", count_points_buffer(list(buffer_row), symbol_player))
             score += count_points_buffer(list(buffer_row), symbol_player)
     score_horiz = score
-    #print("horizontal score is : ", score_horiz)
+    # print("horizontal score is : ", score_horiz)
 
     for j in range(number_col):  # for vertical lines
         print(board)
@@ -175,8 +151,11 @@ def score_column_prediction(
             print("buffer_col is", buffer_col)
             print(count_points_buffer(list(buffer_col), symbol_player))
             if count_points_buffer(list(buffer_col), symbol_player) != 0:
-               print("buffer_col is", buffer_col)
-               print("score added is : ", count_points_buffer(list(buffer_col), symbol_player))
+                print("buffer_col is", buffer_col)
+                print(
+                    "score added is : ",
+                    count_points_buffer(list(buffer_col), symbol_player),
+                )
             score += count_points_buffer(list(buffer_col), symbol_player)
     score_vert = score - score_horiz
     print("vertical score is : ", score_vert)
@@ -263,4 +242,3 @@ def best_col_prediction(
         if best_score == 0:
             best_col = 3
     return best_col
-
