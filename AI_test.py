@@ -29,31 +29,6 @@ opp_one_in_line = 3
 number_col = 7
 number_row = 6
 
-
-def AI(board, symbol_player):  # enter here if playing (turn) = AI turn
-    print(board)
-    col = best_col_prediction(board, symbol_player)
-    #minimax = minimax_no_pruning(board, 2, symbol_player)
-    #col = minimax[0]
-    #score = minimax[1]
-    #print("The best score is", score)
-    #print("the best col is", col)
-    # print(board[:, col])
-    #print(col)
-    #print(score)
-    row = board.find_free_slot(col)
-    # print(row)
-    print("\n")
-    print("we are going to play in (row, col) = ", (row, col))
-    # print(is_valid_col(board, col))
-    if is_valid_col(board, col):  # devrait toujours être bon mais par précaution
-        # print("i'm here !")
-        # board = drop_disk(board, col, symbol_player)
-        board = drop_disk(board, col, symbol_player)
-    # symbol_playing = opponent(symbol_player) # change to other player the global variable
-    return board
-
-
 def opponent(symbol_player):  # Gives symbol of the opponent
     if symbol_player == symbol_player_1:
         return symbol_player_2
