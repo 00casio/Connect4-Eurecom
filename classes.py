@@ -475,6 +475,34 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
         # Nothing found
         return False
 
+    def horiz(self, row, col):
+        for i in range(max(0, col - 3), min(7, col + 1)):
+            yield self[i : i + 4, row]
+
+    def vert(self, row, col):
+        for i in range(max(0, row - 3), min(7, row + 1)):
+            yield self[col, i : i + 4]
+
+    def backslash(self, row, col, back=True):
+        if back:
+            board = self.copy()
+        else:
+            board = np.fliplr(self.copy())
+        i, j = row, col
+        while i > max(0, row - 3) and j > max(0, col - 3):
+            i -= 1
+            j -= 1
+
+        while i < min(7, row + 1) and j < min(7, col + 1):
+            if i >= 3 or j >= 4:
+                break
+            yield [board[i + k, j + k] for k in range(4)]
+            i += 1
+            j += 1
+
+    def slash(self, row, col):
+        yield from self.backslash(row, col[3 - (col - 3)], back=False)
+
 
 class Player:
     """The class that keep all the options for a player"""
