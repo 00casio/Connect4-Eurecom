@@ -287,7 +287,7 @@ class Screen(Tools):
     def handle_quit(self, click: tuple[int, int]) -> None:
         """Function to call when wanting to see if user clicked in the quitting box"""
         if self.quit_box is not None and self.x_in_rect(click, self.quit_box):
-            print("You choose to quit the game\nYou are disapointing me")
+            print(var.message_quit)
             pg.quit()
             sys.exit()
 
@@ -430,6 +430,7 @@ class GamingScreen(Screen):
             pg.display.update()
         self.draw_circle(col, row, color_player, var.radius_hole)
         playsound(var.sound_disk_touch, block=False)
+
 
 class Board(np.ndarray[Any, np.dtype[Any]]):
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
