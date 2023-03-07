@@ -147,57 +147,45 @@ def score_column_prediction(
     score = 0
     score_horiz = 0
     score_vert = 0
-    # score_diag_slash = 0
-    # score_diag_backslash = 0
-    opp = opponent(symbol_player)
-    for i in range(number_row):  # for horizontal lines
-        row = board[i, :]
-        for j in range(number_col - 3):
-            buffer_row = row[
-                j : j + 4
-            ]  # buffer of 4 length to check for disks in horizontal lines
-            # if count_points_buffer(list(buffer_row), symbol_player) != 0:
-            #    print("buffer_row is", buffer_row)
-            #    print("score added is : ", count_points_buffer(list(buffer_row), symbol_player))
-            score += count_points_buffer(list(buffer_row), symbol_player)
+    score_diag_slash = 0
+    score_diag_backslash = 0
+    buffer_gen_horiz = board.horiz(row, col)
+    for buffer_horiz in buffer_gen_horiz: # buffer of 4 length to check for disks in horizontal lines
+        if count_points_buffer(list(buffer_horiz), symbol_player) != 0:
+            print("buffer_row is", buffer_horiz)
+            print("score added is : ", count_points_buffer(list(buffer_horiz), symbol_player))
+        score += count_points_buffer(list(buffer_horiz), symbol_player)
     score_horiz = score
-    #print("horizontal score is : ", score_horiz)
+    print("horizontal score is : ", score_horiz)
 
-    for j in range(number_col):  # for vertical lines
-        #print(board)
-        col = board[:, j]
-        for i in range(number_row - 3):
-            buffer_col = col[
-                i : i + 4
-            ]  # buffer of 4 length to check for disks in vertical lines
-            print("buffer_col is", buffer_col)
-            print(count_points_buffer(list(buffer_col), symbol_player))
-            if count_points_buffer(list(buffer_col), symbol_player) != 0:
-               print("buffer_col is", buffer_col)
-               print("score added is : ", count_points_buffer(list(buffer_col), symbol_player))
-            score += count_points_buffer(list(buffer_col), symbol_player)
+    buffer_gen_col = board.vert(row, col)  # buffer of 4 length to check for disks in vertical lines
+    for buffer_vert in buffer_gen_col:   
+        # print("buffer_col is", buffer_col)
+        # print(count_points_buffer(list(buffer_col), symbol_player))
+        if count_points_buffer(list(buffer_vert), symbol_player) != 0:
+          print("buffer_col is", buffer_vert)
+          print("score added is : ", count_points_buffer(list(buffer_vert), symbol_player))
+        score += count_points_buffer(list(buffer_vert), symbol_player)
     score_vert = score - score_horiz
     print("vertical score is : ", score_vert)
 
-    for i in range(number_row - 3):  # for slash digonal
-        for j in range(number_col - 3):
-            buffer_slash = [board[i + k][j + k] for k in range(4)]
-            # if count_points_buffer(list(buffer_slash), symbol_player) != 0:
-            #    print("buffer_slash is", buffer_slash)
-            #    print("score added is : ", count_points_buffer(list(buffer_slash), symbol_player))
-            score += count_points_buffer(list(buffer_slash), symbol_player)
-    # score_diag_slash = score -(score_horiz + score_vert)
-    # print("diag slash score is : ", score_diag_slash )
-
-    for i in range(number_row - 3):  # for backslash diagonal
-        for j in range(number_col - 3):
-            buffer_backslash = [board[i + 3 - k][j + k] for k in range(4)]
-            # if count_points_buffer(list(buffer_backslash), symbol_player) != 0:
-            #    print("buffer_backslash is", buffer_backslash)
-            #    print("score added is : ", count_points_buffer(list(buffer_backslash), symbol_player))
+    buffer_gen_backslash = board.backslash(row, col) # for backslash diagonal
+    for buffer_backslash in buffer_gen_backslash:
+            if count_points_buffer(list(buffer_backslash), symbol_player) != 0:
+               print("buffer_backslash is", buffer_backslash)
+               print("score added is : ", count_points_buffer(list(buffer_backslash), symbol_player))
             score += count_points_buffer(list(buffer_backslash), symbol_player)
-    # score_diag_backslash = score - (score_horiz + score_vert + score_diag_slash)
-    # print("diag_backslash score is : ", score_diag_backslash )
+    score_diag_backslash = score -(score_horiz + score_vert)
+    print("diag backslash score is : ", score_diag_backslash )
+
+    buffer_gen_slash = board.slash(row, col) # for slash diagonal
+    for buffer_slash in buffer_gen_backslash:
+            if count_points_buffer(list(buffer_slash), symbol_player) != 0:
+               print("buffer_slash is", buffer_slash)
+               print("score added is : ", count_points_buffer(list(buffer_slash), symbol_player))
+            score += count_points_buffer(list(buffer_slash), symbol_player)
+    score_diag_slash = score - (score_horiz + score_vert + score_diag_slash)
+    print("diag slash score is : ", score_diag_slash)
 
     return score
 
@@ -219,7 +207,6 @@ def list_valid_col(board):  # liste des colonnes où l'on peut jouer
             valid_col.append(col)
     return valid_col
 
-
 def best_col_prediction(
     board, symbol_player
 ):  # on cherche la meilleure colonne où jouer en faisant fictivement avance le jeu en jouant dans chaque colonne
@@ -235,8 +222,8 @@ def best_col_prediction(
         # print("to the row", row)
         drop_disk(potential_board, col, symbol_player)
         score = score_column_prediction(potential_board, row, col, symbol_player)
-        # print("the current best score is", best_score)
-        # print("the score calculated is", score)
+        print("the current best score is", best_score)
+        print("the score calculated is", score)
         # print("\n")
         if score >= best_score:
             best_score = score
