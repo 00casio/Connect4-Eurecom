@@ -581,17 +581,6 @@ class Game:
         else:
             return self.player_null
 
-    def draw_winner(self) -> None:
-        winner = self.who_is_winner()
-        if winner == self.player_1:
-            print("Winner is the first player")
-        elif winner == self.player_2:
-            print("Winner is the second player")
-        else:
-            print("That is a draw")
-        input()
-        print("Not finished")
-
     def start(self) -> None:
         self.draw_start_screen()
         self.board = Board()
@@ -614,7 +603,21 @@ class Game:
             self.board[play[1], play[0]] = self.player_playing.symbol.v
             self.inverse_player()
             self.num_turn += 1
-        self.draw_winner()
+        self.draw_winner(gaming)
+    
+    def draw_winner(self, screen: Screen) -> None:
+        winner = self.who_is_winner()
+        sound = var.sound_winner_victory
+        if winner == self.player_1:
+            print("Winner is the first player")
+        elif winner == self.player_2:
+            print("Winner is the second player")
+        else:
+            print("That is a draw")
+            sound = var.sound_winner_draw
+        playsound(sound, block=False)
+        screen.click()
+        print("Not finished")
 
     def draw_options_screen(self) -> None:
         raise NotImplementedError("Not for now")

@@ -28,8 +28,8 @@ The objectives of this project are the following:
 
 - [x] Choose mode
 - [x] Grid
-- [ ] Play sound
-  - [ ] Winning, losing, draw
+- [x] Play sound
+  - [x] Winning, losing, draw
   - [x] Dropping
   - [x] Click box
   - [x] Invalid move

@@ -114,6 +114,8 @@ class Variables:
         self.sound_click_box = "sounds/box.mp3"
         self.sound_error = "sounds/error.mp3"
         self.sound_disk_touch = "sounds/tuck.mp3"
+        self.sound_winner_draw = "sounds/draw.mp3"
+        self.sound_winner_victory = "sounds/victory.mp3"
 
         # Fonts
         self.main_font = pg.font.SysFont(self.text_font, self.text_size)
