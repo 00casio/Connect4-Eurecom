@@ -1,10 +1,10 @@
 #!/bin/bash
 
-p311=$(python -c "import sys; print(sys.version_info[:2])")
+p3=$(python -c "import sys; print(sys.version_info[:2])")
 
-if [ "$p311" == "(3, 11)" ]; then
+if [ "$p3" == "(3, 11)" ]; then
   echo "Using python 3.11"
-elif [ "$p311" == "(3, 10)" ]; then
+elif [ "$p3" == "(3, 10)" ]; then
   echo "Using python 3.10"
 else
   echo "Could not find correct python version"
@@ -12,7 +12,7 @@ else
 fi
 
 test() {
-    python -c "import $1"
+    python -c "import $1" 1>/dev/null 2>&1
     if [ $? != 0 ]; then
         python -m pip install $1
     fi
