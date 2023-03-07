@@ -30,8 +30,9 @@ The objectives of this project are the following:
 - [x] Grid
 - [ ] Play sound
   - [ ] Winning, losing, draw
-  - [ ] Dropping
-  - [ ] Click box
+  - [x] Dropping
+  - [x] Click box
+  - [x] Invalid move
 - [ ] Highlight selected column
 
 Optional:
