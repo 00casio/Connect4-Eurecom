@@ -123,3 +123,4 @@ class Variables:
         self.coor_cancel_box = (10, 10)
         self.text_quit_box = "Quit"
         self.coor_quit_box = (self.width_screen - 10, 10)
+        self.message_quit = "You chose to quit the game\nYou are disapointing me"
