@@ -1,9 +1,20 @@
 #!/bin/bash
 
+p311=$(python -c "import sys; print(sys.version_info[:2])")
+
+if [ "$p311" == "(3, 11)" ]; then
+  echo "Using python 3.11"
+elif [ "$p311" == "(3, 10)" ]; then
+  echo "Using python 3.10"
+else
+  echo "Could not find correct python version"
+  exit 1
+fi
+
 test() {
-    python3.11 -c "import $1"
+    python -c "import $1"
     if [ $? != 0 ]; then
-        python3.11 -m pip install $1
+        python -m pip install $1
     fi
 }
 
@@ -13,5 +24,4 @@ for module in ${to_install}; do
     test ${module}
 done
 
-python3.11 main.py
-python3.11 gesture.py
+python main.py
