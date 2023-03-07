@@ -1,6 +1,6 @@
 import inspect
 import random
-
+import inspect
 import numpy as np
 
 from variables import Variables
