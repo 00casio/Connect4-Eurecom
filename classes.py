@@ -477,11 +477,13 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
 
     def horiz(self, row, col):
         for i in range(max(0, col - 3), min(7, col + 1)):
-            yield self[i : i + 4, row]
+            if len(self[row, i : i + 4]) == 4:
+                yield self[row, i : i + 4]
 
     def vert(self, row, col):
         for i in range(max(0, row - 3), min(7, row + 1)):
-            yield self[col, i : i + 4]
+            if len(self[i : i + 4, col]) == 4:
+                yield self[i : i + 4, col]
 
     def backslash(self, row, col, back=True):
         if back:
