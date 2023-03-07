@@ -10,6 +10,12 @@ venv
 **.mkv
 **.mp4
 **.mp3
+**.mpa
+**.wav
+**.ogg
+**.opus
+**.flac
+**.alac
 
 # LaTeX
 **.out

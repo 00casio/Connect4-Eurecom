@@ -7,6 +7,7 @@ from typing import Any, Callable, Optional
 
 import numpy as np
 import pygame as pg
+from playsound import playsound
 
 from AI_test import best_col_prediction
 from variables import Symbol, Variables
@@ -274,6 +275,8 @@ class Screen(Tools):
         if rect_play is not None:
             while not self.x_in_rect(click, rect_play):
                 click = self.click(rect_play, print_disk, color_disk)
+        if rect_play is None:
+            playsound(var.sound_click_box, block=False)
         return click
 
     def is_canceled(self, click: tuple[int, int]) -> bool:
@@ -426,6 +429,7 @@ class GamingScreen(Screen):
             self.blit_board()
             pg.display.update()
         self.draw_circle(col, row, color_player, var.radius_hole)
+        playsound(var.sound_disk_touch, block=False)
 
 class Board(np.ndarray[Any, np.dtype[Any]]):
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
@@ -533,6 +537,7 @@ class Player:
             col = (click[0] - var.padding) // var.size_cell
         row = board.find_free_slot(col)
         if row == -1:
+            playsound(var.sound_error, block=False)
             col, row = self.play(board, screen)
         return (col, row)
 
