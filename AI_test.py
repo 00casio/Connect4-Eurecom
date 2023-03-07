@@ -1,6 +1,6 @@
 import inspect
 import random
-
+import inspect
 import numpy as np
 
 from variables import Variables
@@ -239,3 +239,4 @@ def best_col_prediction(
             else:
                 best_col = random.choice(list_potential_col)
     return best_col
+

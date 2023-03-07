@@ -431,7 +431,6 @@ class GamingScreen(Screen):
         self.draw_circle(col, row, color_player, var.radius_hole)
         playsound(var.sound_disk_touch, block=False)
 
-
 class Board(np.ndarray[Any, np.dtype[Any]]):
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
         self = np.array([[var.symbol_no_player] * 7 for i in range(6)]).view(cls)
