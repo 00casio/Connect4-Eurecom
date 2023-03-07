@@ -290,11 +290,18 @@ class Screen(Tools):
             pg.quit()
             sys.exit()
 
-    def x_in_rect(self, coor: tuple[int, int], rect: Optional[Rect], sound: str = var.sound_click_box) -> bool:
+    def x_in_rect(
+        self,
+        coor: tuple[int, int],
+        rect: Optional[Rect],
+        sound: str = var.sound_click_box,
+    ) -> bool:
         """Return whether coor is in the rectangle 'rect'"""
         if rect is None:
             return False
-        status = rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
+        status = (
+            rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
+        )
         if status and sound != "":
             playsound(sound, block=False)
         return status
@@ -302,7 +309,7 @@ class Screen(Tools):
     def handle_click(self, click_coor: tuple[int, int], list_rect: list[Rect]) -> int:
         """Return the index of the box the click was in"""
         for i in range(len(list_rect)):
-            if self.x_in_rect(click_coor, list_rect[i]):
+            if self.x_in_rect(click_coor, list_rect[i], ""):
                 return i
         return -1
 
@@ -431,7 +438,8 @@ class GamingScreen(Screen):
             self.blit_board()
             pg.display.update()
         self.draw_circle(col, row, color_player, var.radius_hole)
-        playsound(var.sound_disk_touch, block=True)
+        # playsound(var.sound_disk_touch, block=True)
+
 
 class Board(np.ndarray[Any, np.dtype[Any]]):
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
@@ -605,9 +613,9 @@ class Game:
             self.board[play[1], play[0]] = self.player_playing.symbol.v
             self.inverse_player()
             self.num_turn += 1
-        self.draw_winner(gaming)
-    
-    def draw_winner(self, screen: Screen) -> None:
+        self.draw_winner(gaming, play)
+
+    def draw_winner(self, screen: GamingScreen, lastclick: tuple[int, int]) -> None:
         winner = self.who_is_winner()
         sound = var.sound_winner_victory
         if winner == self.player_1:
@@ -617,9 +625,47 @@ class Game:
         else:
             print("That is a draw")
             sound = var.sound_winner_draw
+        p = var.padding
         playsound(sound, block=False)
+        End = Screen(self.screen)
+        End.screen.fill(var.color_screen)
+        End.draw_quit_box()
+        self.screen.blit(screen.board_surface, (p, p))
+        text_winner = End.create_text_rendered(f"Player {winner.symbol.v} won !")
+        box_winner = End.write_on_line(
+            [text_winner], winner.color, var.width_screen, p // 2
+        )
+        self.board.state_win(winner.symbol)
+        bits = int(self.board.state_to_bits(), 2)
+
+        def complete(bits, direction):
+            d = {0: 7, 1: 1, 2: 6, 3: 8}
+            m = bits & (bits >> d[direction])
+            m2 = m & (m >> 2 * d[direction])
+            if m2:
+                bs = bin(m2)[2:]
+                i = 48 - ("0" * (49 - len(bs)) + bs).find("1")
+                p = var.padding
+                c = var.size_cell
+                x_s = p + (i // 7) * c + c // 2
+                y_s = var.height_board - (i % 7 - 1) * c
+                x_e = x_s
+                y_e = y_s
+                if direction in [0, 2, 3]:
+                    x_e += 3 * c
+                if direction in [1, 3]:
+                    y_e -= 3 * c
+                if direction == 2:
+                    y_e += 3 * c
+                pg.draw.line(self.screen, var.black, (x_s, y_s), (x_e, y_e), 15)
+
+        complete(bits, 0)  # Horizontal check
+        complete(bits, 1)  # Vert
+        complete(bits, 2)  # \
+        complete(bits, 3)  # /
+
+        pg.display.update()
         screen.click()
-        print("Not finished")
 
     def draw_options_screen(self) -> None:
         raise NotImplementedError("Not for now")
