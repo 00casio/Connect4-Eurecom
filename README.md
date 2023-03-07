@@ -10,9 +10,10 @@ The project S6 of:
 
 ### This week objectives
 
-- [x] Contact the tutor
-- [x] Know what we have to do
-- [x] Maybe prototyping
+- [ ] Report + appointment
+- [ ] Begin to add sound
+- [ ] Work on gesture
+- [ ] New point system for AI
 
 ### Objectives
 
@@ -28,6 +29,9 @@ The objectives of this project are the following:
 - [x] Choose mode
 - [x] Grid
 - [ ] Play sound
+  - [ ] Winning, losing, draw
+  - [ ] Dropping
+  - [ ] Click box
 - [ ] Highlight selected column
 
 Optional:
@@ -45,7 +49,7 @@ Optional:
 
 - [ ] Change difficulty
 - [ ] Different gameplay
-- [ ] Choose algorithms
+- [ ] Add other algorithms
 
 #### Hands gesture
 
