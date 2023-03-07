@@ -431,7 +431,7 @@ class GamingScreen(Screen):
         self.draw_circle(col, row, color_player, var.radius_hole)
         playsound(var.sound_disk_touch, block=False)
 
-
+import inspect
 class Board(np.ndarray[Any, np.dtype[Any]]):
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
         self = np.array([[var.symbol_no_player] * 7 for i in range(6)]).view(cls)
@@ -480,6 +480,9 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
         return False
 
     def horiz(self, row, col):
+        print(len(inspect.stack(0)))
+        if len(inspect.stack(0)) > 9:
+            exit()
         for i in range(max(0, col - 3), min(7, col + 1)):
             if len(self[row, i : i + 4]) == 4:
                 yield self[row, i : i + 4]
