@@ -256,6 +256,7 @@ class Screen(Tools):
     def click(
         self,
         rect_play: Optional[Rect] = None,
+        sound: str = var.sound_click_box,
         print_disk: bool = False,
         color_disk: Color = var.white,
     ) -> tuple[int, int]:
@@ -273,10 +274,8 @@ class Screen(Tools):
             self.box_clicked = var.boxAI_cancel
         self.handle_quit(click)
         if rect_play is not None:
-            while not self.x_in_rect(click, rect_play):
+            while not self.x_in_rect(click, rect_play, ""):
                 click = self.click(rect_play, print_disk, color_disk)
-        if rect_play is None:
-            playsound(var.sound_click_box, block=False)
         return click
 
     def is_canceled(self, click: tuple[int, int]) -> bool:
@@ -291,11 +290,14 @@ class Screen(Tools):
             pg.quit()
             sys.exit()
 
-    def x_in_rect(self, coor: tuple[int, int], rect: Optional[Rect]) -> bool:
+    def x_in_rect(self, coor: tuple[int, int], rect: Optional[Rect], sound: str = var.sound_click_box) -> bool:
         """Return whether coor is in the rectangle 'rect'"""
         if rect is None:
             return False
-        return rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
+        status = rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
+        if status and sound != "":
+            playsound(sound, block=False)
+        return status
 
     def handle_click(self, click_coor: tuple[int, int], list_rect: list[Rect]) -> int:
         """Return the index of the box the click was in"""
@@ -429,7 +431,7 @@ class GamingScreen(Screen):
             self.blit_board()
             pg.display.update()
         self.draw_circle(col, row, color_player, var.radius_hole)
-        playsound(var.sound_disk_touch, block=False)
+        playsound(var.sound_disk_touch, block=True)
 
 class Board(np.ndarray[Any, np.dtype[Any]]):
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
