@@ -3,7 +3,9 @@
 
 import argparse
 
-parser = argparse.ArgumentParser(description="Launch a connect 4 window with some options already in place")
+parser = argparse.ArgumentParser(
+    description="Launch a connect 4 window with some options already in place"
+)
 
 parser.add_argument(
     "--no-sound",
@@ -11,7 +13,7 @@ parser.add_argument(
     action="store_const",
     const=True,
     default=False,
-    help="Disable sound by default"
+    help="Disable sound by default",
 )
 
 parser.add_argument(
@@ -20,7 +22,7 @@ parser.add_argument(
     dest="language",
     type=str,
     default="en",
-    help="Choose the language"
+    help="Choose the language",
 )
 
 args = parser.parse_args()

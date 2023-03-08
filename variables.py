@@ -28,7 +28,7 @@ class Symbol:
 class Variables:
     def __init__(self) -> None:
         # Texts
-        self.texts= {
+        self.texts = {
             "en": {
                 "boxAI_text_levels": [
                     "Start",
@@ -66,7 +66,7 @@ class Variables:
                 "cancel_box": "Retour",
                 "quit_box": "Quitter",
                 "message_quit": "Vous avez choisis d'abandonner le jeu.\nVous me décevez.",
-            }
+            },
         }
 
         # Symbols
@@ -141,7 +141,9 @@ class Variables:
         self.text_options_play_HvAI = self.texts["en"]["options_play_HvAI"]
         self.text_options_play_AIvAI = self.texts["en"]["options_play_AIvAI"]
         self.text_options_difficulty_HvAI = self.texts["en"]["options_difficulty_HvAI"]
-        self.text_options_difficulty_AIvAI = self.texts["en"]["options_difficulty_AIvAI"]
+        self.text_options_difficulty_AIvAI = self.texts["en"][
+            "options_difficulty_AIvAI"
+        ]
         self.text_difficulty_options = [
             "",
             self.text_options_difficulty_HvAI,

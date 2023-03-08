@@ -18,13 +18,14 @@ Color = pg.Color
 Rect = pg.Rect
 Surface = pg.Surface
 
+
 class Config:
     def __init__(self, var: Variables, arguments):
         self.arg = arguments
         self.var = var
         self.var.sound = not self.arg.novolume
         self.load_language(self.arg.language)
-    
+
     def load_language(self, language):
         if language not in ["en", "fr"]:
             print("This language is not translated.\nI will use English")
@@ -34,9 +35,15 @@ class Config:
         self.var.text_options_options = self.var.texts[language]["options_options"]
         self.var.text_options_play_HvH = self.var.texts[language]["options_play_HvH"]
         self.var.text_options_play_HvAI = self.var.texts[language]["options_play_HvAI"]
-        self.var.text_options_play_AIvAI = self.var.texts[language]["options_play_AIvAI"]
-        self.var.text_options_difficulty_HvAI = self.var.texts[language]["options_difficulty_HvAI"]
-        self.var.text_options_difficulty_AIvAI = self.var.texts[language]["options_difficulty_AIvAI"]
+        self.var.text_options_play_AIvAI = self.var.texts[language][
+            "options_play_AIvAI"
+        ]
+        self.var.text_options_difficulty_HvAI = self.var.texts[language][
+            "options_difficulty_HvAI"
+        ]
+        self.var.text_options_difficulty_AIvAI = self.var.texts[language][
+            "options_difficulty_AIvAI"
+        ]
         self.var.text_difficulty_options = [
             "",
             self.var.text_options_difficulty_HvAI,
@@ -59,7 +66,10 @@ class Element:
         text_color: Color = Variables().black,
         box_color: Color = Variables().color_options_box,
         font: pg.font.Font = Variables().main_font,
-        padd: tuple[int, int] = (Variables().text_box_spacing, Variables().text_box_spacing),
+        padd: tuple[int, int] = (
+            Variables().text_box_spacing,
+            Variables().text_box_spacing,
+        ),
     ) -> None:
         self.var = var
         self.font = font
@@ -98,7 +108,8 @@ class Tools:
         total_width = []
         for line_text in array_text:
             total_height += (
-                max([t.get_size()[1] for t in line_text]) + 2 * self.var.text_box_spacing
+                max([t.get_size()[1] for t in line_text])
+                + 2 * self.var.text_box_spacing
             )
             width_now = (
                 sum([t.get_size()[0] for t in line_text])
@@ -169,7 +180,9 @@ class Tools:
         y_now = (self.var.height_screen - total_size[0]) // 2
         for i in range(len(array_text)):
             line_text = array_text[i]
-            box_rect = self.write_on_line(line_text, color[i], self.var.width_screen, y_now)
+            box_rect = self.write_on_line(
+                line_text, color[i], self.var.width_screen, y_now
+            )
             y_now += (
                 line_text[0].get_size()[1]
                 + 2 * self.var.text_box_spacing
@@ -197,7 +210,8 @@ class Tools:
         pg_text = self.create_text_rendered(text, color_text)
         pg.draw.rect(screen, color_box, box)
         screen.blit(
-            pg_text, (box.x + self.var.text_box_spacing, box.y + self.var.text_box_spacing)
+            pg_text,
+            (box.x + self.var.text_box_spacing, box.y + self.var.text_box_spacing),
         )
         pg.display.update()
 
@@ -219,10 +233,11 @@ class Tools:
     def draw_icon(self, image, size, position):
         p = self.var.text_box_spacing
         icon = self.make_icon(image, size)
-        box = Rect(position[0]-p, position[1]-p, size[0]+2*p, size[1]+2*p)
+        box = Rect(position[0] - p, position[1] - p, size[0] + 2 * p, size[1] + 2 * p)
         pg.draw.rect(self.screen, self.var.very_light_blue, box)
         self.screen.blit(icon, position)
         return box
+
 
 class Screen(Tools):
     """A screen is composed of what is shown to the user"""
@@ -231,7 +246,7 @@ class Screen(Tools):
         self,
         var: Variables,
         screen: Surface,
-        volume:bool,
+        volume: bool,
         cancel_box: bool = True,
         quit_box: bool = True,
         color_fill: Color = Variables().color_options_screen,
@@ -263,7 +278,11 @@ class Screen(Tools):
         """Draw the box that allow the user to take a step back"""
         quit_t = self.create_text_rendered(self.var.text_quit_box, self.var.black)
         self.quit_box = self.write_on_line(
-            [quit_t], self.var.white, self.var.coor_quit_box[0], self.var.coor_quit_box[1], align=1
+            [quit_t],
+            self.var.white,
+            self.var.coor_quit_box[0],
+            self.var.coor_quit_box[1],
+            align=1,
         )[0]
 
     def reset_screen(
@@ -364,7 +383,9 @@ class Screen(Tools):
 
 
 class Screen_AI(Screen):
-    def __init__(self, var: Variables, screen: Surface, volume:bool, number_AI: int = 1) -> None:
+    def __init__(
+        self, var: Variables, screen: Surface, volume: bool, number_AI: int = 1
+    ) -> None:
         Screen.__init__(self, var, screen, volume)
         self.number_AI = number_AI
         self.begin = 1
@@ -437,9 +458,12 @@ class Screen_AI(Screen):
                 self.diff_AI_1 = -1
                 self.diff_AI_2 = -1
                 self.reset_screen(
-                    self.var.color_options_screen, self.text_options, self.options_colors
+                    self.var.color_options_screen,
+                    self.text_options,
+                    self.options_colors,
                 )
                 pg.display.update()
+
 
 """
 Options to do:
@@ -447,10 +471,11 @@ Language (Cymraeg, Arabic)
 Logging?
 """
 
+
 class OptionsScreen(Screen):
-    def __init__(self, var: Variables, game, screen: Surface, volume:bool):
+    def __init__(self, var: Variables, game, screen: Surface, volume: bool):
         Screen.__init__(self, var, screen, volume)
-        self.size = (self.var.width_screen//10, self.var.height_screen//10)
+        self.size = (self.var.width_screen // 10, self.var.height_screen // 10)
         self.nbr_line = 2
         self.vol = self.draw_volume()
         self.flags = list(self.draw_language())
@@ -468,8 +493,8 @@ class OptionsScreen(Screen):
 
     def draw_volume(self):
         cs = self.var.center_screen
-        sp = self.var.options_spacing//2
-        position = (cs[0] - self.size[0]//2, cs[1] - self.size[1] - 2*sp)
+        sp = self.var.options_spacing // 2
+        position = (cs[0] - self.size[0] // 2, cs[1] - self.size[1] - 2 * sp)
         if self.volume:
             box = self.draw_icon(self.var.image_volume_on, self.size, position)
         else:
@@ -481,16 +506,16 @@ class OptionsScreen(Screen):
         sp = self.var.options_spacing
         y_now = cs[1] + sp
         l = [self.var.image_english, self.var.image_french]
-        x_now = cs[0] - len(l)*self.size[0]//2 - (len(l) - 1)*sp
+        x_now = cs[0] - len(l) * self.size[0] // 2 - (len(l) - 1) * sp
         for lan in l:
             yield self.draw_icon(lan, self.size, (x_now, y_now))
-            x_now += sp + self.size[0] + 2*self.var.text_box_spacing
+            x_now += sp + self.size[0] + 2 * self.var.text_box_spacing
 
 
 class GamingScreen(Screen):
     """The gaming screen is used for the gaming part of the program"""
 
-    def __init__(self, var: Variables, screen: Surface, volume:bool) -> None:
+    def __init__(self, var: Variables, screen: Surface, volume: bool) -> None:
         Screen.__init__(self, var, screen, volume)
         self.color_screen = self.var.white
         self.color_board = self.var.blue
@@ -526,7 +551,9 @@ class GamingScreen(Screen):
     def animate_fall(self, col: int, row: int, color_player: Color) -> None:
         x = self.var.padding + col * self.var.size_cell + self.var.size_cell // 2
         for y in range(
-            self.var.padding // 2, self.var.padding + row * self.var.size_cell + self.var.size_cell // 2, 5
+            self.var.padding // 2,
+            self.var.padding + row * self.var.size_cell + self.var.size_cell // 2,
+            5,
         ):
             self.screen.fill(self.var.white)
             pg.draw.circle(self.screen, color_player, (x, y), self.var.radius_disk)
@@ -539,7 +566,9 @@ class GamingScreen(Screen):
 
 class Board(np.ndarray[Any, np.dtype[Any]]):
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
-        self = np.array([[Variables().symbol_no_player] * 7 for i in range(6)]).view(cls)
+        self = np.array([[Variables().symbol_no_player] * 7 for i in range(6)]).view(
+            cls
+        )
         self.state: Optional[np.ndarray[np.uint8, np.dtype[np.uint8]]] = None
         return self
 
@@ -618,7 +647,9 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
 class Player:
     """The class that keep all the options for a player"""
 
-    def __init__(self, var: Variables, number: int, AI: bool, difficulty: int = -1) -> None:
+    def __init__(
+        self, var: Variables, number: int, AI: bool, difficulty: int = -1
+    ) -> None:
         self.var = var
         if number == 0:
             self.symbol = Symbol(self.var.symbol_no_player)
@@ -634,7 +665,7 @@ class Player:
         self.is_ai = AI
         self.ai_difficulty = difficulty
 
-    def play(self, board: Board, screen: Screen, volume:bool) -> tuple[int, int]:
+    def play(self, board: Board, screen: Screen, volume: bool) -> tuple[int, int]:
         if self.is_ai:
             col = best_col_prediction(board, self.symbol.v)
         else:
@@ -660,14 +691,16 @@ class Player:
 class Game:
     """The big class that will regulate everything"""
 
-    def __init__(self, var:Variables, args) -> None:
+    def __init__(self, var: Variables, args) -> None:
         # Players
         self.var = var
         self.player_1 = Player(self.var, 1, False)
         self.player_2 = Player(self.var, 2, False)
         self.player_playing = self.player_1
         self.player_null = Player(self.var, 0, False)
-        self.screen = pg.display.set_mode((self.var.width_screen, self.var.height_screen), 0, 32)
+        self.screen = pg.display.set_mode(
+            (self.var.width_screen, self.var.height_screen), 0, 32
+        )
         pg.display.set_caption(self.var.screen_title)
         self.conf = Config(self.var, args)
         self.volume = self.var.sound
@@ -803,20 +836,26 @@ class Game:
                 self.player_2 = Player(self.var, 2, False)
             elif screen.x_in_rect(mouse, boxes[1][0]):
                 self.status = self.var.options_play_HvAI
-                self.screen_AI = Screen_AI(self.var, self.screen, volume=self.volume, number_AI=1)
+                self.screen_AI = Screen_AI(
+                    self.var, self.screen, volume=self.volume, number_AI=1
+                )
                 self.player_1 = Player(self.var, 1, False)
                 self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_1)
             elif screen.x_in_rect(mouse, boxes[2][0]):
                 self.status = self.var.options_play_AIvAI
-                self.screen_AI = Screen_AI(self.var, self.screen, volume=self.volume, number_AI=2)
+                self.screen_AI = Screen_AI(
+                    self.var, self.screen, volume=self.volume, number_AI=2
+                )
                 self.player_1 = Player(self.var, 1, True, self.screen_AI.diff_AI_1)
                 self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_2)
             if screen.x_in_rect(mouse, screen.cancel_box):
                 self.status = self.var.options_clicked_cancel
-        if (self.player_1.is_ai and self.player_1.ai_difficulty == -1) or (self.player_2.is_ai and self.player_2.ai_difficulty == -1):
+        if (self.player_1.is_ai and self.player_1.ai_difficulty == -1) or (
+            self.player_2.is_ai and self.player_2.ai_difficulty == -1
+        ):
             if self.status not in [
-            self.var.options_play_HvH,
-            self.var.options_clicked_cancel,
+                self.var.options_play_HvH,
+                self.var.options_clicked_cancel,
             ]:
                 self.draw_play_options()
 
@@ -824,7 +863,9 @@ class Game:
         """Show the start screen.
         For now it is only the play button but soon there will be more options"""
 
-        start_screen = Screen(self.var, self.screen, cancel_box=False, volume=self.volume)
+        start_screen = Screen(
+            self.var, self.screen, cancel_box=False, volume=self.volume
+        )
         text_play = start_screen.create_text_rendered(self.var.text_options_play)
         text_options = start_screen.create_text_rendered(self.var.text_options_options)
         boxes_options = start_screen.center_all([[text_play], [text_options]])
