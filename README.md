@@ -11,7 +11,7 @@ The project S6 of:
 ### This week objectives
 
 - [ ] Report + appointment
-- [ ] Begin to add sound
+- [x] Begin to add sound
 - [ ] Work on gesture
 - [ ] New point system for AI
 
@@ -29,11 +29,7 @@ The objectives of this project are the following:
 - [x] Choose mode
 - [x] Grid
 - [x] Play sound
-  - [x] Winning, losing, draw
-  - [x] Dropping
-  - [x] Click box
-  - [x] Invalid move
-- [ ] Highlight selected column
+- [x] Highlight selected column
 
 Optional:
 

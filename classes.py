@@ -56,8 +56,9 @@ class Element:
 
 
 class Tools:
-    def __init__(self, screen: Surface) -> None:
+    def __init__(self, screen: Surface, volume) -> None:
         self.screen = screen
+        self.volume = volume
 
     def compute_total_size(
         self, array_text: list[list[Surface]]
@@ -180,6 +181,19 @@ class Tools:
         pg.display.update()
         return box
 
+    def make_icon(self, image, size):
+        img = pg.image.load(image)
+        icon = pg.transform.scale(img, size)
+        return icon
+
+    def draw_icon(self, image, size, position):
+        p = var.text_box_spacing
+        icon = self.make_icon(image, size)
+        box = Rect(position[0]-p, position[1]-p, size[0]+2*p, size[1]+2*p)
+        pg.draw.rect(self.screen, var.very_light_blue, box)
+        self.screen.blit(icon, position)
+        pg.display.update()
+        return box
 
 class Screen(Tools):
     """A screen is composed of what is shown to the user"""
@@ -187,15 +201,18 @@ class Screen(Tools):
     def __init__(
         self,
         screen: Surface,
+        volume:bool,
         cancel_box: bool = True,
         quit_box: bool = True,
         color_fill: Color = var.color_options_screen,
     ) -> None:
-        Tools.__init__(self, screen)
+        Tools.__init__(self, screen, volume)
         self.elements: list[Element] = []
         self.cancel_box: Optional[Rect] = None
         self.box_clicked = var.box_out
         self.screen.fill(color_fill)
+        self.draw_cancel = cancel_box
+        self.draw_quit = quit_box
         if cancel_box:
             self.draw_cancel_box()
         if quit_box:
@@ -227,8 +244,10 @@ class Screen(Tools):
     ) -> None:
         self.screen.fill(color_screen)
         self.center_all(text, colors_boxes)
-        self.draw_cancel_box()
-        self.draw_quit_box()
+        if self.draw_cancel:
+            self.draw_cancel_box()
+        if self.draw_quit:
+            self.draw_quit_box()
         pg.display.update()
 
     def get_mouse_pos(self) -> tuple[int, int]:
@@ -302,7 +321,7 @@ class Screen(Tools):
         status = (
             rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
         )
-        if status and sound != "":
+        if status and sound != "" and self.volume:
             playsound(sound, block=False)
         return status
 
@@ -315,8 +334,8 @@ class Screen(Tools):
 
 
 class Screen_AI(Screen):
-    def __init__(self, screen: Surface, number_AI: int = 1) -> None:
-        Screen.__init__(self, screen)
+    def __init__(self, screen: Surface, volume:bool, number_AI: int = 1) -> None:
+        Screen.__init__(self, screen, volume)
         self.number_AI = number_AI
 
         texts_level = [
@@ -391,12 +410,33 @@ class Screen_AI(Screen):
                 )
                 pg.display.update()
 
+"""
+Options to do:
+Volume
+Language (Cymraeg, French, Arabic)
+Logging?
+"""
+
+class OptionsScreen(Screen):
+    def __init__(self, game, screen: Surface, volume:bool):
+        Screen.__init__(self, screen, volume)
+        self.vol = self.draw_volume()
+
+    def draw_volume(self):
+        size = (var.width_screen//20, var.height_screen//20)
+        position = (var.center_screen[0] - size[0]//2, var.center_screen[1] - size[1]//2)
+        if self.volume:
+            box = self.draw_icon(var.image_volume_on, size, position)
+        else:
+            box = self.draw_icon(var.image_volume_muted, size, position)
+        return box
+
 
 class GamingScreen(Screen):
     """The gaming screen is used for the gaming part of the program"""
 
-    def __init__(self, screen: Surface) -> None:
-        Screen.__init__(self, screen)
+    def __init__(self, screen: Surface, volume:bool) -> None:
+        Screen.__init__(self, screen, volume)
         self.color_screen = var.white
         self.color_board = var.blue
         self.width_board = var.width_board
@@ -438,7 +478,8 @@ class GamingScreen(Screen):
             self.blit_board()
             pg.display.update()
         self.draw_circle(col, row, color_player, var.radius_hole)
-        # playsound(var.sound_disk_touch, block=True)
+        if self.volume:
+            playsound(var.sound_disk_touch, block=True)
 
 
 class Board(np.ndarray[Any, np.dtype[Any]]):
@@ -537,7 +578,7 @@ class Player:
         self.is_ai = AI
         self.ai_difficulty = difficulty
 
-    def play(self, board: Board, screen: Screen) -> tuple[int, int]:
+    def play(self, board: Board, screen: Screen, volume:bool) -> tuple[int, int]:
         if self.is_ai:
             col = best_col_prediction(board, self.symbol.v)
         else:
@@ -546,9 +587,9 @@ class Player:
             click = screen.click(box_allowed, print_disk=True, color_disk=self.color)
             col = (click[0] - var.padding) // var.size_cell
         row = board.find_free_slot(col)
-        if row == -1:
+        if row == -1 and volume:
             playsound(var.sound_error, block=False)
-            col, row = self.play(board, screen)
+            col, row = self.play(board, screen, volume)
         return (col, row)
 
     def __eq__(self, other: object) -> bool:
@@ -571,6 +612,7 @@ class Game:
         self.player_null = Player(0, False)
         self.screen = pg.display.set_mode((var.width_screen, var.height_screen), 0, 32)
         pg.display.set_caption(var.screen_title)
+        self.volume = True
 
     def inverse_player(self) -> None:
         """Return the symbols of the opponent of the player currently playing"""
@@ -599,16 +641,16 @@ class Game:
         self.start_game()
 
     def start_game(self) -> None:
-        gaming = GamingScreen(self.screen)
+        gaming = GamingScreen(self.screen, self.volume)
         gaming.draw_board()
         self.player_playing = self.player_1
         while (
             self.who_is_winner() == self.player_null and self.num_turn < self.board.size
         ):
             if self.player_playing == self.player_1:
-                play = self.player_1.play(self.board, gaming)
+                play = self.player_1.play(self.board, gaming, self.volume)
             else:
-                play = self.player_2.play(self.board, gaming)
+                play = self.player_2.play(self.board, gaming, self.volume)
             gaming.animate_fall(play[0], play[1], self.player_playing.color)
             self.board[play[1], play[0]] = self.player_playing.symbol.v
             self.inverse_player()
@@ -618,7 +660,7 @@ class Game:
     def draw_winner(self, screen: GamingScreen, lastclick: tuple[int, int]) -> None:
         winner = self.who_is_winner()
         sound = var.sound_winner_victory
-        End = Screen(self.screen)
+        End = Screen(self.screen, volume=self.volume)
         End.screen.fill(var.color_screen)
         End.draw_quit_box()
         text_winner = End.create_text_rendered(f"Player {winner.symbol.v} won !")
@@ -631,7 +673,8 @@ class Game:
             print("That is a draw")
             sound = var.sound_winner_draw
         p = var.padding
-        playsound(sound, block=False)
+        if self.volume:
+            playsound(sound, block=False)
         self.screen.blit(screen.board_surface, (p, p))
         box_winner = End.write_on_line(
             [text_winner], winner.color, var.width_screen, p // 2
@@ -669,11 +712,19 @@ class Game:
         screen.click()
 
     def draw_options_screen(self) -> None:
-        raise NotImplementedError("Not for now")
+        options = OptionsScreen(self, self.screen, self.volume)
+        click = options.click()
+        while options.box_clicked != var.boxAI_cancel:
+            if options.x_in_rect(click, options.vol):
+                self.volume = not self.volume
+                options.volume = self.volume
+                options.draw_volume()
+            click = options.click()
+        self.status = var.options_clicked_cancel
 
     def draw_play_options(self) -> None:
         """Show the different options when choosing to play"""
-        screen = Screen(self.screen)
+        screen = Screen(self.screen, self.volume)
         text_HvH = screen.create_text_rendered(var.text_options_play_HvH)
         text_HvAI = screen.create_text_rendered(var.text_options_play_HvAI)
         text_AIvAI = screen.create_text_rendered(var.text_options_play_AIvAI)
@@ -689,12 +740,12 @@ class Game:
                 self.player_2 = Player(2, False)
             elif screen.x_in_rect(mouse, boxes[1][0]):
                 self.status = var.options_play_HvAI
-                self.screen_AI = Screen_AI(self.screen, number_AI=1)
+                self.screen_AI = Screen_AI(self.screen, volume=self.volume, number_AI=1)
                 self.player_1 = Player(1, False)
                 self.player_2 = Player(2, True, self.screen_AI.diff_AI_2)
             elif screen.x_in_rect(mouse, boxes[2][0]):
                 self.status = var.options_play_AIvAI
-                self.screen_AI = Screen_AI(self.screen, number_AI=2)
+                self.screen_AI = Screen_AI(self.screen, volume=self.volume, number_AI=2)
                 self.player_1 = Player(1, True, self.screen_AI.diff_AI_1)
                 self.player_2 = Player(2, True, self.screen_AI.diff_AI_2)
             elif screen.x_in_rect(mouse, screen.cancel_box):
@@ -709,14 +760,18 @@ class Game:
         """Show the start screen.
         For now it is only the play button but soon there will be more options"""
 
-        start_screen = Screen(self.screen, cancel_box=False)
+        start_screen = Screen(self.screen, cancel_box=False, volume=self.volume)
         text_play = start_screen.create_text_rendered(var.text_options_play)
-        boxes_options = start_screen.center_all([[text_play]])
+        text_options = start_screen.create_text_rendered(var.text_options_options)
+        boxes_options = start_screen.center_all([[text_play], [text_options]])
         rect_play = boxes_options[0][0]
+        rect_opti = boxes_options[1][0]
         self.status = var.options_menu_start
         while self.status == var.options_menu_start:
             mouse = start_screen.click()
             if start_screen.x_in_rect(mouse, rect_play):
                 self.draw_play_options()
+            elif start_screen.x_in_rect(mouse, rect_opti):
+                self.draw_options_screen()
         if self.status == var.options_clicked_cancel:
             self.draw_start_screen()

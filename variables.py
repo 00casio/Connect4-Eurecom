@@ -53,6 +53,7 @@ class Variables:
         self.blue = Color(38, 60, 255)
         self.dark_blue = Color(0, 0, 229)
         self.light_blue = Color(30, 160, 255)
+        self.very_light_blue = Color(20, 235, 255)
         self.cyan = Color(45, 245, 255)
         self.grey = Color(200, 200, 200)
         self.color_trans = Color(0, 0, 0, 0)
@@ -99,6 +100,7 @@ class Variables:
         self.text_size = 30
         self.text_font = "monospace"
         self.text_options_play = "Play"
+        self.text_options_options = "Options"
         self.text_options_play_HvH = "Human vs. Human"
         self.text_options_play_HvAI = "Human vs. IA"
         self.text_options_play_AIvAI = "Watch the world burn"
@@ -110,12 +112,14 @@ class Variables:
             self.text_options_difficulty_AIvAI,
         ]
 
-        # Sounds
-        self.sound_click_box = "sounds/box.mp3"
-        self.sound_error = "sounds/error.mp3"
-        self.sound_disk_touch = "sounds/tuck.mp3"
-        self.sound_winner_draw = "sounds/draw.mp3"
-        self.sound_winner_victory = "sounds/victory.mp3"
+        # Assets
+        self.sound_click_box = "assets/box.mp3"
+        self.sound_error = "assets/error.mp3"
+        self.sound_disk_touch = "assets/tuck.mp3"
+        self.sound_winner_draw = "assets/draw.mp3"
+        self.sound_winner_victory = "assets/victory.mp3"
+        self.image_volume_on = "assets/volume.svg"
+        self.image_volume_muted = "assets/muted.svg"
 
         # Fonts
         self.main_font = pg.font.SysFont(self.text_font, self.text_size)

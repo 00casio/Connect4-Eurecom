@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Svg Vector Icons : http://www.onlinewebfonts.com/icon -->
+
+<svg
+   version="1.1"
+   x="0px"
+   y="0px"
+   viewBox="0 0 1000 1000"
+   enable-background="new 0 0 1000 1000"
+   xml:space="preserve"
+   id="svg16"
+   sodipodi:docname="muted.svg"
+   inkscape:version="1.2.2 (b0a8486541, 2022-12-01)"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"><defs
+   id="defs20" /><sodipodi:namedview
+   id="namedview18"
+   pagecolor="#ffffff"
+   bordercolor="#000000"
+   borderopacity="0.25"
+   inkscape:showpageshadow="2"
+   inkscape:pageopacity="0.0"
+   inkscape:pagecheckerboard="0"
+   inkscape:deskcolor="#d1d1d1"
+   showgrid="false"
+   inkscape:zoom="0.84171937"
+   inkscape:cx="441.3585"
+   inkscape:cy="498.97865"
+   inkscape:window-width="1890"
+   inkscape:window-height="1120"
+   inkscape:window-x="15"
+   inkscape:window-y="45"
+   inkscape:window-maximized="1"
+   inkscape:current-layer="g12" />
+<metadata
+   id="metadata2"> Svg Vector Icons : http://www.onlinewebfonts.com/icon </metadata>
+<g
+   id="g14"><g
+     transform="matrix(0.13009633,0,0,-0.13009633,158.28186,518.2846)"
+     id="g12"><path
+       d="m 4264.3,3784.9732 c -45.3,-10.8 -112.2,-34.5 -151,-53.9 -38.8,-21.6 -571.6,-429.3 -1186.4,-906 l -1115.2,-871.5 H 1190.5 567 l -133.7,-66.9 c -148.8,-75.5 -258.9,-202.8 -304.2,-351.6 -38.8,-131.6 -38.8,-2709.3 0,-2828 60.4,-181.2 181.2,-308.5 371,-388.3 66.9,-25.9 189.8,-32.4 696.7,-32.4 h 614.8 l 1121.7,-875.8 c 616.9,-481.1 1169.2,-895.2 1225.2,-918.9 226.5,-103.5 506.9,-36.7 683.8,159.6 172.6,194.1 161.8,-58.2 161.8,3468.60002 0,3526.89998 10.8,3274.49998 -161.8,3468.59998 -146.6,164.1 -383.9,243.9 -578,196.5 z m 131.6,-5198.7 -6.5,-1533.7 -1072.1,834.8 -1074.2,837 V 119.97322 1515.5732 l 1074.2,837 1072.1,837 6.5,-1535.8 c 2.1,-843.49998 2.1,-2223.99998 0,-3067.5 z M 1941.1,119.97322 V -1109.6268 H 1326.3 711.5 V 119.97322 1349.4732 h 614.8 614.8 z"
+       id="path8" /></g><rect
+     style="fill:#000000;stroke-width:1.096;fill-opacity:1"
+     id="rect970"
+     width="1239.2294"
+     height="62.763538"
+     x="-653.67798"
+     y="685.81348"
+     ry="31.381769"
+     transform="matrix(-0.73899598,0.67370983,0.66991885,0.74243433,0,0)" /></g>
+</svg>
