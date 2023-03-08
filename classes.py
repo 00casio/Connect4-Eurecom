@@ -618,20 +618,21 @@ class Game:
     def draw_winner(self, screen: GamingScreen, lastclick: tuple[int, int]) -> None:
         winner = self.who_is_winner()
         sound = var.sound_winner_victory
+        End = Screen(self.screen)
+        End.screen.fill(var.color_screen)
+        End.draw_quit_box()
+        text_winner = End.create_text_rendered(f"Player {winner.symbol.v} won !")
         if winner == self.player_1:
             print("Winner is the first player")
         elif winner == self.player_2:
             print("Winner is the second player")
         else:
+            text_winner = End.create_text_rendered("No one won")
             print("That is a draw")
             sound = var.sound_winner_draw
         p = var.padding
         playsound(sound, block=False)
-        End = Screen(self.screen)
-        End.screen.fill(var.color_screen)
-        End.draw_quit_box()
         self.screen.blit(screen.board_surface, (p, p))
-        text_winner = End.create_text_rendered(f"Player {winner.symbol.v} won !")
         box_winner = End.write_on_line(
             [text_winner], winner.color, var.width_screen, p // 2
         )
@@ -684,10 +685,13 @@ class Game:
             mouse = screen.click()
             if screen.x_in_rect(mouse, boxes[0][0]):
                 self.status = var.options_play_HvH
+                self.player_1 = Player(1, False)
+                self.player_2 = Player(2, False)
             elif screen.x_in_rect(mouse, boxes[1][0]):
                 self.status = var.options_play_HvAI
                 self.screen_AI = Screen_AI(self.screen, number_AI=1)
-                self.player_2 = Player(2, True, self.screen_AI.diff_AI_1)
+                self.player_1 = Player(1, False)
+                self.player_2 = Player(2, True, self.screen_AI.diff_AI_2)
             elif screen.x_in_rect(mouse, boxes[2][0]):
                 self.status = var.options_play_AIvAI
                 self.screen_AI = Screen_AI(self.screen, number_AI=2)
