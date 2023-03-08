@@ -157,6 +157,8 @@ class Variables:
         self.sound_winner_victory = "assets/victory.mp3"
         self.image_volume_on = "assets/volume.svg"
         self.image_volume_muted = "assets/muted.svg"
+        self.image_english = "assets/english.svg"
+        self.image_french = "assets/french.svg"
 
         # Fonts
         self.main_font = pg.font.SysFont(self.text_font, self.text_size)
