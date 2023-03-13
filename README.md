@@ -10,9 +10,9 @@ The project S6 of:
 
 ### This week objectives
 
-- [ ] Report + appointment
+- [x] Report
 - [x] Begin to add sound
-- [ ] Work on gesture
+- [x] Work on gesture
 - [ ] New point system for AI
 
 ### Objectives
@@ -50,19 +50,17 @@ Optional:
 
 #### Hands gesture
 
-- [ ] Choose gestures
-- [ ] Continuous or discrete gesture
+- [x] Choose gestures
+- [x] Continuous gesture
 
 Optional:
 
 - [ ] Change on the fly
 - [ ] Detect shapes
+- [ ] Maybe discrete gestures
 
 #### Communication
 
 - [ ] Choose the mean of communication
 - [ ] Choose the protocol
-- [ ] Communicate if rasp is human or AI
-- [ ] If AI: tell the level of difficulty
-- [ ] Make the differences between possible and definitive moves
-- [ ] Allow floating numbers
+- [ ] Menu to choose the opponent

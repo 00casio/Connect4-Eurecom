@@ -348,6 +348,9 @@ class Controller:
                 pyautogui.click(button="left")
             # pyautogui.moveTo(x, y, duration = 0.1)
 
+        # Merge this class with GestureController
+        # either return or have the mouse position as variables
+
 
 class GestureController:
     """

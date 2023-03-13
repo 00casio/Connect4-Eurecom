@@ -96,9 +96,12 @@ class Element:
 
 
 class Tools:
-    def __init__(self, var: Variables, screen: Surface, volume) -> None:
+    def __init__(
+        self, var: Variables, screen: Surface, volume: bool, camera: bool
+    ) -> None:
         self.screen = screen
         self.volume = volume
+        self.camera = camera
         self.var = var
 
     def compute_total_size(
@@ -249,11 +252,12 @@ class Screen(Tools):
         screen: Surface,
         gesture: GestureController,
         volume: bool,
+        camera: bool,
         cancel_box: bool = True,
         quit_box: bool = True,
         color_fill: Color = Variables().color_options_screen,
     ) -> None:
-        Tools.__init__(self, var, screen, volume)
+        Tools.__init__(self, var, screen, volume, camera)
         self.elements: list[Element] = []
         self.cancel_box: Optional[Rect] = None
         self.box_clicked = self.var.box_out
@@ -323,6 +327,43 @@ class Screen(Tools):
         pg.draw.circle(self.screen, color, (mouse_x, p // 2), self.var.radius_disk)
         pg.display.update((mouse_x - p // 2, 0, p, p))
 
+    def update_gesture(self, image):
+        image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
+        image.flags.writeable = False
+        results = self.gestures.hands.process(image)
+
+        image.flags.writeable = True
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+
+        if results.multi_hand_landmarks:
+            GestureController.classify_hands(results)
+            self.gestures.handmajor.update_hand_result(self.gestures.hr_major)
+            self.gestures.handminor.update_hand_result(self.gestures.hr_minor)
+
+            self.gestures.handmajor.set_finger_state()
+            self.gestures.handminor.set_finger_state()
+            gest_name = self.gestures.handminor.get_gesture()
+
+            if gest_name == Gest.PINCH_MINOR:
+                Controller.handle_controls(
+                    gest_name, self.gestures.handminor.hand_result
+                )
+            else:
+                gest_name = self.gestures.handmajor.get_gesture()
+                Controller.handle_controls(
+                    gest_name, self.gestures.handmajor.hand_result
+                )
+
+            for hand_landmarks in results.multi_hand_landmarks:
+                mp_drawing.draw_landmarks(
+                    image, hand_landmarks, mp_hands.HAND_CONNECTIONS
+                )
+        else:
+            Controller.prev_hand = None
+        cv2.imshow("Gesture Controller", image)
+        if cv2.waitKey(5) & 0xFF == 13:
+            self.handle_quit(self.quit_box.center)
+
     def click(
         self,
         rect_play: Optional[Rect] = None,
@@ -334,49 +375,11 @@ class Screen(Tools):
         If f is not None, then the function is called whith the argument 'event' at every iteration"""
         allow_quit = False
         while not allow_quit:
-            success, image = GestureController.cap.read()
+            if self.camera:
+                success, image = GestureController.cap.read()
+                if success:
+                    self.update_gesture(image)
 
-            if not success:
-                print("Ignoring empty camera frame.")
-                continue
-
-            image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
-            image.flags.writeable = False
-            results = self.gestures.hands.process(image)
-
-            image.flags.writeable = True
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-            if results.multi_hand_landmarks:
-                GestureController.classify_hands(results)
-                self.gestures.handmajor.update_hand_result(self.gestures.hr_major)
-                self.gestures.handminor.update_hand_result(self.gestures.hr_minor)
-
-                self.gestures.handmajor.set_finger_state()
-                self.gestures.handminor.set_finger_state()
-                gest_name = self.gestures.handminor.get_gesture()
-
-                if gest_name == Gest.PINCH_MINOR:
-                    Controller.handle_controls(
-                        gest_name, self.gestures.handminor.hand_result
-                    )
-                else:
-                    gest_name = self.gestures.handmajor.get_gesture()
-                    Controller.handle_controls(
-                        gest_name, self.gestures.handmajor.hand_result
-                    )
-
-                for hand_landmarks in results.multi_hand_landmarks:
-                    mp_drawing.draw_landmarks(
-                        image, hand_landmarks, mp_hands.HAND_CONNECTIONS
-                    )
-            else:
-                Controller.prev_hand = None
-            cv2.imshow("Gesture Controller", image)
-            if cv2.waitKey(5) & 0xFF == 13:
-                self.handle_quit(self.quit_box.center)
-            # Update the frame
-            # Detect movement
             for event in pg.event.get():
                 if event.type == pg.MOUSEBUTTONUP:
                     allow_quit = True
@@ -434,9 +437,10 @@ class Screen_AI(Screen):
         screen: Surface,
         gesture: GestureController,
         volume: bool,
+        camera: bool,
         number_AI: int = 1,
     ) -> None:
-        Screen.__init__(self, var, screen, gesture, volume)
+        Screen.__init__(self, var, screen, gesture, volume, camera)
         self.number_AI = number_AI
         self.begin = 1
 
@@ -523,8 +527,16 @@ Logging?
 
 
 class OptionsScreen(Screen):
-    def __init__(self, var: Variables, game, screen: Surface, volume: bool):
-        Screen.__init__(self, var, screen, volume)
+    def __init__(
+        self,
+        var: Variables,
+        game,
+        screen: Surface,
+        gesture: GestureController,
+        volume: bool,
+        camera: bool,
+    ):
+        Screen.__init__(self, var, screen, gesture, volume, camera)
         self.size = (self.var.width_screen // 10, self.var.height_screen // 10)
         self.nbr_line = 2
         self.vol = self.draw_volume()
@@ -566,9 +578,14 @@ class GamingScreen(Screen):
     """The gaming screen is used for the gaming part of the program"""
 
     def __init__(
-        self, var: Variables, screen: Surface, gesture: GestureController, volume: bool
+        self,
+        var: Variables,
+        screen: Surface,
+        gesture: GestureController,
+        volume: bool,
+        camera: bool,
     ) -> None:
-        Screen.__init__(self, var, screen, gesture, volume)
+        Screen.__init__(self, var, screen, gesture, volume, camera)
         self.color_screen = self.var.white
         self.color_board = self.var.blue
         self.width_board = self.var.width_board
@@ -759,6 +776,7 @@ class Game:
         pg.display.set_caption(self.var.screen_title)
         self.conf = Config(self.var, args)
         self.volume = self.var.sound
+        self.camera = self.var.camera
 
     def inverse_player(self) -> None:
         """Return the symbols of the opponent of the player currently playing"""
@@ -787,7 +805,9 @@ class Game:
         self.start_game()
 
     def start_game(self) -> None:
-        gaming = GamingScreen(self.var, self.screen, self.gestures, self.volume)
+        gaming = GamingScreen(
+            self.var, self.screen, self.gestures, self.volume, self.camera
+        )
         gaming.draw_board()
         self.player_playing = self.player_1
         while (
@@ -806,7 +826,7 @@ class Game:
     def draw_winner(self, screen: GamingScreen, lastclick: tuple[int, int]) -> None:
         winner = self.who_is_winner()
         sound = self.var.sound_winner_victory
-        End = Screen(self.var, self.screen, volume=self.volume)
+        End = Screen(self.var, self.screen, self.gestures, volume=self.volume)
         End.screen.fill(self.var.color_screen)
         End.draw_quit_box()
         text_winner = End.create_text_rendered(f"Player {winner.symbol.v} won !")
@@ -858,7 +878,9 @@ class Game:
         screen.click()
 
     def draw_options_screen(self) -> None:
-        options = OptionsScreen(self.var, self, self.screen, self.volume)
+        options = OptionsScreen(
+            self.var, self, self.screen, self.gestures, self.volume, self.camera
+        )
         click = options.click()
         while options.box_clicked != self.var.boxAI_cancel:
             if options.x_in_rect(click, options.vol):
@@ -875,7 +897,7 @@ class Game:
 
     def draw_play_options(self) -> None:
         """Show the different options when choosing to play"""
-        screen = Screen(self.var, self.screen, self.gestures, self.volume)
+        screen = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
         text_HvH = screen.create_text_rendered(self.var.text_options_play_HvH)
         text_HvAI = screen.create_text_rendered(self.var.text_options_play_HvAI)
         text_AIvAI = screen.create_text_rendered(self.var.text_options_play_AIvAI)
@@ -896,6 +918,7 @@ class Game:
                     self.screen,
                     self.gestures,
                     volume=self.volume,
+                    camera=self.camera,
                     number_AI=1,
                 )
                 self.player_1 = Player(self.var, 1, False)
@@ -907,6 +930,7 @@ class Game:
                     self.screen,
                     self.gestures,
                     volume=self.volume,
+                    camera=self.camera,
                     number_AI=2,
                 )
                 self.player_1 = Player(self.var, 1, True, self.screen_AI.diff_AI_1)
@@ -927,7 +951,12 @@ class Game:
         For now it is only the play button but soon there will be more options"""
 
         start_screen = Screen(
-            self.var, self.screen, self.gestures, cancel_box=False, volume=self.volume
+            self.var,
+            self.screen,
+            self.gestures,
+            cancel_box=False,
+            volume=self.volume,
+            camera=self.camera,
         )
         text_play = start_screen.create_text_rendered(self.var.text_options_play)
         text_options = start_screen.create_text_rendered(self.var.text_options_options)

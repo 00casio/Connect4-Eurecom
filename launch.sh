@@ -18,11 +18,11 @@ fi
 test() {
     $1 -c "import $2" 1>/dev/null 2>&1
     if [ $? != 0 ]; then
-        $1 -m pip install $2
+        $1 -m pip install -U $2
     fi
 }
 
-to_install="pygame numpy mediapipe pyautogui playsound pygobject"
+to_install="pygame numpy mediapipe pyautogui playsound pygobject protobuf==3.20.1"
 
 for module in ${to_install}; do
     test ${com} ${module}

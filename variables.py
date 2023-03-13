@@ -151,6 +151,7 @@ class Variables:
         ]
 
         # Assets
+        self.camera = True
         self.sound = True
         self.sound_click_box = "assets/box.mp3"
         self.sound_error = "assets/error.mp3"

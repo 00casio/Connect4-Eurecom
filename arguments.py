@@ -8,21 +8,30 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument(
-    "--no-sound",
-    dest="novolume",
-    action="store_const",
-    const=True,
-    default=False,
-    help="Disable sound by default",
-)
-
-parser.add_argument(
     "-l",
     "--language",
     dest="language",
     type=str,
     default="en",
     help="Choose the language",
+)
+
+parser.add_argument(
+    "--no-sound",
+    dest="novolume",
+    action="store_const",
+    const=True,
+    default=False,
+    help="Disable the sound",
+)
+
+parser.add_argument(
+    "--no-camera",
+    dest="nocamera",
+    action="store_const",
+    const=True,
+    default=False,
+    help="Disable the camera",
 )
 
 args = parser.parse_args()
