@@ -263,6 +263,8 @@ class Screen(Tools):
         If f is not None, then the function is called whith the argument 'event' at every iteration"""
         allow_quit = False
         while not allow_quit:
+            # Update the frame
+            # Detect movement
             for event in pg.event.get():
                 if event.type == pg.MOUSEBUTTONUP:
                     allow_quit = True
