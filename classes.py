@@ -833,7 +833,7 @@ class Game:
     def draw_winner(self, screen: GamingScreen, lastclick: tuple[int, int]) -> None:
         winner = self.who_is_winner()
         sound = self.var.sound_winner_victory
-        End = Screen(self.var, self.screen, self.gestures, volume=self.volume)
+        End = Screen(self.var, self.screen, self.gestures, volume=self.volume, camera=self.camera)
         End.screen.fill(self.var.color_screen)
         End.draw_quit_box()
         text_winner = End.create_text_rendered(f"Player {winner.symbol.v} won !")
