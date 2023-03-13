@@ -162,6 +162,8 @@ class Variables:
         self.image_volume_muted = "assets/muted.svg"
         self.image_english = "assets/english.svg"
         self.image_french = "assets/french.svg"
+        self.image_camera = "assets/camera.svg"
+        self.image_nocamera = "assets/no-camera.svg"
 
         # Fonts
         self.main_font = pg.font.SysFont(self.text_font, self.text_size)

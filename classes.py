@@ -539,7 +539,7 @@ class OptionsScreen(Screen):
         Screen.__init__(self, var, screen, gesture, volume, camera)
         self.size = (self.var.width_screen // 10, self.var.height_screen // 10)
         self.nbr_line = 2
-        self.vol = self.draw_volume()
+        self.vol, self.cam = self.draw_vol_cam()
         self.flags = list(self.draw_language())
         pg.display.update()
 
@@ -549,24 +549,31 @@ class OptionsScreen(Screen):
             self.draw_cancel_box()
         if self.draw_quit:
             self.draw_quit_box()
-        self.vol = self.draw_volume()
+        self.vol, self.cam = self.draw_vol_cam()
         self.flags = list(self.draw_language())
         pg.display.update()
-
-    def draw_volume(self):
-        cs = self.var.center_screen
-        sp = self.var.options_spacing // 2
-        position = (cs[0] - self.size[0] // 2, cs[1] - self.size[1] - 2 * sp)
-        if self.volume:
-            box = self.draw_icon(self.var.image_volume_on, self.size, position)
+    
+    def dfites(self, testing, position, first_image, second_image):
+        if testing:
+            box = self.draw_icon(first_image, self.size, position)
         else:
-            box = self.draw_icon(self.var.image_volume_muted, self.size, position)
+            box = self.draw_icon(second_image, self.size, position)
         return box
+
+    def draw_vol_cam(self):
+        cs = self.var.center_screen
+        sp = self.var.options_spacing
+        x_now = cs[0] - self.size[0] - sp
+        y = cs[1] - self.size[1] // 2 - 3 * sp // 2
+        vol = self.dfites(self.volume, (x_now, y), self.var.image_volume_on, self.var.image_volume_muted)
+        x_now += sp + self.size[0] + 2 * self.var.text_box_spacing
+        cam = self.dfites(self.camera, (x_now, y), self.var.image_camera, self.var.image_nocamera)
+        return vol, cam
 
     def draw_language(self):
         cs = self.var.center_screen
         sp = self.var.options_spacing
-        y_now = cs[1] + sp
+        y_now = cs[1] + 3*sp//2
         l = [self.var.image_english, self.var.image_french]
         x_now = cs[0] - len(l) * self.size[0] // 2 - (len(l) - 1) * sp
         for lan in l:
@@ -886,7 +893,9 @@ class Game:
             if options.x_in_rect(click, options.vol):
                 self.volume = not self.volume
                 options.volume = self.volume
-                options.draw_volume()
+            elif options.x_in_rect(click, options.cam):
+                self.camera = not self.camera
+                options.camera = self.camera
             elif options.x_in_rect(click, options.flags[0]):
                 self.conf.load_language("en")
             elif options.x_in_rect(click, options.flags[1]):
