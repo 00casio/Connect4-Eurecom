@@ -9,7 +9,7 @@ import numpy as np
 import pygame as pg
 from playsound import playsound
 
-from AI_test import best_col_prediction
+from AI_test import best_col_prediction, minimax2
 from gesture import *
 from variables import Symbol, Variables
 
@@ -743,7 +743,8 @@ class Player:
 
     def play(self, board: Board, screen: Screen, volume: bool) -> tuple[int, int]:
         if self.is_ai:
-            col = best_col_prediction(board, self.symbol.v)
+            score, col = minimax2(board, 3, self.symbol.v)
+            print("score is ", score)
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)

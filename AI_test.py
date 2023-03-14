@@ -17,7 +17,7 @@ symbol_no_player = vzuydskqdkz.symbol_no_player
 
 ##Variables describing points given
 
-winning_move = 1500  # si on peut gagner, on le fait
+winning_move = np.inf  # si on peut gagner, on le fait
 three_in_lines = 9
 two_in_lines = 6
 counter_losing_move = 1000  # si on peut contrer une défaite imminente, on le fait
@@ -30,69 +30,32 @@ opp_one_in_line = 3
 number_col = 7
 number_row = 6
 
-
 def opponent(symbol_player):  # Gives symbol of the opponent
     if symbol_player == symbol_player_1:
         return symbol_player_2
     else:
         return symbol_player_1
 
+def end_game(board):
+    if board.state_win(symbol_player_1) or board.state_win(symbol_player_2):
+        return True
 
-# def minimax_no_pruning(
-#     board, depth, symbol_player
-# ):  # returns the column where the AI will play, I tried without any success to follow and adapt the pseudo code in wikipedia
-#     valid_col = list_valid_col(board)
-#     if depth == 0 or who_is_winner2(board) != symbol_no_player:
-#         if who_is_winner2(board) == symbol_player_1:
-#             # print("test 1")
-#             return (None, math.inf)
-#         elif who_is_winner2(board) == symbol_player_2:
-#             # print("test 2")
-#             return (None, -math.inf)
-#         elif who_is_winner2(board) == symbol_draw:
-#             print("It is a draw, game is over")
-#             return (None, 0)
-#         else:
-#             # print("test 3")
-#             # print("the score is", score_column_prediction(board, symbol_player))
-#             return (None, score_column_prediction(board, symbol_player))  # depth = 0
-
-#     if symbol_player == "2":  # on cherche à maximiser le score du joueur 2 ici
-#         best_score = -math.inf
-#         best_col = random.choice(valid_col)
-#         for col in valid_col:
-#             potential_board = board.copy()
-#             drop_disk(potential_board, col, symbol_player)
-#             print(" IA turn, Here is for col", col)
-#             print(potential_board)
-#             print("\n")
-#             score_calculated = minimax_no_pruning(
-#                 potential_board, depth - 1, symbol_player
-#             )[1]
-#             if score_calculated >= best_score:
-#                 best_score = score_calculated
-#                 best_col = col
-#         if best_score == 0:
-#             return 3, best_score
-#         print("best score, best col : ", best_score, best_col)
-#         return best_col, best_score
-#     else:
-#         best_score = math.inf
-#         best_col = random.choice(valid_col)
-#         for col in valid_col:
-#             potential_board = board.copy()
-#             drop_disk(board, col, opponent(symbol_player))
-#             print(" hypothesis player turn, Here is for col", col)
-#             print(potential_board)
-#             print("\n")
-#             score_calculated = minimax_no_pruning(
-#                 potential_board, depth - 1, opponent(symbol_player)
-#             )[1]
-#             if score_calculated <= best_score:
-#                 best_score = score_calculated
-#                 best_col = col
-#         return best_col, best_score
-
+def minimax2(board, depth, symbol_player):
+    valid_col = list_valid_col(board)
+    best_col = random.choice(valid_col)
+    best_score = - np.inf
+    for col in valid_col:
+        potential_board = board.copy()
+        row = drop_disk(potential_board, col, symbol_player)
+        score = score_column_prediction(potential_board, row, col, symbol_player)
+        if depth > 0 and not end_game(potential_board):
+            score_opp = minimax2(potential_board, depth - 1, opponent(symbol_player))[0]
+            score -= score_opp
+        if score > best_score:
+            best_score = score
+            best_col = col
+    return best_score, best_col
+            
 
 def count_points_buffer(
     buffer, symbol_player
@@ -133,7 +96,7 @@ def score_column_prediction(
         #     print("buffer_horiz is", buffer_horiz)
         #     print("score added is : ", count_points_buffer(list(buffer_horiz), symbol_player))
         score += count_points_buffer(list(buffer_horiz), symbol_player)
-    # score_horiz = score
+    score_horiz = score
     # print("horizontal score is : ", score_horiz)
 
     buffer_gen_col = board.vert(
@@ -146,7 +109,7 @@ def score_column_prediction(
         #   print("buffer_col is", buffer_vert)
         #   print("score added is : ", count_points_buffer(list(buffer_vert), symbol_player))
         score += count_points_buffer(list(buffer_vert), symbol_player)
-    # score_vert = score - score_horiz
+    score_vert = score - score_horiz
     # print("vertical score is : ", score_vert)
 
     buffer_gen_backslash = board.backslash(row, col)  # for backslash diagonal
@@ -166,14 +129,13 @@ def score_column_prediction(
         score += count_points_buffer(list(buffer_slash), symbol_player)
     # score_diag_slash = score - (score_horiz + score_vert + score_diag_slash)
     # print("diag slash score is : ", score_diag_slash)
-
     return score
 
 
 def drop_disk(board, col, symbol_player):  # on glisse un jeton
     free_slot = board.find_free_slot(col)
     board[free_slot][col] = symbol_player
-    return board
+    return free_slot
 
 
 def is_valid_col(board, col):  # on regarde si la colonne est pleine ou pas
