@@ -28,4 +28,4 @@ for module in ${to_install}; do
     test ${com} ${module}
 done
 
-${com} main.py
+${com} main.py --no-camera --no-sound

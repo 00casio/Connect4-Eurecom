@@ -25,6 +25,7 @@ class Config:
         self.arg = arguments
         self.var = var
         self.var.sound = not self.arg.novolume
+        self.var.camera = not self.arg.nocamera
         self.load_language(self.arg.language)
 
     def load_language(self, language):
@@ -744,8 +745,7 @@ class Player:
 
     def play(self, board: Board, screen: Screen, volume: bool) -> tuple[int, int]:
         if self.is_ai:
-            score, col = minimax2(board, 3, self.symbol.v)
-            print("score is ", score)
+            score, col = minimax2(board, 3, True, self)
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)

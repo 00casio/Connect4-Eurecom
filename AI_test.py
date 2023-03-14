@@ -17,7 +17,7 @@ symbol_no_player = vzuydskqdkz.symbol_no_player
 
 ##Variables describing points given
 
-winning_move = np.inf  # si on peut gagner, on le fait
+winning_move = 9999  # si on peut gagner, on le fait
 three_in_lines = 9
 two_in_lines = 6
 counter_losing_move = 1000  # si on peut contrer une défaite imminente, on le fait
@@ -40,24 +40,84 @@ def end_game(board):
     if board.state_win(symbol_player_1) or board.state_win(symbol_player_2):
         return True
 
-def minimax2(board, depth, symbol_player):
+def c(buffer, symbol_player):
+    return count_points_buffer(list(buffer), symbol_player)
+
+def score_board(board, symbol_player):
+    s = 0
+    # Horiz
+    for i in range(6):
+        for j in range(0, 4, 1):
+            s += c(board[i, j:j+4], symbol_player)
+    # Vert
+    for i in range(3):
+        for j in range(7):
+            s += c(board[i:i+4, j], symbol_player)
+    # \
+    for i in range(3):
+        for j in range(4):
+            s += c([board[i + k, j + k] for k in range(4)], symbol_player)
+    # /
+    for i in range(3):
+        for j in range(4):
+            s += c([board[i + 3 - k, j + k] for k in range(4)], symbol_player)
+    return s
+
+# def minimax(board, depth, maximising, symbol_player, row, col):
+#     valid_col = list_valid_col(board)
+#     best_value = np.inf
+#     best_col = random.choice(valid_col)
+#     if maximising:
+#         best_value = - np.inf
+
+#     if depth <= 1 or end_game(board):
+#         score = score_board(board, symbol_player)
+#         return score, col
+#     print(f"{symbol_player} turn")
+
+#     for col in valid_col:
+#         potential_board = board.copy()
+#         row = drop_disk(potential_board, col, symbol_player)
+#         pot_val, pot_col = minimax(potential_board, depth - 1, not maximising, opponent(symbol_player), row, col)
+#         print(f"pot_val {pot_val} {'>' if maximising else '<'} best_value {best_value}")
+#         if (pot_val > best_value and maximising) or (pot_val < best_value and not maximising):
+#             print(f"v: {pot_val}, c: {pot_col}")
+#             best_value = pot_val
+#             best_col = pot_col
+#     print(f"col: {best_col}, val: {best_value}")
+#     return best_value, best_col
+
+best_col = -1
+def minimax(board, depth, col, maximising, symbol_player):
+    global best_col
+    row = drop_disk(board, col, symbol_player)
+    score = score_column_prediction(board, row, col, symbol_player)
+
+    if depth <= 1 or end_game(board):
+        # score = score_board(board, symbol_player)
+        return score
+
     valid_col = list_valid_col(board)
-    best_col = random.choice(valid_col)
-    best_score = - np.inf
+    best_value = np.inf
+
     for col in valid_col:
         potential_board = board.copy()
-        row = drop_disk(potential_board, col, symbol_player)
-        score = score_column_prediction(potential_board, row, col, symbol_player)
-        # print(potential_board)
-        # input(score)
-        if depth > 0 and not end_game(potential_board):
-            score_opp = minimax2(potential_board, depth - 1, opponent(symbol_player))[0]
-            score -= score_opp
-        if score > best_score:
-            best_score = score
+        pot_val = - minimax(potential_board, depth-1, col, not maximising, opponent(symbol_player))
+        if (maximising and (pot_val > best_value)) or (not maximising and (pot_val < best_value)) :
+            best_value = pot_val
             best_col = col
-    return best_score, best_col
-            
+    return best_value
+
+
+def minimax2(board, depth, maximising, player):
+    global best_col
+    valid_col = list_valid_col(board)
+    best_col = random.choice(valid_col)
+    print("----- "*20)
+    pot_board = board.copy()
+    s = minimax(pot_board, depth, best_col, maximising, player.symbol.v)
+    return s, best_col
+
 
 def count_points_buffer(
     buffer, symbol_player
@@ -68,13 +128,13 @@ def count_points_buffer(
     # print(opp_player)
     if buffer.count(symbol_player) == 4:
         score += winning_move
-    elif buffer.count(symbol_player) == 3 and buffer.count(symbol_no_player) == 1:
+    if buffer.count(symbol_player) == 3 and buffer.count(symbol_no_player) == 1:
         score += three_in_lines
-    elif buffer.count(symbol_player) == 2 and buffer.count(symbol_no_player) == 2:
+    if buffer.count(symbol_player) == 2 and buffer.count(symbol_no_player) == 2:
         score += two_in_lines
     if buffer.count(opp_player) == 3 and buffer.count(symbol_player) == 1:
         score += counter_losing_move
-    elif buffer.count(opp_player) == 2 and buffer.count(symbol_player) == 1:
+    if buffer.count(opp_player) == 2 and buffer.count(symbol_player) == 1:
         score += opp_two_in_lines
     return score
 
