@@ -7,7 +7,7 @@ from typing import Any, Callable, Optional
 
 import numpy as np
 import pygame as pg
-# from playsound import playsound
+from playsound import playsound
 
 from AI_test import best_col_prediction, minimax2
 from gesture import *
