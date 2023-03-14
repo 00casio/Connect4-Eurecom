@@ -48,6 +48,8 @@ def minimax2(board, depth, symbol_player):
         potential_board = board.copy()
         row = drop_disk(potential_board, col, symbol_player)
         score = score_column_prediction(potential_board, row, col, symbol_player)
+        print(potential_board)
+        input(score)
         if depth > 0 and not end_game(potential_board):
             score_opp = minimax2(potential_board, depth - 1, opponent(symbol_player))[0]
             score -= score_opp

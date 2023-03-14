@@ -7,7 +7,7 @@ from typing import Any, Callable, Optional
 
 import numpy as np
 import pygame as pg
-from playsound import playsound
+# from playsound import playsound
 
 from AI_test import best_col_prediction, minimax2
 from gesture import *
@@ -259,6 +259,7 @@ class Screen(Tools):
     ) -> None:
         Tools.__init__(self, var, screen, volume, camera)
         self.elements: list[Element] = []
+        self.gestures = gesture
         self.cancel_box: Optional[Rect] = None
         self.box_clicked = self.var.box_out
         self.screen.fill(color_fill)
