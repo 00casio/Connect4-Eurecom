@@ -1,13 +1,12 @@
 # import numpy as np
 # import random
-from classes import Board
 # from variables import *
 # from scores import *
 from AI_test import *
-import np
+import numpy as np
 from typing import Optional
 
-from variables import Variables
+from variables import Variables, Symbol
 
 vzuydskqdkz = Variables()
 symbol_player_1 = vzuydskqdkz.symbol_player_1
@@ -31,9 +30,9 @@ number_row = 6
 
 def opponent(symbol_player):  # Gives symbol of the opponent
     if symbol_player == symbol_player_1:
-        return symbol_player_2
+        return Symbol(symbol_player_2)
     else:
-        return symbol_player_1
+        return Symbol(symbol_player_1)
 
 def count_point(line, symbol_player):
     buffer = list(line)
@@ -73,17 +72,17 @@ def score_board(board, symbol_player):
     return s
 
 
-def minimax(node: Node, alpha, beta, maximising):
+def minimax(node, alpha, beta, maximising):
     if node.is_terminal():
         node.compute_score()
         return node.score
 
     if maximising:
         value = - np.inf
-        for child in node:
+        for child in node.children:
             value = max(value, minimax(child, alpha, beta, not maximising))
     else:
         value = + np.inf
-        for child in node:
+        for child in node.children:
             value = min(value, minimax(child, alpha, beta, not maximising))
     return value

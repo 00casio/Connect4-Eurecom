@@ -643,7 +643,7 @@ class GamingScreen(Screen):
 
 
 class Node:
-    def __init__(self, move: int, parent: Optional[Node], symbol, depth: int) -> None:
+    def __init__(self, move: int, parent, symbol: Symbol, depth: int) -> None:
         self.column_played = move
         self.parent = parent
         self.symbol_player = symbol
@@ -657,14 +657,14 @@ class Node:
 
     def move(self) -> None:
         self.depth -= 1
-        self.board = self.parent.board
-        self.board[self.board.find_free_slot(self.column_played), self.column_played] = self.symbol_player
+        self.board = self.parent.get_board_state()
+        self.board[self.board.find_free_slot(self.column_played), self.column_played] = self.symbol_player.v
         self.parent = None
         for child in self.children:
             child.move()
 
-    def add_child(self, column: int) -> Node:
-        child = Node(column, self, opponent(self.symbol_player), not self.maximising, self.depth+1)
+    def add_child(self, column: int):
+        child = Node(column, self, opponent(self.symbol_player), self.depth+1)
         self.children.append(child)
         return child
 
@@ -672,13 +672,23 @@ class Node:
         board = self.board
         if self.depth != 0:
             board = self.parent.get_board_state()
-            board[self.board.find_free_slot(self.column_played), self.column_played] = symbol
+            board[board.find_free_slot(self.column_played), self.column_played] = self.symbol_player.v
         return board
 
     def compute_score(self):
-        assert self.is_terminal(), "Node is not a terminal Node"
         board = self.get_board_state()
         self.score = score_board(board, self.symbol_player)
+
+    def create_tree(self, depth):
+        if depth == 0:
+            return
+        board = self.get_board_state()
+        for col in board.list_valid_col():
+            # if col in [c.column_played for c in self.children]:
+            #     child = self.children[col]
+            # else:
+            child = self.add_child(col)
+            child.create_tree(depth-1)
 
 
 class Board(np.ndarray[Any, np.dtype[Any]]):
@@ -792,15 +802,16 @@ class Player:
         self.is_ai = AI
         self.ai_difficulty = difficulty
 
-    def play(self, board: Board, screen: Screen, volume: bool) -> tuple[int, int]:
+    def play(self, board: Board, root: Node, screen: Screen, volume: bool) -> tuple[int, int]:
         if self.is_ai:
-            root = Node()
+            root.board = board.copy()
             val = minimax(root, 0, 0, True)
             for candidate in root.children:
                 if candidate.score == val:
                     break
             root = candidate
             root.move()
+            root.create_tree(5)
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
@@ -809,7 +820,7 @@ class Player:
         row = board.find_free_slot(col)
         if row == -1 and volume:
             playsound(self.var.sound_error, block=False)
-            col, row = self.play(board, screen, volume)
+            col, row = self.play(board, root, screen, volume)
         return (col, row)
 
     def __eq__(self, other: object) -> bool:
@@ -830,8 +841,9 @@ class Game:
 
         # Players
         self.var = var
-        self.player_1 = Player(self.var, 1, False)
-        self.player_2 = Player(self.var, 2, False)
+        self.root = None
+        self.player_1 = Player(self.var, 1, False, None)
+        self.player_2 = Player(self.var, 2, False, None)
         self.player_playing = self.player_1
         self.player_null = Player(self.var, 0, False)
         self.screen = pg.display.set_mode(
@@ -874,13 +886,16 @@ class Game:
         )
         gaming.draw_board()
         self.player_playing = self.player_1
+        self.root = Node(-1, None, self.player_playing.symbol, 0)
+        self.root.board = self.board.copy()
+        self.root.create_tree(5)
         while (
             self.who_is_winner() == self.player_null and self.num_turn < self.board.size
         ):
             if self.player_playing == self.player_1:
-                play = self.player_1.play(self.board, gaming, self.volume)
+                play = self.player_1.play(self.board, self.root, gaming, self.volume)
             else:
-                play = self.player_2.play(self.board, gaming, self.volume)
+                play = self.player_2.play(self.board, self.root, gaming, self.volume)
             gaming.animate_fall(play[0], play[1], self.player_playing.color)
             self.board[play[1], play[0]] = self.player_playing.symbol.v
             self.inverse_player()
