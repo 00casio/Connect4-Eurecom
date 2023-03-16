@@ -9,7 +9,7 @@ import numpy as np
 import pygame as pg
 from playsound import playsound
 
-from AI_test import best_col_prediction, minimax2
+from minimax_ai import *
 from gesture import *
 from variables import Symbol, Variables
 
@@ -642,6 +642,45 @@ class GamingScreen(Screen):
             playsound(self.var.sound_disk_touch, block=True)
 
 
+class Node:
+    def __init__(self, move: int, parent: Optional[Node], symbol, depth: int) -> None:
+        self.column_played = move
+        self.parent = parent
+        self.symbol_player = symbol
+        self.board: Board = None
+        self.score: int = None
+        self.children: list[Node] = []
+        self.depth = depth
+
+    def is_terminal(self) -> bool:
+        return self.children == []
+
+    def move(self) -> None:
+        self.depth -= 1
+        self.board = self.parent.board
+        self.board[self.board.find_free_slot(self.column_played), self.column_played] = self.symbol_player
+        self.parent = None
+        for child in self.children:
+            child.move()
+
+    def add_child(self, column: int) -> Node:
+        child = Node(column, self, opponent(self.symbol_player), not self.maximising, self.depth+1)
+        self.children.append(child)
+        return child
+
+    def get_board_state(self):
+        board = self.board
+        if self.depth != 0:
+            board = self.parent.get_board_state()
+            board[self.board.find_free_slot(self.column_played), self.column_played] = symbol
+        return board
+
+    def compute_score(self):
+        assert self.is_terminal(), "Node is not a terminal Node"
+        board = self.get_board_state()
+        self.score = score_board(board, self.symbol_player)
+
+
 class Board(np.ndarray[Any, np.dtype[Any]]):
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
         self = np.array([[Variables().symbol_no_player] * 7 for i in range(6)]).view(
@@ -721,6 +760,16 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
     def slash(self, row, col):
         yield from self.backslash(row, col[3 - (col - 3)], back=False)
 
+    def is_valid_col(self, col):  # on regarde si la colonne est pleine ou pas
+        return self[0, col] == Variables().symbol_no_player
+
+    def list_valid_col(self):  # liste des colonnes où l'on peut jouer
+        valid_col = []
+        for col in range(7):
+            if self.is_valid_col(col):
+                valid_col.append(col)
+        return valid_col
+
 
 class Player:
     """The class that keep all the options for a player"""
@@ -745,7 +794,13 @@ class Player:
 
     def play(self, board: Board, screen: Screen, volume: bool) -> tuple[int, int]:
         if self.is_ai:
-            score, col = minimax2(board, 3, True, self)
+            root = Node()
+            val = minimax(root, 0, 0, True)
+            for candidate in root.children:
+                if candidate.score == val:
+                    break
+            root = candidate
+            root.move()
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)

@@ -200,18 +200,6 @@ def drop_disk(board, col, symbol_player):  # on glisse un jeton
     return free_slot
 
 
-def is_valid_col(board, col):  # on regarde si la colonne est pleine ou pas
-    return board[0][col] == symbol_no_player
-
-
-def list_valid_col(board):  # liste des colonnes où l'on peut jouer
-    valid_col = []
-    for col in range(number_col):
-        if is_valid_col(board, col):
-            valid_col.append(col)
-    return valid_col
-
-
 def best_col_prediction(
     board, symbol_player
 ):  # on cherche la meilleure colonne où jouer en faisant fictivement avance le jeu en jouant dans chaque colonne

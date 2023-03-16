@@ -1,115 +1,89 @@
 # import numpy as np
 # import random
-# from interface import *
+from classes import Board
 # from variables import *
 # from scores import *
 from AI_test import *
-import math
+import np
+from typing import Optional
+
+from variables import Variables
+
+vzuydskqdkz = Variables()
+symbol_player_1 = vzuydskqdkz.symbol_player_1
+symbol_player_2 = vzuydskqdkz.symbol_player_2
+symbol_no_player = vzuydskqdkz.symbol_no_player
 
 
-class Node:
-    def __init__(self, value):
-        self.value = value
-        self.child = []
-        
-class Tree:
+winning_move = 9999  # si on peut gagner, on le fait
+three_in_lines = 9
+two_in_lines = 6
+counter_losing_move = 1000  # si on peut contrer une défaite imminente, on le fait
+opp_three_in_lines = 12
+opp_two_in_lines = 9
+opp_one_in_line = 3
 
-    def __init__(self,root_value):
-        self.root_value = Node(root_value)
+# dimensions board
 
-    def add_child(self,value,node):
-        node.child.append(Node(value))
-
-    def is_terminal(self,node):
-        return not node.child
-    
-    def depth(self):
-        """Returns depth of the tree"""
-        return self._get_depth(self.root)
-    
-    def depth_node(self,node):
-        """Returns depth of given node"""
-        return self._get_depth(node)
-    
-    def _get_depth(self,node):
-        if node is None:
-            return 0
-        else:
-            d = 0
-            for x in node.child :
-                d = max(d,self._get_depth(x))
-            return d + 1
-    
-    def min_or_max(self,node):
-        """Returns True if it is the maximizing player turn, False otherwise
-        (given that max plays at root)"""
-        return not (self.depth_node(node) % 2 == 0)
-    
-    def generate_children(self,available_columns,node):
-        """Generates childrens to the parent node based on the number of playable columns."""
-        for x in range (len(available_columns)):
-            self.add_child(0,node)
-        
-    def delete_terminal_nodes(self):
-        """Deletes all terminal nodes"""
-
-        # depth first search to get all the nodes
-        def depth_first_search(self,node):
-            discovered=[self.root]
-            for x in self.child:
-                if x not in discovered:
-                    discovered.append(x)
-                    self.delete_depth(x)
-            # return discovered
-        
-        for x in depth_first_search(self.root):
-            if self.is_terminal(x):
-                del x
+number_col = 7
+number_row = 6
 
 
-def minimax(board,tree,alpha,beta,symbol_player):
-    playable_columns = list_valid_col(board)
-    current_node=[tree.root]
-    i=0
-    end = tree.is_terminal(current_node[i])
-    if tree.depth == tree.depth_node(current_node) or end:
-        if end:
-            print('jsp')
-        else:
-            return (None,score_column_prediction(board,symbol_player))
-    
-    if tree.min_or_max(current_node): #maximazing player
-        value = -math.inf
-        column = random.choice(playable_columns)
-        for col in playable_columns:
-            row = find_free_row(board,col)
-            b_cp = board.copy()
-            drop_disk(b_cp,col,opponent(symbol_player))
-            tree.delete_terminal_nodes()
-            new_score = minimax(b_cp,tree,alpha,beta,symbol_player)
-            if new_score > value :
-                value = new_score
-                column = col
-            alpha = max(alpha,value)
-            if alpha>=beta:
-                break
-        return column,value
-    
-    else: #minimizing player
-        value = math.inf
-        column = random.choice(playable_columns)
-        for col in playable_columns:
-            row = find_free_row(board,col)
-            b_cp = board.copy()
-            drop_disk(b_cp,col,symbol_player)
-            tree.delete_terminal_nodes()
-            new_score = minimax(b_cp,tree,alpha,beta,symbol_player)
-            if new_score < value :
-                value = new_score
-                column = col
-            beta = min(beta,value)
-            if alpha >= beta :
-                break
-        return column,value
-        
+def opponent(symbol_player):  # Gives symbol of the opponent
+    if symbol_player == symbol_player_1:
+        return symbol_player_2
+    else:
+        return symbol_player_1
 
+def count_point(line, symbol_player):
+    buffer = list(line)
+    score = 0
+    opp_player = opponent(symbol_player)
+    # print(opp_player)
+    if buffer.count(symbol_player) == 4:
+        score += winning_move
+    if buffer.count(symbol_player) == 3 and buffer.count(symbol_no_player) == 1:
+        score += three_in_lines
+    if buffer.count(symbol_player) == 2 and buffer.count(symbol_no_player) == 2:
+        score += two_in_lines
+    if buffer.count(opp_player) == 3 and buffer.count(symbol_player) == 1:
+        score += counter_losing_move
+    if buffer.count(opp_player) == 2 and buffer.count(symbol_player) == 1:
+        score += opp_two_in_lines
+    return score
+
+def score_board(board, symbol_player):
+    s = 0
+    # Horiz
+    for i in range(6):
+        for j in range(0, 4, 1):
+            s += count_point(board[i, j:j+4], symbol_player)
+    # Vert
+    for i in range(3):
+        for j in range(7):
+            s += count_point(board[i:i+4, j], symbol_player)
+    # \
+    for i in range(3):
+        for j in range(4):
+            s += count_point([board[i + k, j + k] for k in range(4)], symbol_player)
+    # /
+    for i in range(3):
+        for j in range(4):
+            s += count_point([board[i + 3 - k, j + k] for k in range(4)], symbol_player)
+    return s
+
+
+def minimax(node: Node, alpha, beta, maximising):
+    if node.is_terminal():
+        node.compute_score()
+        return node.score
+
+    if maximising:
+        value = - np.inf
+        for child in node:
+            value = max(value, minimax(child, alpha, beta, not maximising))
+    else:
+        value = + np.inf
+        for child in node:
+            value = min(value, minimax(child, alpha, beta, not maximising))
+    return value
