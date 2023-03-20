@@ -71,18 +71,41 @@ def score_board(board, symbol_player):
             s += count_point([board[i + 3 - k, j + k] for k in range(4)], symbol_player)
     return s
 
+def score_node(node):
+    board = node.get_board_state()
+    score = 0
+    if board.state_win(node.symbol_player):
+        score = 42 - node.nbr_move
+    elif node.parent is not None and board.state_win(node.parent.symbol_player):
+        score = -(42 - node.nbr_move)
+    node.score = score
+    return score
+
 
 def minimax(node, alpha, beta, maximising):
     if node.is_terminal():
-        node.compute_score()
-        return node.score
+        score = score_node(node)
+        if maximising:
+            print("maximising", end = " ")
+        else:
+            print("minimizing", end = " ")
+        node.score = score
+        print(node.score, score)
+        print(node.depth)
+        return node
 
     if maximising:
-        value = - np.inf
+        value = - 100
         for child in node.children:
-            value = max(value, minimax(child, alpha, beta, not maximising))
+            p = minimax(child, alpha, beta, False)
+            value = max(value, p.score)
+        node.score = value
+        print("maximizing", value)
     else:
-        value = + np.inf
+        value = + 100
         for child in node.children:
-            value = min(value, minimax(child, alpha, beta, not maximising))
-    return value
+            p = minimax(child, alpha, beta, True)
+            value = min(value, p.score)
+        node.score = value
+        print("minimizing", value)
+    return node

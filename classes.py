@@ -643,7 +643,7 @@ class GamingScreen(Screen):
 
 
 class Node:
-    def __init__(self, move: int, parent, symbol: Symbol, depth: int) -> None:
+    def __init__(self, move: int, parent, symbol: Symbol, depth: int, nbr:int = 0) -> None:
         self.column_played = move
         self.parent = parent
         self.symbol_player = symbol
@@ -651,6 +651,7 @@ class Node:
         self.score: int = None
         self.children: list[Node] = []
         self.depth = depth
+        self.nbr_move = nbr
 
     def is_terminal(self) -> bool:
         return self.children == []
@@ -665,7 +666,7 @@ class Node:
             child.remove_old_root()
 
     def add_child(self, column: int):
-        child = Node(column, self, opponent(self.symbol_player), self.depth+1)
+        child = Node(column, self, opponent(self.symbol_player), self.depth+1, self.nbr_move+1)
         self.children.append(child)
         return child
 
@@ -775,8 +776,9 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
         return self[0, col] == Variables().symbol_no_player
 
     def list_valid_col(self):  # liste des colonnes où l'on peut jouer
+        possible_col = [3, 4, 2, 5, 1, 6, 0]
         valid_col = []
-        for col in range(7):
+        for col in possible_col:
             if self.is_valid_col(col):
                 valid_col.append(col)
         return valid_col
@@ -806,11 +808,7 @@ class Player:
     def play(self, board: Board, root: Node, screen: Screen, volume: bool) -> tuple[int, int]:
         if self.is_ai:
             root.board = board.copy()
-            val = minimax(root, 0, 0, True)
-            for candidate in root.children:
-                if candidate.score == val:
-                    break
-            root = candidate
+            root = minimax(root, 0, 0, True)
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
@@ -821,7 +819,7 @@ class Player:
                     break
             root = candidate
         root.remove_old_root()
-        root.create_tree(5)
+        root.create_tree(4)
         col = root.column_played
 
         row = board.find_free_slot(col)
@@ -894,10 +892,8 @@ class Game:
         gaming.draw_board()
         self.player_playing = self.player_1
         self.root = Node(-1, None, self.player_playing.symbol.v, 0)
-        print(self.root.board)
         self.root.board = self.board.copy()
-        print(self.root.board)
-        self.root.create_tree(5)
+        self.root.create_tree(4)
         while (
             self.who_is_winner() == self.player_null and self.num_turn < self.board.size
         ):
