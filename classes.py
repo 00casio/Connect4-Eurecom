@@ -655,13 +655,14 @@ class Node:
     def is_terminal(self) -> bool:
         return self.children == []
 
-    def move(self) -> None:
+    def remove_old_root(self) -> None:
         self.depth -= 1
-        self.board = self.parent.get_board_state()
-        self.board[self.board.find_free_slot(self.column_played), self.column_played] = self.symbol_player.v
-        self.parent = None
+        if self.depth == 0:
+            self.board = self.parent.get_board_state()
+            self.board[self.board.find_free_slot(self.column_played), self.column_played] = self.symbol_player
+            self.parent = None
         for child in self.children:
-            child.move()
+            child.remove_old_root()
 
     def add_child(self, column: int):
         child = Node(column, self, opponent(self.symbol_player), self.depth+1)
@@ -671,8 +672,8 @@ class Node:
     def get_board_state(self):
         board = self.board
         if self.depth != 0:
-            board = self.parent.get_board_state()
-            board[board.find_free_slot(self.column_played), self.column_played] = self.symbol_player.v
+            board = self.parent.get_board_state().copy()
+            board[board.find_free_slot(self.column_played), self.column_played] = self.symbol_player
         return board
 
     def compute_score(self):
@@ -810,18 +811,24 @@ class Player:
                 if candidate.score == val:
                     break
             root = candidate
-            root.move()
-            root.create_tree(5)
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
             click = screen.click(box_allowed, print_disk=True, color_disk=self.color)
             col = (click[0] - self.var.padding) // self.var.size_cell
+            for candidate in root.children:
+                if candidate.column_played == col:
+                    break
+            root = candidate
+        root.remove_old_root()
+        root.create_tree(5)
+        col = root.column_played
+
         row = board.find_free_slot(col)
         if row == -1 and volume:
             playsound(self.var.sound_error, block=False)
-            col, row = self.play(board, root, screen, volume)
-        return (col, row)
+            col, row, root = self.play(board, root, screen, volume)
+        return (col, row, root)
 
     def __eq__(self, other: object) -> bool:
         eq: bool = False
@@ -886,21 +893,23 @@ class Game:
         )
         gaming.draw_board()
         self.player_playing = self.player_1
-        self.root = Node(-1, None, self.player_playing.symbol, 0)
+        self.root = Node(-1, None, self.player_playing.symbol.v, 0)
+        print(self.root.board)
         self.root.board = self.board.copy()
+        print(self.root.board)
         self.root.create_tree(5)
         while (
             self.who_is_winner() == self.player_null and self.num_turn < self.board.size
         ):
             if self.player_playing == self.player_1:
-                play = self.player_1.play(self.board, self.root, gaming, self.volume)
+                col, row, self.root = self.player_1.play(self.board, self.root, gaming, self.volume)
             else:
-                play = self.player_2.play(self.board, self.root, gaming, self.volume)
-            gaming.animate_fall(play[0], play[1], self.player_playing.color)
-            self.board[play[1], play[0]] = self.player_playing.symbol.v
+                col, row, self.root = self.player_2.play(self.board, self.root, gaming, self.volume)
+            gaming.animate_fall(col, row, self.player_playing.color)
+            self.board[row, col] = self.player_playing.symbol.v
             self.inverse_player()
             self.num_turn += 1
-        self.draw_winner(gaming, play)
+        self.draw_winner(gaming, (col, row))
 
     def draw_winner(self, screen: GamingScreen, lastclick: tuple[int, int]) -> None:
         winner = self.who_is_winner()

@@ -6,7 +6,7 @@ from AI_test import *
 import numpy as np
 from typing import Optional
 
-from variables import Variables, Symbol
+from variables import Variables
 
 vzuydskqdkz = Variables()
 symbol_player_1 = vzuydskqdkz.symbol_player_1
@@ -30,9 +30,9 @@ number_row = 6
 
 def opponent(symbol_player):  # Gives symbol of the opponent
     if symbol_player == symbol_player_1:
-        return Symbol(symbol_player_2)
+        return symbol_player_2
     else:
-        return Symbol(symbol_player_1)
+        return symbol_player_1
 
 def count_point(line, symbol_player):
     buffer = list(line)
