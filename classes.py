@@ -672,7 +672,7 @@ class Node:
 
     def get_board_state(self):
         board = self.board
-        if self.depth != 0:
+        if self.parent is not None:
             board = self.parent.get_board_state().copy()
             board[board.find_free_slot(self.column_played), self.column_played] = self.symbol_player
         return board
@@ -680,6 +680,13 @@ class Node:
     def compute_score(self):
         board = self.get_board_state()
         self.score = score_board(board, self.symbol_player)
+
+    def copy(self):
+        node = Node(self.column_played, self.parent, self.symbol_player, self.depth, self.nbr_move)
+        node.board = self.board
+        node.children = self.children
+        node.score = self.score
+        return node
 
     def create_tree(self, depth):
         if depth == 0:
@@ -807,7 +814,6 @@ class Player:
 
     def play(self, board: Board, root: Node, screen: Screen, volume: bool) -> tuple[int, int]:
         if self.is_ai:
-            root.board = board.copy()
             root = minimax(root, 0, 0, True)
         else:
             p = self.var.padding

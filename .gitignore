@@ -3,6 +3,12 @@ __pycache__
 .mypy_cache
 venv
 
+# Archive
+**.tar
+**.zip
+**.gz
+**.gz2
+
 # Media
 **.png
 **.jpg

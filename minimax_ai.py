@@ -2,7 +2,6 @@
 # import random
 # from variables import *
 # from scores import *
-from AI_test import *
 import numpy as np
 from typing import Optional
 
@@ -34,21 +33,51 @@ def opponent(symbol_player):  # Gives symbol of the opponent
     else:
         return symbol_player_1
 
+def count(buffer, symbol, number):
+    return buffer.count(symbol) == number
+
 def count_point(line, symbol_player):
     buffer = list(line)
     score = 0
     opp_player = opponent(symbol_player)
-    # print(opp_player)
-    if buffer.count(symbol_player) == 4:
-        score += winning_move
-    if buffer.count(symbol_player) == 3 and buffer.count(symbol_no_player) == 1:
+    g = buffer.count(symbol_player)
+    b = buffer.count(opp_player)
+    z = buffer.count(symbol_no_player)
+    
+    # if (g == 4):
+    #     score += 500001 #// preference to go for winning move vs. block
+    # elif (g == 3 and z == 1):
+    #     score += 5000
+    # elif (g == 2 and z == 2):
+    #     score += 500
+    # elif (b == 2 and z == 2):
+    #     score -= 501# // preference to block
+    # elif (b == 3 and z == 1):
+    #     score -= 5001 # // preference to block
+    # elif (b == 4):
+    #     score -= 500000
+    # if count(buffer, symbol_player, 4):
+    #     score += 100
+    # if count(buffer, symbol_player, 3) and count(buffer, symbol_no_player, 1):
+    #     score += 5
+    # if count(buffer, symbol_no_player, 2) and count(buffer, symbol_player, 2):
+    #     score += 2
+    # if count(buffer, opp_player, 3) and count(buffer, symbol_no_player, 1):
+    #     score -= 4
+    if count(buffer, symbol_player, 4):
+        return winning_move
+    elif count(buffer, opp_player, 4):
+        return - winning_move
+    elif count(buffer, symbol_player, 3) and count(buffer, symbol_no_player, 1):
         score += three_in_lines
-    if buffer.count(symbol_player) == 2 and buffer.count(symbol_no_player) == 2:
-        score += two_in_lines
-    if buffer.count(opp_player) == 3 and buffer.count(symbol_player) == 1:
-        score += counter_losing_move
-    if buffer.count(opp_player) == 2 and buffer.count(symbol_player) == 1:
-        score += opp_two_in_lines
+    elif count(buffer, opp_player, 3):
+        if count(buffer, symbol_no_player, 1):
+            score -= three_in_lines
+    elif count(buffer, symbol_no_player, 2):
+        if count(buffer, symbol_player, 2):
+            score += two_in_lines
+        elif count(buffer, opp_player, 2):
+            score -= two_in_lines
     return score
 
 def score_board(board, symbol_player):
@@ -84,28 +113,32 @@ def score_node(node):
 
 def minimax(node, alpha, beta, maximising):
     if node.is_terminal():
-        score = score_node(node)
-        if maximising:
-            print("maximising", end = " ")
-        else:
-            print("minimizing", end = " ")
-        node.score = score
-        print(node.score, score)
-        print(node.depth)
-        return node
+        score = score_board(node.get_board_state(), node.symbol_player)
+        # if maximising:
+        #     print("maximising", end = " ")
+        # else:
+        #     print("minimizing", end = " ")
+        n = node.copy()
+        n.score = score
+        # print(node.score, score)
+        return n
 
+    chosen = node.copy()
+    chosen.column_played = -1
     if maximising:
-        value = - 100
+        value = - 10000000
         for child in node.children:
             p = minimax(child, alpha, beta, False)
-            value = max(value, p.score)
-        node.score = value
-        print("maximizing", value)
+            if p.score > value:
+                value = p.score
+                chosen = p.copy()
+        # print("maximizing", value)
     else:
-        value = + 100
+        value = + 10000000
         for child in node.children:
             p = minimax(child, alpha, beta, True)
-            value = min(value, p.score)
-        node.score = value
-        print("minimizing", value)
-    return node
+            if p.score < value:
+                value = p.score
+                chosen = p.copy()
+        # print("minimizing", value)
+    return chosen
