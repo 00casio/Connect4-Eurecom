@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from typing import Any
-
+from headers import *
 import pygame as pg
 
 pg.init()
