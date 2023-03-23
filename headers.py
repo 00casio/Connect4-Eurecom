@@ -1,10 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from headers import *
 from typing import Any, Optional, Iterator
-from gesture import *
-from variables import *
 import numpy as np
 import pygame as pg
 
@@ -27,7 +24,7 @@ class Variables:
     
 class Node:
     pass
-class Board:
+class GestureController:
     pass
 
 class Config:
@@ -46,13 +43,10 @@ class Element:
         pos: tuple[int, int],
         text: str,
         screen: Surface,
-        text_color: Color = Variables().black,
-        box_color: Color = Variables().color_options_box,
-        font: pg.font.Font = Variables().main_font,
-        padd: tuple[int, int] = (
-            Variables().text_box_spacing,
-            Variables().text_box_spacing,
-        ),
+        text_color: Color,
+        box_color: Color,
+        font: pg.font.Font,
+        padd: tuple[int, int]
     ) -> None:
         raise NotImplementedError
 
@@ -77,8 +71,8 @@ class Tools:
         color_box: Color,
         x: int,
         y: int,
-        spacing_x: int = Variables().text_box_spacing,
-        spacing_y: int = Variables().text_box_spacing,
+        spacing_x: int,
+        spacing_y: int
     ) -> Rect:
         """Write the text and create the box arround it"""
         raise NotImplementedError
@@ -89,17 +83,17 @@ class Tools:
         color_box: Color,
         x: int,
         y: int,
-        align: int = 0,
-        space_x: int = Variables().text_box_spacing,
-        space_y: int = Variables().text_box_spacing,
-        space_box: int = Variables().options_spacing,
+        align: int,
+        space_x: int,
+        space_y: int,
+        space_box: int
     ) -> list[Rect]:
         raise NotImplementedError
 
     def center_all(
         self,
         array_text: list[list[Surface]],
-        color_box: list[Color] = [Variables().color_options_box],
+        color_box: list[Color],
     ) -> list[list[Rect]]:
         """Write the texts in 'array_text' centered in the middle of the screen.
         If 'color_box' is a single element, then all boxes will have the same color"""
@@ -108,9 +102,9 @@ class Tools:
     def create_text_rendered(
         self,
         text: str,
-        color: Color = Variables().color_options_text,
-        font: str = Variables().text_font,
-        size: int = Variables().text_size,
+        color: Color,
+        font: str,
+        size: int,
     ) -> Surface:
         """Create text in the color, font, and size asked"""
         raise NotImplementedError
@@ -121,7 +115,7 @@ class Tools:
         """Highlight the clicked box to be in a color or another"""
         raise NotImplementedError
 
-    def draw_agreement_box(self, text: str, position: float = 0.75) -> Rect:
+    def draw_agreement_box(self, text: str, position: float) -> Rect:
         """Draw a agreement box in the center of the screen at position (in %) of the height of the screen"""
         raise NotImplementedError
 
@@ -141,9 +135,9 @@ class Screen(Tools):
         gesture: GestureController,
         volume: bool,
         camera: bool,
-        cancel_box: bool = True,
-        quit_box: bool = True,
-        color_fill: Color = Variables().color_options_screen,
+        cancel_box: bool,
+        quit_box: bool,
+        color_fill: Color
     ) -> None:
         raise NotImplementedError
 
@@ -175,10 +169,10 @@ class Screen(Tools):
     
     def click(
         self,
-        rect_play: Optional[Rect] = None,
-        sound: str = Variables().sound_click_box,
-        print_disk: bool = False,
-        color_disk: Color = Variables().white,
+        rect_play: Optional[Rect],
+        sound: str,
+        print_disk: bool,
+        color_disk: Color,
     ) -> tuple[int, int]:
         """Quit the function only when there is a click. Return the position of the click.
         If f is not None, then the function is called whith the argument 'event' at every iteration"""
@@ -195,7 +189,7 @@ class Screen(Tools):
         self,
         coor: tuple[int, int],
         rect: Optional[Rect],
-        sound: str = Variables().sound_click_box,
+        sound: str,
     ) -> bool:
         """Return whether coor is in the rectangle 'rect'"""
         raise NotImplementedError
@@ -212,7 +206,7 @@ class Screen_AI(Screen):
         gesture: GestureController,
         volume: bool,
         camera: bool,
-        number_AI: int = 1,
+        number_AI: int,
     ) -> None:
         raise NotImplementedError
 
@@ -269,31 +263,6 @@ class GamingScreen(Screen):
 
     def animate_fall(self, col: int, row: int, color_player: Color) -> None:
         raise NotImplementedError
-
-class Node:
-    def __init__(self, move: int, parent, symbol: Symbol, depth: int, nbr:int = 0) -> None:
-        raise NotImplementedError
-
-    def is_terminal(self) -> bool:
-       raise NotImplementedError
-    
-    def remove_old_root(self) -> Node:
-        raise NotImplementedError
-
-    def add_child(self, column: int) -> Node:
-        raise NotImplementedError
-
-    def get_board_state(self) -> Board:
-        raise NotImplementedError
-
-    def compute_score(self) -> None:
-        raise NotImplementedError
-
-    def copy(self) -> Node:
-        raise NotImplementedError
-
-    def create_tree(self, depth: int) -> None:
-        raise NotImplementedError
     
 class Board(np.ndarray[Any, np.dtype[Any]]):
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
@@ -322,17 +291,42 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
     def slash(self, row: int, col: int) -> Iterator:
         raise NotImplementedError
 
-    def is_valid_col(self, col: int):
+    def is_valid_col(self, col: int) -> bool:
         raise NotImplementedError
 
-    def list_valid_col(self):
+    def list_valid_col(self) -> list:
+        raise NotImplementedError
+
+class Node:
+    def __init__(self, move: int, parent, symbol: Symbol, depth: int, nbr: int) -> None:
+        raise NotImplementedError
+
+    def is_terminal(self) -> bool:
+       raise NotImplementedError
+    
+    def remove_old_root(self) -> Node:
+        raise NotImplementedError
+
+    def add_child(self, column: int) -> Node:
+        raise NotImplementedError
+
+    def get_board_state(self) -> Board:
+        raise NotImplementedError
+
+    def compute_score(self) -> None:
+        raise NotImplementedError
+
+    def copy(self) -> Node:
+        raise NotImplementedError
+
+    def create_tree(self, depth: int) -> None:
         raise NotImplementedError
     
 class Player:
     """The class that keep all the options for a player"""
 
     def __init__(
-        self, var: Variables, number: int, AI: bool, difficulty: int = -1
+        self, var: Variables, number: int, AI: bool, difficulty: int
     ) -> None:
         raise NotImplementedError
 
@@ -345,7 +339,7 @@ class Player:
 class Game:
     """The big class that will regulate everything"""
 
-    def __init__(self, var: Variables, args) -> None:
+    def __init__(self, var: Variables, arg: Any) -> None:
         raise NotImplementedError
 
     def inverse_player(self) -> None:
@@ -390,7 +384,6 @@ def score_board(board: np.ndarray[Any, np.dtype[Any]] ,symbol_player: Symbol) ->
 
 def score_node(node: Node) -> int:
     raise NotImplementedError
-
 
 def minimax(node: Node, alpha: int, beta: int, maximising: bool) -> Node:
     raise NotImplementedError
