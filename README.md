@@ -13,7 +13,7 @@ The project S6 of:
 - [x] Report
 - [x] Begin to add sound
 - [x] Work on gesture
-- [ ] New point system for AI
+- [x] New point system for AI
 
 ### Objectives
 
@@ -40,7 +40,7 @@ Optional:
 
 #### AI
 
-- [ ] Use minimax algorithm
+- [x] Use minimax algorithm
 
 Optional:
 
