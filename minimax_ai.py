@@ -3,6 +3,7 @@
 # from variables import *
 # from scores import *
 import numpy as np
+from headers import *
 from typing import Optional
 
 from variables import Variables

@@ -1,19 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import sys
-from time import sleep
-from typing import Any, Callable, Optional, Iterator
-
+from headers import *
+from typing import Any, Optional, Iterator
+from gesture import *
+from variables import *
 import numpy as np
 import pygame as pg
-from playsound import playsound
-
-from minimax_ai import *
-from gesture import *
-from variables import Symbol, Variables
-
-pg.init()
 
 Color = pg.Color
 Rect = pg.Rect
@@ -382,3 +375,22 @@ class Game:
         """Show the start screen.
         For now it is only the play button but soon there will be more options"""
         raise NotImplementedError
+    
+def opponent(symbol_player: Symbol) -> Symbol:
+    raise NotImplementedError
+
+def count(buffer: np.ndarray[Any, np.dtype[Any]], symbol: Symbol, number: int):
+    raise NotImplementedError
+
+def count_point(line: np.ndarray[Any, np.dtype[Any]], symbol_player: Symbol) -> int:
+    raise NotImplementedError
+
+def score_board(board: np.ndarray[Any, np.dtype[Any]] ,symbol_player: Symbol) -> int:
+    raise NotImplementedError
+
+def score_node(node: Node) -> int:
+    raise NotImplementedError
+
+
+def minimax(node: Node, alpha: int, beta: int, maximising: bool) -> Node:
+    raise NotImplementedError

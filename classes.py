@@ -1,9 +1,8 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from headers import *
 import sys
-from time import sleep
-from typing import Any, Callable, Optional
 
 import numpy as np
 import pygame as pg
@@ -14,11 +13,6 @@ from gesture import *
 from variables import Symbol, Variables
 
 pg.init()
-
-Color = pg.Color
-Rect = pg.Rect
-Surface = pg.Surface
-
 
 class Config:
     def __init__(self, var: Variables, arguments):
@@ -825,7 +819,7 @@ class Player:
                 if candidate.column_played == col:
                     break
             new_root = candidate
-        print(root.depth, root.nbr_move)
+        print(root.depth, new_root.nbr_move)
         print(new_root.depth, new_root.nbr_move)
         root = new_root.remove_old_root()
         root.create_tree(4)
