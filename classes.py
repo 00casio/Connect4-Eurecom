@@ -664,6 +664,7 @@ class Node:
             self.parent = None
         for child in self.children:
             child.remove_old_root()
+        return self
 
     def add_child(self, column: int):
         child = Node(column, self, opponent(self.symbol_player), self.depth+1, self.nbr_move+1)
@@ -814,7 +815,7 @@ class Player:
 
     def play(self, board: Board, root: Node, screen: Screen, volume: bool) -> tuple[int, int]:
         if self.is_ai:
-            root = minimax(root, 0, 0, True)
+            new_root = minimax(root, 0, 0, True)
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
@@ -823,8 +824,10 @@ class Player:
             for candidate in root.children:
                 if candidate.column_played == col:
                     break
-            root = candidate
-        root.remove_old_root()
+            new_root = candidate
+        print(root.depth, root.nbr_move)
+        print(new_root.depth, new_root.nbr_move)
+        root = new_root.remove_old_root()
         root.create_tree(4)
         col = root.column_played
 
