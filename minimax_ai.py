@@ -122,24 +122,22 @@ def minimax(node, alpha, beta, maximising):
         n = node.copy()
         n.score = score
         # print(node.score, score)
-        return n
+        return n.score, n.column_played
 
     chosen = node.copy()
     chosen.column_played = -1
     if maximising:
         value = - 10000000
         for child in node.children:
-            p = minimax(child, alpha, beta, False)
-            if p.score > value:
-                value = p.score
-                chosen = p.copy()
+            score = minimax(child, alpha, beta, False)[0]
+            if score > value:
+                value = score
         # print("maximizing", value)
     else:
         value = + 10000000
         for child in node.children:
-            p = minimax(child, alpha, beta, True)
-            if p.score < value:
-                value = p.score
-                chosen = p.copy()
+            score = minimax(child, alpha, beta, True)[0]
+            if score < value:
+                value = score
         # print("minimizing", value)
-    return chosen
+    return score, chosen.column_played # faux, plus de node

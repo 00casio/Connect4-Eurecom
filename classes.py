@@ -809,21 +809,20 @@ class Player:
 
     def play(self, board: Board, root: Node, screen: Screen, volume: bool) -> tuple[int, int]:
         if self.is_ai:
-            new_root = minimax(root, 0, 0, True)
+            score, col = minimax(root, 0, 0, True)
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
             click = screen.click(box_allowed, print_disk=True, color_disk=self.color)
             col = (click[0] - self.var.padding) // self.var.size_cell
-            for candidate in root.children:
-                if candidate.column_played == col:
-                    break
-            new_root = candidate
-        print(root.depth, new_root.nbr_move)
-        print(new_root.depth, new_root.nbr_move)
+        for candidate in root.children:
+            if candidate.column_played == col:
+                break
+        new_root = candidate
+        # print(root.depth, new_root.nbr_move)
+        # print(new_root.depth, new_root.nbr_move)
         root = new_root.remove_old_root()
         root.create_tree(4)
-        col = root.column_played
 
         row = board.find_free_slot(col)
         if row == -1 and volume:
