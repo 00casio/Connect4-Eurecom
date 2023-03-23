@@ -931,7 +931,6 @@ class Game:
         box_winner = End.write_on_line(
             [text_winner], winner.color, self.var.width_screen, p // 2
         )
-        self.board.state_win(winner.symbol)
         bits = int(self.board.state_to_bits(), 2)
 
         def complete(bits, direction):
