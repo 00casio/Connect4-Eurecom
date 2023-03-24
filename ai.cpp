@@ -1,7 +1,9 @@
-#include <cmath>
-#include <cstdint>
-#include <cstdio>
-#include <ctime>
+#include "ai.hpp"
+
+/* To compile this as a shared library, use:
+ * g++ ai.cpp -shared -O3 -o libai.so
+or another program that would output the same thing
+*/
 
 /*
 The reason we are using (internally) a 8x8 board is because we are using an
@@ -16,15 +18,7 @@ pieces are handled, and it may slow down a lot the algorithm.
 #define SYMBOL_AI "x"
 #define SYMBOL_HUMAN "o"
 
-int HUMAN = 1;
-int AI = 2;
-int current_player = HUMAN;
-
-unsigned long long human_board = 0b0;
-unsigned long long ai_board = 0b0;
-uint8_t col_heights[7] = {56, 57, 58, 59, 60, 61, 62};
-
-int putPiece(unsigned long long *player, int col, uint8_t *heights) {
+int Game::putPiece(unsigned long long *player, int col, uint8_t *heights) {
     if (heights[col] < 16 || col < 0 || col > 6) {
         return 1;
     }
@@ -33,12 +27,12 @@ int putPiece(unsigned long long *player, int col, uint8_t *heights) {
     return 0;
 }
 
-void removePiece(unsigned long long *player, int col, uint8_t *heights) {
+void Game::removePiece(unsigned long long *player, int col, uint8_t *heights) {
     heights[col] += 8;
     *player &= ~(1UL << (BOARDLEN - 1 - heights[col]));
 }
 
-bool winning(unsigned long long bitboard) {
+bool Game::winning(unsigned long long bitboard) {
     unsigned long long m;
     m = (bitboard & (bitboard >> 8));
     if ((m & (m >> 16)) != 0) {
@@ -59,7 +53,7 @@ bool winning(unsigned long long bitboard) {
     return false;
 }
 
-int evaluateBoard(unsigned long long bitboard, unsigned long long oppBitboard, int depth) {
+int Game::evaluateBoard(unsigned long long bitboard, unsigned long long oppBitboard, int depth) {
     int score = 0;
 
     // Vertical check
@@ -94,7 +88,7 @@ int evaluateBoard(unsigned long long bitboard, unsigned long long oppBitboard, i
     return 111;
 }
 
-int minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, int depth, bool isMaximising, double alpha, double beta) {
+int Game::minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, int depth, bool isMaximising, double alpha, double beta) {
     int result = evaluateBoard(*player, *opponent, depth);
     if (depth == 0 || result != 111)
         return result;
@@ -146,7 +140,7 @@ int minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *h
     }
 }
 
-int aiMove(unsigned long long *player, unsigned long long *opponent, int depth, uint8_t *heights) {
+int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent, int depth, uint8_t *heights) {
     int bestMove = 0;
     double bestScore = -INFINITY;
 
@@ -166,7 +160,16 @@ int aiMove(unsigned long long *player, unsigned long long *opponent, int depth, 
     return bestMove;
 }
 
-void printBoard() {
+int Game::aiMove(int depth) {
+    int ai_col = aiSearchMove(&ai_board, &human_board, depth, col_heights);
+    return putPiece(&ai_board, ai_col, col_heights);
+}
+
+int Game::humanMove(int col) {
+    return putPiece(&human_board, col, col_heights);
+}
+
+void Game::printBoard() {
     unsigned short column = 0;
     unsigned long long place = 1UL << 47;
     for (int i = 16; i < BOARDLEN; i++) {
@@ -193,7 +196,7 @@ void printBoard() {
     printf("\n");
 }
 
-int main() {
+int Game::run() {
     int depth;
     printf("AI depth: ");
     scanf("%d", &depth);
@@ -203,14 +206,14 @@ int main() {
             int col;
             printf("Your move [1-7]: ");
             scanf("%d", &col);
-            while (putPiece(&human_board, col - 1, col_heights) != 0) {
+            while (humanMove(col - 1) != 0) {
                 printf("Reenter your move [1-7]: ");
                 scanf("%d", &col);
             }
         } else {
             clock_t start = clock();
             printf("AI is thinking... ");
-            putPiece(&ai_board, aiMove(&ai_board, &human_board, depth, col_heights), col_heights);
+            aiMove(depth);
             clock_t end = clock();
             printf("and it took %lf seconds\n", (double)(end - start) / CLOCKS_PER_SEC);
         }

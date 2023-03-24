@@ -2,7 +2,7 @@
 
 echo "If you want to compile ai.cpp, don't forget to use the -03 flag."
 echo "For now, (without multithreading) g++ seems to produce better binary than clang++-16"
-echo "We will need to benchmark that properly"
+echo "You can benchmark this by using the ai_benchmark.cpp program"
 
 python3.11 -c "" 2>/dev/null 1>&2
 if [ $? -ne 0 ]; then
