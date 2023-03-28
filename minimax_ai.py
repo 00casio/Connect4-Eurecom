@@ -95,6 +95,8 @@ def score_board(board: Board, symbol_player: Any) -> int:
     for i in range(3):
         for j in range(4):
             s += count_point([board[i + 3 - k, j + k] for k in range(4)], symbol_player)
+    print ("Board is : ", board)
+    print("Score is : ", s)
     return s
 
 
@@ -112,29 +114,29 @@ def score_node(node: Node) -> int:
 def minimax(node: Node, alpha: int, beta: int, maximising: bool) -> tuple[int, int]:
     if node.is_terminal():
         score = score_board(node.get_board_state(), node.symbol_player)
-        # if maximising:
-        #     print("maximising", end = " ")
-        # else:
-        #     print("minimizing", end = " ")
         n = node.copy()
         n.score = score
-        # print(node.score, score)
         return n.score, n.column_played
-
-    chosen = node.copy()
-    chosen.column_played = -1
+    column_chosen = -1
     if maximising:
         value = -10000000
         for child in node.children:
-            score = minimax(child, alpha, beta, False)[0]
+            score, column_played = minimax(child, alpha, beta, False)
+            print("maximizing : score, col, value = ", (score, column_played, value))
             if score > value:
                 value = score
-        # print("maximizing", value)
+                column_chosen = column_played
     else:
         value = +10000000
         for child in node.children:
-            score = minimax(child, alpha, beta, True)[0]
+            score, column_played = minimax(child, alpha, beta, True)
+            print("minimizing : score, col, value = ", (score, column_played, value))
             if score < value:
                 value = score
+<<<<<<< HEAD
         # print("minimizing", value)
     return score, chosen.column_played  # faux, plus de node
+=======
+                column_chosen = column_played
+    return score, column_chosen 
+>>>>>>> 53b019e (Still not finished, counting points pb)
