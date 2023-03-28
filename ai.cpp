@@ -1,19 +1,12 @@
-#include "ai.hpp"
-#include <boost/python/module.hpp>
-
 /* To compile this as a shared library, use:
  * g++ -shared ai.cpp -o libai.so -O3 -I /usr/include/python3.11 -lboost_python311 -fPIC
  * or another program that would output the same thing
 */
 
-/*
-The reason we are using (internally) a 8x8 board is because we are using an
-unsigned long long (so 64 bits long) variable to put the pieces in places. We
-could use a 7*7 board or even a 7x6 but it would require to rework how the
-pieces are handled, and it may slow down a lot the algorithm.
-*/
+#include "ai.hpp"
+#include <boost/python/module.hpp>
 
-int Game::putPiece(unsigned long long *player, int col, uint8_t *heights) {
+int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) {
     if (heights[col] < 16 || col < 0 || col > 6) {
         return NOT_ALLOWED;
     }
@@ -22,12 +15,12 @@ int Game::putPiece(unsigned long long *player, int col, uint8_t *heights) {
     return col;
 }
 
-void Game::removePiece(unsigned long long *player, int col, uint8_t *heights) {
+void Game::removePiece(unsigned long long *player, const int col, uint8_t *heights) {
     heights[col] += 8;
     *player &= ~(1UL << (BOARDLEN - 1 - heights[col]));
 }
 
-bool Game::winning(unsigned long long bitboard) {
+bool Game::winning(const unsigned long long bitboard) {
     unsigned long long m;
     m = (bitboard & (bitboard >> 8));
     if ((m & (m >> 16)) != 0) {
@@ -48,7 +41,7 @@ bool Game::winning(unsigned long long bitboard) {
     return false;
 }
 
-int Game::evaluateBoard(unsigned long long bitboard, unsigned long long oppBitboard, int depth) {
+int Game::evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth) {
     int score = 0;
 
     // Vertical check
@@ -83,7 +76,7 @@ int Game::evaluateBoard(unsigned long long bitboard, unsigned long long oppBitbo
     return 111;
 }
 
-int Game::minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, int depth, bool isMaximising, double alpha, double beta) {
+int Game::minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta) {
     int result = evaluateBoard(*player, *opponent, depth);
     if (depth == 0 || result != 111)
         return result;
@@ -135,7 +128,7 @@ int Game::minimax(unsigned long long *player, unsigned long long *opponent, uint
     }
 }
 
-int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent, int depth, uint8_t *heights) {
+int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent, const int depth, uint8_t *heights) {
     int bestMove = 0;
     double bestScore = -INFINITY;
 
@@ -155,12 +148,12 @@ int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent,
     return bestMove;
 }
 
-int Game::aiMove(int depth) {
+int Game::aiMove(const int depth) {
     int ai_col = aiSearchMove(&ai_board, &human_board, depth, col_heights);
     return putPiece(&ai_board, ai_col, col_heights);
 }
 
-int Game::humanMove(int col) {
+int Game::humanMove(const int col) {
     return putPiece(&human_board, col, col_heights);
 }
 
@@ -241,6 +234,10 @@ int Game::run() {
     return EXIT_SUCCESS;
 }
 
+/**
+ * @brief Allow to use those functions in a python program
+ * 
+ */
 BOOST_PYTHON_MODULE(libai) {
     boost::python::class_<Game>("Game")
         .def("aiMove", &Game::aiMove)
