@@ -1,28 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from typing import Any
-from headers import *
 import pygame as pg
 
+from headers import Color
+
 pg.init()
-
-Color = pg.Color
-
-
-class Symbol:
-    """The Symbol class is used to make the difference between two players"""
-
-    def __init__(self, value: Any) -> None:
-        self.v = value
-
-    def __eq__(self, o: object) -> Any:
-        if isinstance(o, Symbol):
-            return o.v == self.v
-        elif isinstance(o, type(self.v)):
-            return o == self.v
-        else:
-            return NotImplemented
 
 
 class Variables:

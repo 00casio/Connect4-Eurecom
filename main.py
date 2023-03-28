@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from arguments import args
-from classes import Game
+from game import Game
 from variables import Variables
 
 game = Game(Variables(), args)

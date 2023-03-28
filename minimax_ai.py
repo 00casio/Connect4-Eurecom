@@ -1,12 +1,12 @@
-# import numpy as np
-# import random
-# from variables import *
-# from scores import *
-import numpy as np
-from headers import *
-from typing import Optional
+#!/usr/bin/python3
+# -*- coding: utf-8 -*-
 
+import numpy as np
+
+from typing import Any, Iterator
 from variables import Variables
+from utils import Symbol, opponent
+from structure import Node, Board
 
 vzuydskqdkz = Variables()
 symbol_player_1 = vzuydskqdkz.symbol_player_1
@@ -28,23 +28,18 @@ number_col = 7
 number_row = 6
 
 
-def opponent(symbol_player):  # Gives symbol of the opponent
-    if symbol_player == symbol_player_1:
-        return symbol_player_2
-    else:
-        return symbol_player_1
-
-def count(buffer, symbol, number):
+def count(buffer: list[Any], symbol: Any, number: int) -> bool:
     return buffer.count(symbol) == number
 
-def count_point(line, symbol_player):
+
+def count_point(line: np.ndarray[Any, np.dtype[Any]] | list[Any], symbol_player: Any) -> int:
     buffer = list(line)
     score = 0
     opp_player = opponent(symbol_player)
     g = buffer.count(symbol_player)
     b = buffer.count(opp_player)
     z = buffer.count(symbol_no_player)
-    
+
     # if (g == 4):
     #     score += 500001 #// preference to go for winning move vs. block
     # elif (g == 3 and z == 1):
@@ -68,7 +63,7 @@ def count_point(line, symbol_player):
     if count(buffer, symbol_player, 4):
         return winning_move
     elif count(buffer, opp_player, 4):
-        return - winning_move
+        return -winning_move
     elif count(buffer, symbol_player, 3) and count(buffer, symbol_no_player, 1):
         score += three_in_lines
     elif count(buffer, opp_player, 3):
@@ -81,16 +76,17 @@ def count_point(line, symbol_player):
             score -= two_in_lines
     return score
 
-def score_board(board, symbol_player):
+
+def score_board(board: Board, symbol_player: Any) -> int:
     s = 0
     # Horiz
     for i in range(6):
         for j in range(0, 4, 1):
-            s += count_point(board[i, j:j+4], symbol_player)
+            s += count_point(board[i, j : j + 4], symbol_player)
     # Vert
     for i in range(3):
         for j in range(7):
-            s += count_point(board[i:i+4, j], symbol_player)
+            s += count_point(board[i : i + 4, j], symbol_player)
     # \
     for i in range(3):
         for j in range(4):
@@ -101,7 +97,8 @@ def score_board(board, symbol_player):
             s += count_point([board[i + 3 - k, j + k] for k in range(4)], symbol_player)
     return s
 
-def score_node(node):
+
+def score_node(node: Node) -> int:
     board = node.get_board_state()
     score = 0
     if board.state_win(node.symbol_player):
@@ -112,7 +109,7 @@ def score_node(node):
     return score
 
 
-def minimax(node, alpha, beta, maximising):
+def minimax(node: Node, alpha: int, beta: int, maximising: bool) -> tuple[int, int]:
     if node.is_terminal():
         score = score_board(node.get_board_state(), node.symbol_player)
         # if maximising:
@@ -127,17 +124,17 @@ def minimax(node, alpha, beta, maximising):
     chosen = node.copy()
     chosen.column_played = -1
     if maximising:
-        value = - 10000000
+        value = -10000000
         for child in node.children:
             score = minimax(child, alpha, beta, False)[0]
             if score > value:
                 value = score
         # print("maximizing", value)
     else:
-        value = + 10000000
+        value = +10000000
         for child in node.children:
             score = minimax(child, alpha, beta, True)[0]
             if score < value:
                 value = score
         # print("minimizing", value)
-    return score, chosen.column_played # faux, plus de node
+    return score, chosen.column_played  # faux, plus de node

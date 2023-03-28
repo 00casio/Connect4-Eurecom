@@ -2,12 +2,15 @@
 # -*- coding: utf-8 -*-
 
 from typing import Any, Optional, Iterator
+from argparse import Namespace
+
 import numpy as np
 import pygame as pg
 
 Color = pg.Color
 Rect = pg.Rect
 Surface = pg.Surface
+
 
 class Symbol:
     """The Symbol class is used to make the difference between two players"""
@@ -18,21 +21,23 @@ class Symbol:
     def __eq__(self, o: object) -> Any:
         raise NotImplementedError
 
+
 class Variables:
     def __init__(self) -> None:
         raise NotImplementedError
-    
-class Node:
-    pass
+
+
 class GestureController:
     pass
 
+
 class Config:
-    def __init__(self, var: Variables, arguments) -> None:
+    def __init__(self, var: Variables, arguments: Namespace) -> None:
         raise NotImplementedError
 
     def load_language(self, language: str) -> None:
         raise NotImplementedError
+
 
 class Element:
     """An element is composed of a box and text"""
@@ -46,12 +51,13 @@ class Element:
         text_color: Color,
         box_color: Color,
         font: pg.font.Font,
-        padd: tuple[int, int]
+        padd: tuple[int, int],
     ) -> None:
         raise NotImplementedError
 
     def draw(self, text: str) -> None:
         raise NotImplementedError
+
 
 class Tools:
     def __init__(
@@ -72,7 +78,7 @@ class Tools:
         x: int,
         y: int,
         spacing_x: int,
-        spacing_y: int
+        spacing_y: int,
     ) -> Rect:
         """Write the text and create the box arround it"""
         raise NotImplementedError
@@ -86,7 +92,7 @@ class Tools:
         align: int,
         space_x: int,
         space_y: int,
-        space_box: int
+        space_box: int,
     ) -> list[Rect]:
         raise NotImplementedError
 
@@ -122,9 +128,15 @@ class Tools:
     def make_icon(self, image: str, size: np.ndarray[Any, np.dtype[Any]]) -> Surface:
         raise NotImplementedError
 
-    def draw_icon(self, image: str, size: np.ndarray[Any, np.dtype[Any]], position: tuple[int, int]) -> Rect:
+    def draw_icon(
+        self,
+        image: str,
+        size: np.ndarray[Any, np.dtype[Any]],
+        position: tuple[int, int],
+    ) -> Rect:
         raise NotImplementedError
-    
+
+
 class Screen(Tools):
     """A screen is composed of what is shown to the user"""
 
@@ -137,7 +149,7 @@ class Screen(Tools):
         camera: bool,
         cancel_box: bool,
         quit_box: bool,
-        color_fill: Color
+        color_fill: Color,
     ) -> None:
         raise NotImplementedError
 
@@ -166,7 +178,7 @@ class Screen(Tools):
 
     def update_gesture(self, image: str) -> None:
         raise NotImplementedError
-    
+
     def click(
         self,
         rect_play: Optional[Rect],
@@ -197,7 +209,8 @@ class Screen(Tools):
     def handle_click(self, click_coor: tuple[int, int], list_rect: list[Rect]) -> int:
         """Return the index of the box the click was in"""
         raise NotImplementedError
-        
+
+
 class Screen_AI(Screen):
     def __init__(
         self,
@@ -213,28 +226,35 @@ class Screen_AI(Screen):
     def screen_loop(self) -> None:
         raise NotImplementedError
 
+class Game:
+    pass
+class Node:
+    pass
+
 class OptionsScreen(Screen):
     def __init__(
         self,
         var: Variables,
-        game,
+        game: Game,
         screen: Surface,
         gesture: GestureController,
         volume: bool,
         camera: bool,
-    ):
+    ) -> None:
         raise NotImplementedError
 
-    def reset_screen(self):
-        raise NotImplementedError
-    
-    def dfites(self, testing: bool, position: float, first_image: str, second_image: str) -> Any:
+    def reset_options_screen(self) -> None:
         raise NotImplementedError
 
-    def draw_vol_cam(self) -> tuple[Any, Any]: 
+    def dfites(
+        self, testing: bool, position: float, first_image: str, second_image: str
+    ) -> Rect:
         raise NotImplementedError
 
-    def draw_language(self):
+    def draw_vol_cam(self) -> tuple[Rect, Rect]:
+        raise NotImplementedError
+
+    def draw_language(self) -> None:
         raise NotImplementedError
 
 
@@ -263,7 +283,8 @@ class GamingScreen(Screen):
 
     def animate_fall(self, col: int, row: int, color_player: Color) -> None:
         raise NotImplementedError
-    
+
+
 class Board(np.ndarray[Any, np.dtype[Any]]):
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
         raise NotImplementedError
@@ -279,31 +300,32 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
     def state_win(self, symbol: Symbol) -> bool:
         raise NotImplementedError
 
-    def horiz(self, row: int, col: int) -> Iterator:
+    def horiz(self, row: int, col: int) -> Iterator[list[Any]]:
         raise NotImplementedError
 
-    def vert(self, row: int, col: int) -> Iterator:
+    def vert(self, row: int, col: int) -> Iterator[list[Any]]:
         raise NotImplementedError
 
-    def backslash(self, row: int, col: int, back = True) -> Iterator:
+    def backslash(self, row: int, col: int, back: bool=True) -> Iterator[list[Any]]:
         raise NotImplementedError
 
-    def slash(self, row: int, col: int) -> Iterator:
+    def slash(self, row: int, col: int) -> Iterator[list[Any]]:
         raise NotImplementedError
 
     def is_valid_col(self, col: int) -> bool:
         raise NotImplementedError
 
-    def list_valid_col(self) -> list:
+    def list_valid_col(self) -> list[int]:
         raise NotImplementedError
 
+
 class Node:
-    def __init__(self, move: int, parent, symbol: Symbol, depth: int, nbr: int) -> None:
+    def __init__(self, move: int, parent: Optional[Node], symbol: Symbol, depth: int, nbr: int) -> None:
         raise NotImplementedError
 
     def is_terminal(self) -> bool:
-       raise NotImplementedError
-    
+        raise NotImplementedError
+
     def remove_old_root(self) -> Node:
         raise NotImplementedError
 
@@ -321,21 +343,23 @@ class Node:
 
     def create_tree(self, depth: int) -> None:
         raise NotImplementedError
-    
+
+
 class Player:
     """The class that keep all the options for a player"""
 
-    def __init__(
-        self, var: Variables, number: int, AI: bool, difficulty: int
-    ) -> None:
+    def __init__(self, var: Variables, number: int, AI: bool, difficulty: int) -> None:
         raise NotImplementedError
 
-    def play(self, board: Board, root: Node, screen: Screen, volume: bool) -> tuple[int, int, Node]:
+    def play(
+        self, board: Board, root: Node, screen: Screen, volume: bool
+    ) -> tuple[int, int, Node]:
         raise NotImplementedError
 
     def __eq__(self, other: object) -> bool:
         raise NotImplementedError
-    
+
+
 class Game:
     """The big class that will regulate everything"""
 
@@ -369,21 +393,27 @@ class Game:
         """Show the start screen.
         For now it is only the play button but soon there will be more options"""
         raise NotImplementedError
-    
+
+
 def opponent(symbol_player: Symbol) -> Symbol:
     raise NotImplementedError
 
-def count(buffer: np.ndarray[Any, np.dtype[Any]], symbol: Symbol, number: int):
+
+def count(buffer: np.ndarray[Any, np.dtype[Any]], symbol: Symbol, number: int) -> bool:
     raise NotImplementedError
+
 
 def count_point(line: np.ndarray[Any, np.dtype[Any]], symbol_player: Symbol) -> int:
     raise NotImplementedError
 
-def score_board(board: np.ndarray[Any, np.dtype[Any]] ,symbol_player: Symbol) -> int:
+
+def score_board(board: np.ndarray[Any, np.dtype[Any]], symbol_player: Symbol) -> int:
     raise NotImplementedError
+
 
 def score_node(node: Node) -> int:
     raise NotImplementedError
+
 
 def minimax(node: Node, alpha: int, beta: int, maximising: bool) -> Node:
     raise NotImplementedError
