@@ -3,9 +3,12 @@
 
 import pygame as pg
 
-from headers import Color
+# from headers import Color
 
 pg.init()
+Color = pg.Color
+Rect = pg.Rect
+Surface = pg.Surface
 
 
 class Variables:

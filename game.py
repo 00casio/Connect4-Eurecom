@@ -7,12 +7,13 @@ from typing import Any, Iterator, Optional
 from argparse import Namespace
 
 from gesture import *
-from headers import Rect
+# from headers import Rect
 from minimax_ai import minimax, opponent
 from screens import GamingScreen, OptionsScreen, Screen, Screen_AI
 from utils import Config, Symbol
 from structure import Node, Board
-from variables import Variables
+from variables import Variables, Rect
+from playsound import playsound
 
 pg.init()
 
@@ -81,7 +82,7 @@ class Game:
 
         # Players
         self.var = var
-        self.root = None
+        self.root: Optional[Node] = None
         self.player_1 = Player(self.var, 1, False, None)
         self.player_2 = Player(self.var, 2, False, None)
         self.player_playing = self.player_1

@@ -226,16 +226,12 @@ class Screen_AI(Screen):
     def screen_loop(self) -> None:
         raise NotImplementedError
 
-class Game:
-    pass
-class Node:
-    pass
 
 class OptionsScreen(Screen):
     def __init__(
         self,
         var: Variables,
-        game: Game,
+        game,
         screen: Surface,
         gesture: GestureController,
         volume: bool,
@@ -320,16 +316,16 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
 
 
 class Node:
-    def __init__(self, move: int, parent: Optional[Node], symbol: Symbol, depth: int, nbr: int) -> None:
+    def __init__(self, move: int, parent, symbol: Symbol, depth: int, nbr: int) -> None:
         raise NotImplementedError
 
     def is_terminal(self) -> bool:
         raise NotImplementedError
 
-    def remove_old_root(self) -> Node:
+    def remove_old_root(self) -> None:
         raise NotImplementedError
 
-    def add_child(self, column: int) -> Node:
+    def add_child(self, column: int) -> None:
         raise NotImplementedError
 
     def get_board_state(self) -> Board:
@@ -338,7 +334,7 @@ class Node:
     def compute_score(self) -> None:
         raise NotImplementedError
 
-    def copy(self) -> Node:
+    def copy(self) -> None:
         raise NotImplementedError
 
     def create_tree(self, depth: int) -> None:

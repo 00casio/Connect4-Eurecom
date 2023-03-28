@@ -5,12 +5,12 @@ import sys
 import pygame as pg
 import numpy as np
 import cv2
-from typing import Any, Iterator
+from typing import Any, Iterator, Optional
 
 from gesture import *
-from headers import Surface, Color, Rect, Optional, Game
+# from headers import Surface, Color, Rect, Optional, Game
 from utils import Tools
-from variables import Variables
+from variables import Variables, Color, Rect, Surface
 from playsound import playsound
 
 
@@ -162,7 +162,7 @@ class Screen(Tools):
         self.handle_quit(click)
         if rect_play is not None:
             while not self.x_in_rect(click, rect_play, ""):
-                click = self.click(rect_play, print_disk, color_disk)
+                click = self.click(rect_play, sound, print_disk, color_disk)
         return click
 
     def is_canceled(self, click: tuple[int, int]) -> bool:
@@ -301,7 +301,7 @@ class OptionsScreen(Screen):
     def __init__(
         self,
         var: Variables,
-        game: Game,
+        game,
         screen: Surface,
         gesture: GestureController,
         volume: bool,

@@ -2,11 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from argparse import Namespace
-from typing import Any
+from typing import Any, Sequence
 
-from headers import Rect, Color, Surface
+# from headers import Rect, Color, Surface
 import pygame as pg
-from variables import Variables
+from variables import Variables, Color, Rect, Surface
 
 def opponent(symbol_player: Any) -> Any:  # Gives symbol of the opponent
     if symbol_player == Variables().symbol_player_1:
@@ -169,7 +169,7 @@ class Tools:
 
     def create_text_rendered(
         self,
-        text: str,
+        text: str | Sequence[str],
         color: Color = Variables().color_options_text,
         font: str = Variables().text_font,
         size: int = Variables().text_size,
