@@ -1,3 +1,4 @@
+#include <boost/python.hpp>
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -15,17 +16,18 @@ pieces are handled, and it may slow down a lot the algorithm.
 #define BOARDLEN 64
 #define SYMBOL_AI "x"
 #define SYMBOL_HUMAN "o"
+#define NOT_ALLOWED -1
 
 class Game {
 private:
     int HUMAN = 1;
     int AI = ~HUMAN; // This way we are sure they are not the same
     int current_player = HUMAN;
-    
+
     unsigned long long human_board = 0b0;
     unsigned long long ai_board = 0b0;
     uint8_t col_heights[7] = {56, 57, 58, 59, 60, 61, 62};
-    
+
     int putPiece(unsigned long long *player, int col, uint8_t *heights);
     void removePiece(unsigned long long *player, int col, uint8_t *heights);
     bool winning(unsigned long long bitboard);
@@ -35,6 +37,7 @@ private:
 public:
     int aiMove(int depth);
     int humanMove(int col);
+    void clearBoard();
     void printBoard();
     int run();
 };

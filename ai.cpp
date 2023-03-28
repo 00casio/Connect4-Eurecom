@@ -1,8 +1,9 @@
 #include "ai.hpp"
+#include <boost/python/module.hpp>
 
 /* To compile this as a shared library, use:
- * g++ ai.cpp -shared -O3 -o libai.so
-or another program that would output the same thing
+ * g++ -shared ai.cpp -o libai.so -O3 -I /usr/include/python3.11 -lboost_python311 -fPIC
+ * or another program that would output the same thing
 */
 
 /*
@@ -12,19 +13,13 @@ could use a 7*7 board or even a 7x6 but it would require to rework how the
 pieces are handled, and it may slow down a lot the algorithm.
 */
 
-#define NBR_LINE 6
-#define NBR_COL 7
-#define BOARDLEN 64
-#define SYMBOL_AI "x"
-#define SYMBOL_HUMAN "o"
-
 int Game::putPiece(unsigned long long *player, int col, uint8_t *heights) {
     if (heights[col] < 16 || col < 0 || col > 6) {
-        return 1;
+        return NOT_ALLOWED;
     }
     *player ^= 1ULL << (BOARDLEN - 1 - heights[col]);
     heights[col] -= 8;
-    return 0;
+    return col;
 }
 
 void Game::removePiece(unsigned long long *player, int col, uint8_t *heights) {
@@ -96,8 +91,8 @@ int Game::minimax(unsigned long long *player, unsigned long long *opponent, uint
     if (isMaximising) {
         double bestScore = -INFINITY;
         for (int i = 0; i < NBR_COL; i++) {
-            bool dpRes = putPiece(player, i, heights);
-            if (dpRes != 0) {
+            int dpRes = putPiece(player, i, heights);
+            if (dpRes == NOT_ALLOWED) {
                 continue;
             }
 
@@ -118,8 +113,8 @@ int Game::minimax(unsigned long long *player, unsigned long long *opponent, uint
     } else {
         double bestScore = INFINITY;
         for (int i = 0; i < NBR_COL; i++) {
-            bool dpRes = putPiece(opponent, i, heights);
-            if (dpRes != 0) {
+            int dpRes = putPiece(opponent, i, heights);
+            if (dpRes == NOT_ALLOWED) {
                 continue;
             }
 
@@ -145,8 +140,8 @@ int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent,
     double bestScore = -INFINITY;
 
     for (int i = 0; i < NBR_COL; i++) {
-        bool dpRes = putPiece(player, i, heights);
-        if (dpRes != 0) {
+        int dpRes = putPiece(player, i, heights);
+        if (dpRes == NOT_ALLOWED) {
             continue;
         }
 
@@ -167,6 +162,12 @@ int Game::aiMove(int depth) {
 
 int Game::humanMove(int col) {
     return putPiece(&human_board, col, col_heights);
+}
+
+void Game::clearBoard() {
+    human_board = 0b0;
+    ai_board = 0b0;
+    uint8_t col_heights[7] = {56, 57, 58, 59, 60, 61, 62};
 }
 
 void Game::printBoard() {
@@ -191,7 +192,7 @@ void Game::printBoard() {
         place >>= 1;
     }
     printf("-----------------------------\n ");
-    for (int i = 1; i < NBR_COL + 1; i++)
+    for (int i = 0; i < NBR_COL; i++)
         printf(" %d  ", i);
     printf("\n");
 }
@@ -204,10 +205,10 @@ int Game::run() {
         if (current_player == HUMAN) {
             printBoard();
             int col;
-            printf("Your move [1-7]: ");
+            printf("Your move [0-6]: ");
             scanf("%d", &col);
-            while (humanMove(col - 1) != 0) {
-                printf("Reenter your move [1-7]: ");
+            while (humanMove(col) == NOT_ALLOWED) {
+                printf("Reenter your move [0-6]: ");
                 scanf("%d", &col);
             }
         } else {
@@ -238,4 +239,14 @@ int Game::run() {
     }
 
     return EXIT_SUCCESS;
+}
+
+BOOST_PYTHON_MODULE(libai) {
+    boost::python::class_<Game>("Game")
+        .def("aiMove", &Game::aiMove)
+        .def("humanMove", &Game::humanMove)
+        .def("clearBoard", &Game::clearBoard)
+        .def("printBoard", &Game::printBoard)
+        .def("run", &Game::run)
+    ;
 }
