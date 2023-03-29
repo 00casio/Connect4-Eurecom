@@ -4,7 +4,6 @@
 */
 
 #include "ai.hpp"
-#include <boost/python/module.hpp>
 
 int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) {
     if (heights[col] < 16 || col < 0 || col > 6) {
@@ -48,45 +47,53 @@ int Game::countNbrOne(const unsigned long long bitboard) {
         if ((gaëtan & bitboard) != 0) {
             count++;
         }
-        gaëtan *= 2;
+        gaëtan <<= 1;
     }
     return count;
 }
 
-int Game::points3InLine(const unsigned long long bitboard) {
+int Game::nbr3InLine(const unsigned long long bitboard) {
     int nbr_3_in_line = 0;
     // Points when there are 3 disks next to each other
-    if ((bitboard & (bitboard >> 8) & (bitboard >> 16)) != 0) {
-        nbr_3_in_line += countNbrOne(bitboard);
+    int tmp = bitboard & (bitboard >> 8) & (bitboard >> 16);
+    if (tmp != 0) {
+        nbr_3_in_line += countNbrOne(tmp);
     }
-    if ((bitboard & (bitboard >> 1) & (bitboard >> 2)) != 0) {
-        nbr_3_in_line += countNbrOne(bitboard);
+    tmp = bitboard & (bitboard >> 1) & (bitboard >> 2);
+    if (tmp != 0) {
+        nbr_3_in_line += countNbrOne(tmp);
     }
-    if ((bitboard & (bitboard >> 7) & (bitboard >> 14)) != 0) {
-        nbr_3_in_line += countNbrOne(bitboard);
+    tmp = bitboard & (bitboard >> 7) & (bitboard >> 14);
+    if (tmp != 0) {
+        nbr_3_in_line += countNbrOne(tmp);
     }
-    if ((bitboard & (bitboard >> 9) & (bitboard >> 18)) != 0) {
-        nbr_3_in_line += countNbrOne(bitboard);
+    tmp = bitboard & (bitboard >> 9) & (bitboard >> 18);
+    if (tmp != 0) {
+        nbr_3_in_line += countNbrOne(tmp);
     }
-    return nbr_3_in_line*6;
+    return nbr_3_in_line;
 }
 
-int Game::points2InLine(const unsigned long long bitboard) {
+int Game::nbr2InLine(const unsigned long long bitboard) {
     int nbr_2_in_line = 0;
     // Points when there are 3 disks next to each other
-    if ((bitboard & (bitboard >> 8)) != 0) {
-        nbr_2_in_line += countNbrOne(bitboard);
+    int tmp = bitboard & (bitboard >> 8);
+    if (tmp != 0) {
+        nbr_2_in_line += countNbrOne(tmp);
     }
-    if ((bitboard & (bitboard >> 1)) != 0) {
-        nbr_2_in_line += countNbrOne(bitboard);
+    tmp = bitboard & (bitboard >> 1);
+    if (tmp != 0) {
+        nbr_2_in_line += countNbrOne(tmp);
     }
-    if ((bitboard & (bitboard >> 7)) != 0) {
-        nbr_2_in_line += countNbrOne(bitboard);
+    tmp = bitboard & (bitboard >> 7);
+    if (tmp != 0) {
+        nbr_2_in_line += countNbrOne(tmp);
     }
-    if ((bitboard & (bitboard >> 9)) != 0) {
-        nbr_2_in_line += countNbrOne(bitboard);
+    tmp = bitboard & (bitboard >> 9);
+    if (tmp != 0) {
+        nbr_2_in_line += countNbrOne(tmp);
     }
-    return nbr_2_in_line*2;
+    return nbr_2_in_line;
 }
 
 int Game::evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth) {
@@ -99,10 +106,10 @@ int Game::evaluateBoard(const unsigned long long bitboard, const unsigned long l
         return -100000;
     }
 
-    score += points3InLine(bitboard);
-    score -= points3InLine(oppBitboard);
-    score += points2InLine(bitboard);
-    score -= points2InLine(oppBitboard);
+    score += nbr3InLine(bitboard)*6;
+    score -= nbr3InLine(oppBitboard)*6;
+    score += nbr2InLine(bitboard)*2;
+    score -= nbr2InLine(oppBitboard)*2;
 
     // if board is maxed out (excluding top row)
     if ((bitboard | oppBitboard) == 280371153272574) {
