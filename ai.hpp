@@ -60,6 +60,10 @@ private:
      */
     bool winning(const unsigned long long bitboard);
 
+    int countNbrOne(const unsigned long long bitboard);
+    int points3InLine(const unsigned long long bitboard);
+    int points2InLine(const unsigned long long bitboard);
+
     /**
      * @brief Compute the score of the board
      * 
