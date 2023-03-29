@@ -30,11 +30,12 @@ The objectives of this project are the following:
 - [x] Grid
 - [x] Play sound
 - [x] Highlight selected column
+- [ ] Menu to choose the opponent
 
 Optional:
 
 - [ ] Name
-- [ ] Options
+- [x] Options
 - [ ] Change theme
 - [ ] Background music
 
@@ -44,7 +45,7 @@ Optional:
 
 Optional:
 
-- [ ] Change difficulty
+- [x] Change difficulty
 - [ ] Different gameplay
 - [ ] Add other algorithms
 
@@ -63,4 +64,3 @@ Optional:
 
 - [ ] Choose the mean of communication
 - [ ] Choose the protocol
-- [ ] Menu to choose the opponent
