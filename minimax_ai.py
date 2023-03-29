@@ -133,10 +133,5 @@ def minimax(node: Node, alpha: int, beta: int, maximising: bool) -> tuple[int, i
             print("minimizing : score, col, value = ", (score, column_played, value))
             if score < value:
                 value = score
-<<<<<<< HEAD
-        # print("minimizing", value)
-    return score, chosen.column_played  # faux, plus de node
-=======
                 column_chosen = column_played
     return score, column_chosen 
->>>>>>> 53b019e (Still not finished, counting points pb)
