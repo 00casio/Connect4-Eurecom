@@ -40,10 +40,13 @@ class Player:
         self.ai_difficulty = difficulty
 
     def play(
-        self, board: Board, root: Node, screen: Screen, volume: bool
+        self, board: Board, root: Node, screen: Screen, volume: bool, ai_cpp
     ) -> tuple[int, int]:
         if self.is_ai:
-            score, col = minimax(root, 0, 0, True)
+            if ai_cpp is None:
+                score, col = minimax(root, 0, 0, True)
+            else:
+                col = ai_cpp.aiMove(2*self.ai_difficulty+1)
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
@@ -76,13 +79,15 @@ class Player:
 class Game:
     """The big class that will regulate everything"""
 
-    def __init__(self, var: Variables, args: Namespace) -> None:
+    def __init__(self, var: Variables, args: Namespace, ai_cpp_1, ai_cpp_2) -> None:
         # Gestures
         self.gestures = GestureController()
 
         # Players
         self.var = var
         self.root: Optional[Node] = None
+        self.ai_cpp_1 = ai_cpp_1
+        self.ai_cpp_2 = ai_cpp_2
         self.player_1 = Player(self.var, 1, False, None)
         self.player_2 = Player(self.var, 2, False, None)
         self.player_playing = self.player_1
@@ -94,6 +99,7 @@ class Game:
         self.conf = Config(self.var, args)
         self.volume = self.var.sound
         self.camera = self.var.camera
+        self.libai = self.var.libai
 
     def inverse_player(self) -> None:
         """Return the symbols of the opponent of the player currently playing"""
@@ -135,12 +141,16 @@ class Game:
         ):
             if self.player_playing == self.player_1:
                 col, row, self.root = self.player_1.play(
-                    self.board, self.root, gaming, self.volume
+                    self.board, self.root, gaming, self.volume, self.ai_cpp_1
                 )
+                if self.libai:
+                    self.ai_cpp_2.humanMove(col)
             else:
                 col, row, self.root = self.player_2.play(
-                    self.board, self.root, gaming, self.volume
+                    self.board, self.root, gaming, self.volume, self.ai_cpp_2
                 )
+                if self.libai:
+                    self.ai_cpp_1.humanMove(col)
             gaming.animate_fall(col, row, self.player_playing.color)
             self.board[row, col] = self.player_playing.symbol.v
             self.inverse_player()
@@ -201,6 +211,7 @@ class Game:
 
         pg.display.update()
         screen.click()
+        self.draw_play_options()
 
     def draw_options_screen(self) -> None:
         options = OptionsScreen(
@@ -224,6 +235,8 @@ class Game:
 
     def draw_play_options(self) -> None:
         """Show the different options when choosing to play"""
+        self.ai_cpp_1.clearBoard()
+        self.ai_cpp_2.clearBoard()
         screen = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
         text_HvH = screen.create_text_rendered(self.var.text_options_play_HvH)
         text_HvAI = screen.create_text_rendered(self.var.text_options_play_HvAI)

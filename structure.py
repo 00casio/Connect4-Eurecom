@@ -88,7 +88,7 @@ class Node_H:
 
 class Node(Node_H):
     def __init__(
-        self, move: int, parent: Optionnal[Node_H], symbol: Symbol, depth: int, nbr: int = 0
+        self, move: int, parent: Optional[Node_H], symbol: Symbol, depth: int, nbr: int = 0
     ) -> None:
         super().__init__()
         self.column_played = move

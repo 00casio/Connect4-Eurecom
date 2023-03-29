@@ -34,4 +34,13 @@ parser.add_argument(
     help="Disable the camera",
 )
 
+parser.add_argument(
+    "--no-libai",
+    dest="no_libai",
+    action="store_const",
+    const=True,
+    default=False,
+    help="Do not use libai for the AI movement",
+)
+
 args = parser.parse_args()
