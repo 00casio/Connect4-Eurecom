@@ -63,9 +63,10 @@ class Player:
             root.create_tree(4)
 
         row = board.find_free_slot(col)
-        if row == -1 and volume:
-            playsound(self.var.sound_error, block=False)
-            col, row, root = self.play(board, root, screen, volume)
+        if row == -1:
+            if volume:
+                playsound(self.var.sound_error, block=False)
+            col, row, root = self.play(board, root, screen, volume, ai_cpp)
         return (col, row, root)
 
     def __eq__(self, other: object) -> bool:
@@ -121,8 +122,11 @@ class Game:
         else:
             return self.player_null
 
-    def start(self) -> None:
-        self.draw_start_screen()
+    def start(self, skip_start=False) -> None:
+        if not skip_start:
+            self.draw_start_screen()
+        else:
+            self.draw_play_options()
         self.board = Board()
         self.CLOCK = pg.time.Clock()
         self.num_turn = 0
@@ -213,7 +217,7 @@ class Game:
 
         pg.display.update()
         screen.click()
-        self.draw_play_options()
+        self.start(skip_start=True)
 
     def draw_options_screen(self) -> None:
         options = OptionsScreen(

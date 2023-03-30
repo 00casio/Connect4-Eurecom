@@ -1,6 +1,7 @@
 #include <boost/python.hpp>
 #include <cmath>
 #include <cstdint>
+#include <cstdlib>
 #include <cstdio>
 #include <ctime>
 
@@ -72,7 +73,7 @@ private:
      * @param depth The depth at wich we are looking
      * @return The score computed
      */
-    int evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth);
+    double evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth);
 
     /**
      * @brief Apply the minmax algorithm with alpha-beta prunning
@@ -86,7 +87,9 @@ private:
      * @param beta The beta parameter
      * @return The score of the minmax algorithm at this level
      */
-    int minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta);
+    double minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta);
+
+    int bestStartingMove(const uint8_t *heights);
 
     /**
      * @brief Search the best move the AI can make

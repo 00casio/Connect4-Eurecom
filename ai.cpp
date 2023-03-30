@@ -4,6 +4,7 @@
 */
 
 #include "ai.hpp"
+#include <cstdio>
 
 int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) {
     if (heights[col] < 16 || col < 0 || col > 6) {
@@ -16,7 +17,7 @@ int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) 
 
 void Game::removePiece(unsigned long long *player, const int col, uint8_t *heights) {
     heights[col] += 8;
-    *player &= ~(1UL << (BOARDLEN - 1 - heights[col]));
+    *player &= ~(1ULL << (BOARDLEN - 1 - heights[col]));
 }
 
 bool Game::winning(const unsigned long long bitboard) {
@@ -76,7 +77,7 @@ int Game::nbr3InLine(const unsigned long long bitboard) {
 
 int Game::nbr2InLine(const unsigned long long bitboard) {
     int nbr_2_in_line = 0;
-    // Points when there are 3 disks next to each other
+    // Points when there are 2 disks next to each other
     int tmp = bitboard & (bitboard >> 8);
     if (tmp != 0) {
         nbr_2_in_line += countNbrOne(tmp);
@@ -96,20 +97,20 @@ int Game::nbr2InLine(const unsigned long long bitboard) {
     return nbr_2_in_line;
 }
 
-int Game::evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth) {
+double Game::evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth) {
     int score = 0;
 
     // Vertical check
     if (winning(bitboard)) {
-        return 100000;
+        return INFINITY;
     } else if (winning(oppBitboard)) {
-        return -100000;
+        return -INFINITY;
     }
 
-    score += nbr3InLine(bitboard)*6;
-    score -= nbr3InLine(oppBitboard)*6;
-    score += nbr2InLine(bitboard)*2;
-    score -= nbr2InLine(oppBitboard)*2;
+    score += nbr3InLine(bitboard) * 20;
+    score -= nbr3InLine(oppBitboard) * 20;
+    score += nbr2InLine(bitboard) * 2;
+    score -= nbr2InLine(oppBitboard) * 2;
 
     // if board is maxed out (excluding top row)
     if ((bitboard | oppBitboard) == 280371153272574) {
@@ -122,8 +123,8 @@ int Game::evaluateBoard(const unsigned long long bitboard, const unsigned long l
     return 111;
 }
 
-int Game::minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta) {
-    int result = evaluateBoard(*player, *opponent, depth);
+double Game::minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta) {
+    double result = evaluateBoard(*player, *opponent, depth);
     if (depth == 0 || result != 111)
         return result;
 
@@ -135,7 +136,7 @@ int Game::minimax(unsigned long long *player, unsigned long long *opponent, uint
                 continue;
             }
 
-            int score = minimax(player, opponent, heights, depth - 1, false, alpha, beta);
+            double score = minimax(player, opponent, heights, depth - 1, false, alpha, beta);
             removePiece(player, i, heights);
 
             if (score > bestScore) {
@@ -157,7 +158,7 @@ int Game::minimax(unsigned long long *player, unsigned long long *opponent, uint
                 continue;
             }
 
-            int score = minimax(player, opponent, heights, depth - 1, true, alpha, beta);
+            double score = minimax(player, opponent, heights, depth - 1, true, alpha, beta);
             removePiece(opponent, i, heights);
 
             if (score < bestScore) {
@@ -174,8 +175,20 @@ int Game::minimax(unsigned long long *player, unsigned long long *opponent, uint
     }
 }
 
+int Game::bestStartingMove(const uint8_t *heights) {
+    if (heights[3] > 15) return 3;
+    if (heights[2] > 15) return 2;
+    if (heights[4] > 15) return 4;
+    if (heights[1] > 15) return 1;
+    if (heights[5] > 15) return 5;
+    if (heights[0] > 15) return 0;
+    if (heights[6] > 15) return 6;
+    fprintf(stderr, "All columns are full\n");
+    exit(-1);
+}
+
 int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent, const int depth, uint8_t *heights) {
-    int bestMove = 0;
+    int bestMove = bestStartingMove(heights);
     double bestScore = -INFINITY;
 
     for (int i = 0; i < NBR_COL; i++) {
@@ -184,7 +197,7 @@ int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent,
             continue;
         }
 
-        int score = minimax(player, opponent, heights, depth, false, -INFINITY, INFINITY);
+        double score = minimax(player, opponent, heights, depth, false, -INFINITY, INFINITY);
         removePiece(player, i, heights);
         if (score > bestScore) {
             bestScore = score;
@@ -259,11 +272,11 @@ int Game::run() {
         }
         current_player = ((current_player == HUMAN) ? AI : HUMAN);
         int result = evaluateBoard(ai_board, human_board, 1);
-        if (result == 100000) {
+        if (result > 10000) {
             printf("AI WINS!\n");
             printBoard();
             return EXIT_SUCCESS;
-        } else if (result == -100000) {
+        } else if (result < -10000) {
             printf("HUMAN WINS!\n");
             printBoard();
             return EXIT_SUCCESS;
@@ -280,9 +293,16 @@ int Game::run() {
     return EXIT_SUCCESS;
 }
 
-int main() {
+int main(int argc, char **argv) {
     Game g;
     return g.run();
+    // char *tmp;
+    // g.human_board = strtoul(argv[1], &tmp, 10);
+    // g.ai_board = strtoul(argv[2], &tmp, 10);
+
+    // g.printBoard();
+    // printf("%i", g.aiMove(*argv[3] - '0'));
+    // return 0;
 }
 
 /**
