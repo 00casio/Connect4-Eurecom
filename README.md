@@ -10,10 +10,9 @@ The project S6 of:
 
 ### This week objectives
 
-- [x] Report
-- [x] Begin to add sound
-- [x] Work on gesture
-- [x] New point system for AI
+- [ ] Speed up the minimax algorithm
+- [ ] Solve lag problem on gestures
+- [ ] Reorganize repo
 
 ### Objectives
 

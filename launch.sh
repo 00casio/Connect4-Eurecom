@@ -15,11 +15,11 @@ test_python() {
     shift
     test_python "$@"
   else
-    echo "Using $1" | tee >&2
+    echo "Using $($1 --version)" | tee >&2
     echo "$1"
   fi
 }
-com=$(test_python "python3.11" "python3.10" "python3.9")
+com=$(test_python "python" "python3.11" "python3.10" "python3.9")
 if [ "${com}" == "" ]; then exit; fi
 
 install_pypi() {
