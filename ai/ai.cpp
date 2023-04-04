@@ -4,7 +4,9 @@
 */
 
 #include "ai.hpp"
-#include <cstdio>
+#include <algorithm>
+#include <cmath>
+#include <cstdint>
 
 int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) {
     if (heights[col] < 16 || col < 0 || col > 6) {
@@ -123,6 +125,23 @@ double Game::evaluateBoard(const unsigned long long bitboard, const unsigned lon
     return 111;
 }
 
+double Game::searchTopResult(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta, int col_played) {
+
+    unsigned long long tmp_p = *player;
+    unsigned long long tmp_o = *opponent;
+    uint8_t tmp_h = *heights;
+
+    int dpRes = putPiece(&tmp_p, col_played, &tmp_h);
+    if (dpRes == NOT_ALLOWED) {
+        return SCORE_NOT_ALLOWED;
+    }
+
+    double score = minimax(&tmp_p, &tmp_o, &tmp_h, depth - 1, ~isMaximising, alpha, beta);
+    removePiece(&tmp_p, col_played, &tmp_h);
+
+    return score;
+}
+
 double Game::minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta) {
     double result = evaluateBoard(*player, *opponent, depth);
     if (depth == 0 || result != 111)
@@ -192,6 +211,7 @@ int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent,
     double bestScore = -INFINITY;
 
     for (int i = 0; i < NBR_COL; i++) {
+        //multithreads -------------------------------
         int dpRes = putPiece(player, i, heights);
         if (dpRes == NOT_ALLOWED) {
             continue;
@@ -199,6 +219,9 @@ int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent,
 
         double score = minimax(player, opponent, heights, depth, false, -INFINITY, INFINITY);
         removePiece(player, i, heights);
+
+        // end multithread -------------------------
+
         if (score > bestScore) {
             bestScore = score;
             bestMove = i;
@@ -216,7 +239,12 @@ int Game::humanMove(const int col) {
     return putPiece(&human_board, col, col_heights);
 }
 
-void Game::clearBoard() {
+void Game::resetBoard() {
+    // boost::asio::io_service::work work(ioService);
+    // for (int i = 0; i < my_thread_count; i++) {
+    //     threadpool.create_thread(boost::bind(&boost::asio::io_service::run, &ioService));
+    // };
+
     human_board = 0b0;
     ai_board = 0b0;
     uint8_t col_heights[7] = {56, 57, 58, 59, 60, 61, 62};
@@ -313,7 +341,7 @@ BOOST_PYTHON_MODULE(libai) {
     boost::python::class_<Game>("Game")
         .def("aiMove", &Game::aiMove)
         .def("humanMove", &Game::humanMove)
-        .def("clearBoard", &Game::clearBoard)
+        .def("resetBoard", &Game::resetBoard)
         .def("printBoard", &Game::printBoard)
         .def("run", &Game::run)
     ;

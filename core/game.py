@@ -241,8 +241,8 @@ class Game:
 
     def draw_play_options(self) -> None:
         """Show the different options when choosing to play"""
-        self.ai_cpp_1.clearBoard()
-        self.ai_cpp_2.clearBoard()
+        self.ai_cpp_1.resetBoard()
+        self.ai_cpp_2.resetBoard()
         screen = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
         text_HvH = screen.create_text_rendered(self.var.text_options_play_HvH)
         text_HvAI = screen.create_text_rendered(self.var.text_options_play_HvAI)

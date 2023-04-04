@@ -1,4 +1,7 @@
 #include <boost/python.hpp>
+#include <boost/asio/io_service.hpp>
+#include <boost/bind/bind.hpp>
+#include <boost/thread/thread.hpp>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
@@ -18,6 +21,7 @@ pieces are handled, and it may slow down a lot the algorithm.
 #define SYMBOL_AI "x"
 #define SYMBOL_HUMAN "o"
 #define NOT_ALLOWED -1
+#define SCORE_NOT_ALLOWED 42587268
 
 /**
  * @brief The class that contains all information about the game
@@ -25,6 +29,12 @@ pieces are handled, and it may slow down a lot the algorithm.
  */
 class Game {
 private:
+    // Multithreading variables
+    int my_thread_count = 4;
+    // boost::asio::io_service ioService;
+    // boost::thread_group threadpool;
+
+    // Connect 4 variables
     int HUMAN = 1;
     int AI = ~HUMAN; // This way we are sure they are not the same
     int current_player = HUMAN;
@@ -75,6 +85,8 @@ private:
      */
     double evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth);
 
+    double searchTopResult(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta, int col_played);
+
     /**
      * @brief Apply the minmax algorithm with alpha-beta prunning
      * 
@@ -124,7 +136,7 @@ public:
      * @brief Reset the state of the board
      * 
      */
-    void clearBoard();
+    void resetBoard();
 
     /**
      * @brief Print the board on the screen
