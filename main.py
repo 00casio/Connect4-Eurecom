@@ -1,13 +1,12 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from arguments import args
-from game import Game
-from variables import Variables
+from extern.arguments import args
+from core.game import Game
 
 if not args.no_libai:
-    import libai
-    game = Game(Variables(), args, libai.Game(), libai.Game())
+    import ai.libai as libai
+    game = Game(args, libai.Game(), libai.Game())
 else:
-    game = Game(Variables(), args, None, None)
+    game = Game(args, None, None)
 game.start()

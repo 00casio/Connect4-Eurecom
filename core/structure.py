@@ -2,10 +2,10 @@
 # -*- coding: utf-8 -*-
 
 from typing import Any, Iterator, Optional
-from utils import Symbol, opponent
+from core.utils import Symbol, opponent
 import numpy as np
 # from headers import Node
-from variables import Variables
+from core.variables import Variables
 
 
 class Board(np.ndarray[Any, np.dtype[Any]]):

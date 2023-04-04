@@ -7,10 +7,10 @@ import numpy as np
 import cv2
 from typing import Any, Iterator, Optional
 
-from gesture import *
+from extern.gesture import *
 # from headers import Surface, Color, Rect, Optional, Game
-from utils import Tools
-from variables import Variables, Color, Rect, Surface
+from core.utils import Tools
+from core.variables import Variables, Color, Rect, Surface
 from playsound import playsound
 
 

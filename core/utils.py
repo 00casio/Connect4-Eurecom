@@ -6,7 +6,7 @@ from typing import Any, Sequence
 
 # from headers import Rect, Color, Surface
 import pygame as pg
-from variables import Variables, Color, Rect, Surface
+from core.variables import Variables, Color, Rect, Surface
 
 def opponent(symbol_player: Any) -> Any:  # Gives symbol of the opponent
     if symbol_player == Variables().symbol_player_1:

@@ -12,7 +12,7 @@ The project S6 of:
 
 - [ ] Speed up the minimax algorithm
 - [ ] Solve lag problem on gestures
-- [ ] Reorganize repo
+- [x] Reorganize repo
 
 ### Objectives
 

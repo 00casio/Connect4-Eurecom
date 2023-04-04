@@ -6,13 +6,13 @@ import pygame as pg
 from typing import Any, Iterator, Optional
 from argparse import Namespace
 
-from gesture import *
+from extern.gesture import *
 # from headers import Rect
-from minimax_ai import minimax, opponent
-from screens import GamingScreen, OptionsScreen, Screen, Screen_AI
-from utils import Config, Symbol
-from structure import Node, Board
-from variables import Variables, Rect
+from ai.minimax_ai import minimax, opponent
+from core.screens import GamingScreen, OptionsScreen, Screen, Screen_AI
+from core.utils import Config, Symbol
+from core.structure import Node, Board
+from core.variables import Variables, Rect
 from playsound import playsound
 
 pg.init()
@@ -81,12 +81,12 @@ class Player:
 class Game:
     """The big class that will regulate everything"""
 
-    def __init__(self, var: Variables, args: Namespace, ai_cpp_1, ai_cpp_2) -> None:
+    def __init__(self, args: Namespace, ai_cpp_1, ai_cpp_2) -> None:
         # Gestures
         self.gestures = GestureController()
 
         # Players
-        self.var = var
+        self.var = Variables()
         self.root: Optional[Node] = None
         self.ai_cpp_1 = ai_cpp_1
         self.ai_cpp_2 = ai_cpp_2

@@ -33,10 +33,11 @@ for module in ${to_install}; do
     install_pypi ${com} ${module}
 done
 
-boost_lib="boost_$(echo ${com//.})"
+python_ver=$(${com} -c "from sys import version_info as v; print(f'python{v[0]}.{v[1]}')")
+boost_lib="boost_$(echo ${python_ver//.})"
 ldconfig -p | grep ${boost_lib} 2>/dev/null 1>&2
 if [ $? -eq 0 ]; then
-  g++ -shared ai.cpp -o libai.so -O3 -I /usr/include/python3.11 -l "${boost_lib}" -fPIC
+  g++ -shared ai/ai.cpp -o ai/libai.so -O3 -I /usr/include/${python_ver} -l "${boost_lib}" -fPIC
   ${com} main.py --no-camera --no-sound
 else
   echo "Could not find the boost library on your machine, deactivating it" | tee >&2

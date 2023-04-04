@@ -4,9 +4,9 @@
 import numpy as np
 
 from typing import Any, Iterator
-from variables import Variables
-from utils import Symbol, opponent
-from structure import Node, Board
+from core.variables import Variables
+from core.utils import Symbol, opponent
+from core.structure import Node, Board
 
 vzuydskqdkz = Variables()
 symbol_player_1 = vzuydskqdkz.symbol_player_1
