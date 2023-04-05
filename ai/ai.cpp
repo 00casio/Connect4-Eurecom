@@ -4,9 +4,7 @@
 */
 
 #include "ai.hpp"
-#include <algorithm>
 #include <cmath>
-#include <cstdint>
 
 int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) {
     if (heights[col] < 16 || col < 0 || col > 6) {
@@ -14,6 +12,7 @@ int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) 
     }
     *player ^= 1ULL << (BOARDLEN - 1 - heights[col]);
     heights[col] -= 8;
+    count++;
     return col;
 }
 
@@ -55,7 +54,7 @@ int Game::countNbrOne(const unsigned long long bitboard) {
     return count;
 }
 
-int Game::nbr3InLine(const unsigned long long bitboard) {
+void Game::nbr3InLine(const unsigned long long bitboard, int *score, const int multi) {
     int nbr_3_in_line = 0;
     // Points when there are 3 disks next to each other
     int tmp = bitboard & (bitboard >> 8) & (bitboard >> 16);
@@ -74,10 +73,10 @@ int Game::nbr3InLine(const unsigned long long bitboard) {
     if (tmp != 0) {
         nbr_3_in_line += countNbrOne(tmp);
     }
-    return nbr_3_in_line;
+    *score += multi*nbr_3_in_line;
 }
 
-int Game::nbr2InLine(const unsigned long long bitboard) {
+void Game::nbr2InLine(const unsigned long long bitboard, int *score, const int multi) {
     int nbr_2_in_line = 0;
     // Points when there are 2 disks next to each other
     int tmp = bitboard & (bitboard >> 8);
@@ -96,7 +95,7 @@ int Game::nbr2InLine(const unsigned long long bitboard) {
     if (tmp != 0) {
         nbr_2_in_line += countNbrOne(tmp);
     }
-    return nbr_2_in_line;
+    *score += multi*nbr_2_in_line;
 }
 
 double Game::evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth) {
@@ -109,10 +108,19 @@ double Game::evaluateBoard(const unsigned long long bitboard, const unsigned lon
         return -INFINITY;
     }
 
-    score += nbr3InLine(bitboard) * 20;
-    score -= nbr3InLine(oppBitboard) * 20;
-    score += nbr2InLine(bitboard) * 2;
-    score -= nbr2InLine(oppBitboard) * 2;
+    // t1(nbr3InLine, bitboard, &score, 20);
+    // t2(nbr3InLine, oppBitboard, &score, -20);
+    // t3(nbr2InLine, bitboard, &score, 2);
+    // t4(nbr2InLine, oppBitboard, &score, -2);
+    nbr3InLine(bitboard, &score, 20);
+    nbr3InLine(oppBitboard, &score, -20);
+    nbr2InLine(bitboard, &score, 2);
+    nbr2InLine(oppBitboard, &score, -2);
+
+	// t1.join();
+	// t2.join();
+	// t3.join();
+	// t4.join();
 
     // if board is maxed out (excluding top row)
     if ((bitboard | oppBitboard) == 280371153272574) {
@@ -206,26 +214,31 @@ int Game::bestStartingMove(const uint8_t *heights) {
     exit(-1);
 }
 
+void Game::start_search(value_search values, int column_played) {
+    int dpRes = putPiece(&values.player, values.column_played, values.heights);
+    if (dpRes == NOT_ALLOWED) {
+        return;
+    }
+
+    double score = minimax(&values.player, &values.opponent, values.heights, values.depth, false, -INFINITY, INFINITY);
+    removePiece(&values.player, values.column_played, values.heights);
+
+    if (score > *values.best_score) {
+        *values.best_score = score;
+        *values.best_move = column_played;
+    }
+}
+
 int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent, const int depth, uint8_t *heights) {
+    ThreadPool thread_pool(thread_count);
     int bestMove = bestStartingMove(heights);
     double bestScore = -INFINITY;
 
     for (int i = 0; i < NBR_COL; i++) {
-        //multithreads -------------------------------
-        int dpRes = putPiece(player, i, heights);
-        if (dpRes == NOT_ALLOWED) {
-            continue;
-        }
-
-        double score = minimax(player, opponent, heights, depth, false, -INFINITY, INFINITY);
-        removePiece(player, i, heights);
-
-        // end multithread -------------------------
-
-        if (score > bestScore) {
-            bestScore = score;
-            bestMove = i;
-        }
+        value_search tmp(*player, *opponent, depth, heights, bestScore, bestMove, i);
+        thread_pool.addTask([this, tmp, i]{
+            start_search(tmp, i);
+        });
     }
     return bestMove;
 }
@@ -240,11 +253,6 @@ int Game::humanMove(const int col) {
 }
 
 void Game::resetBoard() {
-    // boost::asio::io_service::work work(ioService);
-    // for (int i = 0; i < my_thread_count; i++) {
-    //     threadpool.create_thread(boost::bind(&boost::asio::io_service::run, &ioService));
-    // };
-
     human_board = 0b0;
     ai_board = 0b0;
     uint8_t col_heights[7] = {56, 57, 58, 59, 60, 61, 62};
@@ -344,5 +352,6 @@ BOOST_PYTHON_MODULE(libai) {
         .def("resetBoard", &Game::resetBoard)
         .def("printBoard", &Game::printBoard)
         .def("run", &Game::run)
+        .def("count", &Game::getCount)
     ;
 }

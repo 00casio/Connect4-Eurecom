@@ -1,12 +1,10 @@
 #include <boost/python.hpp>
-#include <boost/asio/io_service.hpp>
-#include <boost/bind/bind.hpp>
-#include <boost/thread/thread.hpp>
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
+#include "threads.hpp"
 
 /*
 The reason we are using (internally) a 8x8 board is because we are using an
@@ -30,14 +28,13 @@ pieces are handled, and it may slow down a lot the algorithm.
 class Game {
 private:
     // Multithreading variables
-    int my_thread_count = 4;
-    // boost::asio::io_service ioService;
-    // boost::thread_group threadpool;
+    int thread_count = 4;
 
     // Connect 4 variables
     int HUMAN = 1;
     int AI = ~HUMAN; // This way we are sure they are not the same
     int current_player = HUMAN;
+    long count = 0;
 
     unsigned long long human_board = 0b0;
     unsigned long long ai_board = 0b0;
@@ -72,8 +69,8 @@ private:
     bool winning(const unsigned long long bitboard);
 
     int countNbrOne(const unsigned long long bitboard);
-    int nbr3InLine(const unsigned long long bitboard);
-    int nbr2InLine(const unsigned long long bitboard);
+    void nbr3InLine(const unsigned long long bitboard, int *score, const int multi);
+    void nbr2InLine(const unsigned long long bitboard, int *score, const int multi);
 
     /**
      * @brief Compute the score of the board
@@ -102,6 +99,27 @@ private:
     double minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta);
 
     int bestStartingMove(const uint8_t *heights);
+
+    struct value_search {
+        unsigned long long player;
+        unsigned long long opponent;
+        int depth;
+        uint8_t heights[7];
+        double *best_score;
+        int *best_move;
+        int column_played;
+
+        value_search(unsigned long long p, unsigned long long o, int d, uint8_t *h, double bs, int bm, int c) {
+            player = p;
+            opponent = o;
+            depth = d;
+            for (int i = 0; i < 7; i++) {heights[i] = h[i];}
+            best_score = &bs;
+            best_move = &bm;
+            column_played = c;
+        }
+    };
+    void start_search(value_search values, int column_played);
 
     /**
      * @brief Search the best move the AI can make
@@ -150,4 +168,7 @@ public:
      * @return the status code
      */
     int run();
+    long getCount() {
+        return count;
+    }
 };

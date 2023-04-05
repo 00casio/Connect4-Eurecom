@@ -17,7 +17,7 @@ for depth in range(1, nbr_depth+1):
         end = time()
         t += end - start
         print(f"{depth:2d}: {i}", end="\r")
-    print(f"{depth:2d}: done, it took {t} seconds")
+    print(f"{depth:2d}: done, it took {t} seconds ({g.count()} nodes visited)")
     fp = open("result.csv", "a")
     fp.write(f"{depth:5d}, {compiler:>25s}, {nbr_test:10d}, {t/nbr_test:15f}, {id_test:>10s}\n")
     fp.close()
