@@ -11,7 +11,6 @@ int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) 
     }
     *player ^= 1ULL << (BOARDLEN - 1 - heights[col]);
     heights[col] -= 8;
-    count++;
     return col;
 }
 
@@ -42,18 +41,22 @@ bool Game::winning(const unsigned long long bitboard) {
 }
 
 int Game::countNbrOne(const unsigned long long bitboard) {
-    int count = 0;
+    count++;
+    int count_one = 0;
     int gaëtan = 1;
-    for (int i = 0; i < BOARDLEN; i++) {
-        if ((gaëtan & bitboard) != 0) {
-            count++;
+    for (int i = 0; i < 6; i++) {
+        for (int j = 0; j < 7; j++) {
+            if ((gaëtan & bitboard) != 0) {
+                count_one++;
+            }
+            gaëtan <<= 1;
         }
         gaëtan <<= 1;
     }
-    return count;
+    return count_one;
 }
 
-int Game::nbr3InLine(const unsigned long long bitboard){//, int *score, const int multi) {
+int Game::nbr3InLine(const unsigned long long bitboard){
     int nbr_3_in_line = 0;
     // Points when there are 3 disks next to each other
     int tmp = bitboard & (bitboard >> 8) & (bitboard >> 16);
@@ -72,11 +75,10 @@ int Game::nbr3InLine(const unsigned long long bitboard){//, int *score, const in
     if (tmp != 0) {
         nbr_3_in_line += countNbrOne(tmp);
     }
-    // *score += multi*nbr_3_in_line;
     return nbr_3_in_line;
 }
 
-int Game::nbr2InLine(const unsigned long long bitboard){//, int *score, const int multi) {
+int Game::nbr2InLine(const unsigned long long bitboard){
     int nbr_2_in_line = 0;
     // Points when there are 2 disks next to each other
     int tmp = bitboard & (bitboard >> 8);
@@ -95,7 +97,6 @@ int Game::nbr2InLine(const unsigned long long bitboard){//, int *score, const in
     if (tmp != 0) {
         nbr_2_in_line += countNbrOne(tmp);
     }
-    // *score += multi*nbr_2_in_line;
     return nbr_2_in_line;
 }
 
@@ -109,10 +110,6 @@ double Game::evaluateBoard(const unsigned long long bitboard, const unsigned lon
         return -INFINITY;
     }
 
-    // nbr3InLine(bitboard, &score, 20);
-    // nbr3InLine(oppBitboard, &score, -20);
-    // nbr2InLine(bitboard, &score, 2);
-    // nbr2InLine(oppBitboard, &score, -2);
     score += nbr3InLine(bitboard) * 20;
     score -= nbr3InLine(oppBitboard) * 20;
     score += nbr2InLine(bitboard) * 2;
@@ -127,23 +124,6 @@ double Game::evaluateBoard(const unsigned long long bitboard, const unsigned lon
         return score;
     }
     return 111;
-}
-
-double Game::searchTopResult(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta, int col_played) {
-
-    unsigned long long tmp_p = *player;
-    unsigned long long tmp_o = *opponent;
-    uint8_t tmp_h = *heights;
-
-    int dpRes = putPiece(&tmp_p, col_played, &tmp_h);
-    if (dpRes == NOT_ALLOWED) {
-        return SCORE_NOT_ALLOWED;
-    }
-
-    double score = minimax(&tmp_p, &tmp_o, &tmp_h, depth - 1, ~isMaximising, alpha, beta);
-    removePiece(&tmp_p, col_played, &tmp_h);
-
-    return score;
 }
 
 double Game::minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta) {

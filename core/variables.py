@@ -30,7 +30,7 @@ class Variables:
                 "options_play_AIvAI": "Watch the world burn",
                 "options_difficulty_HvAI": "Choose your poison",
                 "options_difficulty_AIvAI": "How badly do you want this game to go ?",
-                "cancel_box": "Cancel",
+                "cancel_box": "Return",
                 "quit_box": "Quit",
                 "message_quit": "You chose to quit the game\nYou are disapointing me",
             },

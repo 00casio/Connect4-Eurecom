@@ -10,7 +10,7 @@ The project S6 of:
 
 ### This week objectives
 
-- [ ] Speed up the minimax algorithm
+- [x] Speed up the minimax algorithm
 - [ ] Solve lag problem on gestures
 - [x] Reorganize repo
 
@@ -22,6 +22,8 @@ The objectives of this project are the following:
 - Setting up a protocol to play with two different Raspberry Pi
 - Building an AI capable of playing the game
 - Building a program allowing a human to play the game with hand gestures using the Raspberry Pi camera module
+
+We may be able to use the time between out move and the opponent's move to squeeze in some more time to compute things.
 
 #### Interface
 

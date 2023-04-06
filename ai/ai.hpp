@@ -1,15 +1,13 @@
-#if true
+#if true // Change this to 'false' to compile for the shared library
     #include <boost/python.hpp>
     #define BOOST_PYTHON_USED
 #endif
 
+#include "threads.hpp"
 #include <cmath>
 #include <cstdint>
-#include <cstdlib>
 #include <cstdio>
 #include <ctime>
-#include <vector>
-#include "threads.hpp"
 
 /*
 The reason we are using (internally) a 8x8 board is because we are using an
@@ -39,12 +37,13 @@ private:
     int HUMAN = 1;
     int AI = ~HUMAN; // This way we are sure they are not the same
     int current_player = HUMAN;
-    long count = 0;
 
+    // The bitboards for the two players
     unsigned long long human_board = 0b0;
     unsigned long long ai_board = 0b0;
     uint8_t col_heights[7] = {56, 57, 58, 59, 60, 61, 62};
 
+    long count = 0; // This is used to know how many times something is done
     /**
      * @brief Place the new piece on the board
      * 
@@ -73,9 +72,30 @@ private:
      */
     bool winning(const unsigned long long bitboard);
 
+    /**
+     * @brief Count the number of 1 in bitboard
+     * 
+     * @param bitboard The board representation
+     * @return the number of 1
+     */
     int countNbrOne(const unsigned long long bitboard);
-    int nbr3InLine(const unsigned long long bitboard);//, int *score, const int multi);
-    int nbr2InLine(const unsigned long long bitboard);//, int *score, const int multi);
+
+    /**
+     * @brief Count the number of 3 aligned disks
+     * 
+     * @param bitboard The board representation
+     * @return the number of aligned disks
+     */
+    int nbr3InLine(const unsigned long long bitboard);
+
+
+    /**
+     * @brief Count the number of 2 aligned disks
+     * 
+     * @param bitboard The board representation
+     * @return the number of aligned disks
+     */
+    int nbr2InLine(const unsigned long long bitboard);
 
     /**
      * @brief Compute the score of the board
@@ -86,8 +106,6 @@ private:
      * @return The score computed
      */
     double evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth);
-
-    double searchTopResult(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta, int col_played);
 
     /**
      * @brief Apply the minmax algorithm with alpha-beta prunning
@@ -103,8 +121,18 @@ private:
      */
     double minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta);
 
+    /**
+     * @brief Return the best starting move when no evaluation is done
+     * 
+     * @param heights The list of the heights of the different columns
+     * @return the column played
+     */
     int bestStartingMove(const uint8_t *heights);
 
+    /**
+     * @brief A structure to copy the important values for multithreading
+     * 
+     */
     struct value_search {
         unsigned long long player;
         unsigned long long opponent;
@@ -118,7 +146,16 @@ private:
             for (int i = 0; i < 7; i++) {heights[i] = h[i];}
         }
     };
-    void start_search(value_search values, int column_played, double *best_screen, int *best_move);
+
+    /**
+     * @brief The function used for multithreading
+     * 
+     * @param values The structure for the values copied
+     * @param column_played The column for the first move
+     * @param best_score A pointer to the variable storing the best score
+     * @param best_move A pointer to the variable storing the best move
+     */
+    void start_search(value_search values, int column_played, double *best_score, int *best_move);
 
     /**
      * @brief Search the best move the AI can make

@@ -34,3 +34,6 @@ venv
 **.pdf
 **.tmp
 **.so
+
+# VSCode
+.vscode
