@@ -1,9 +1,14 @@
-#include <boost/python.hpp>
+#if true
+    #include <boost/python.hpp>
+    #define BOOST_PYTHON_USED
+#endif
+
 #include <cmath>
 #include <cstdint>
 #include <cstdlib>
 #include <cstdio>
 #include <ctime>
+#include <vector>
 #include "threads.hpp"
 
 /*
@@ -69,8 +74,8 @@ private:
     bool winning(const unsigned long long bitboard);
 
     int countNbrOne(const unsigned long long bitboard);
-    void nbr3InLine(const unsigned long long bitboard, int *score, const int multi);
-    void nbr2InLine(const unsigned long long bitboard, int *score, const int multi);
+    int nbr3InLine(const unsigned long long bitboard);//, int *score, const int multi);
+    int nbr2InLine(const unsigned long long bitboard);//, int *score, const int multi);
 
     /**
      * @brief Compute the score of the board
@@ -105,21 +110,15 @@ private:
         unsigned long long opponent;
         int depth;
         uint8_t heights[7];
-        double *best_score;
-        int *best_move;
-        int column_played;
 
-        value_search(unsigned long long p, unsigned long long o, int d, uint8_t *h, double bs, int bm, int c) {
+        value_search(unsigned long long p, unsigned long long o, int d, uint8_t *h) {
             player = p;
             opponent = o;
             depth = d;
             for (int i = 0; i < 7; i++) {heights[i] = h[i];}
-            best_score = &bs;
-            best_move = &bm;
-            column_played = c;
         }
     };
-    void start_search(value_search values, int column_played);
+    void start_search(value_search values, int column_played, double *best_screen, int *best_move);
 
     /**
      * @brief Search the best move the AI can make

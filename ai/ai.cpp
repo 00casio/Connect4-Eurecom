@@ -4,7 +4,6 @@
 */
 
 #include "ai.hpp"
-#include <cmath>
 
 int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) {
     if (heights[col] < 16 || col < 0 || col > 6) {
@@ -54,7 +53,7 @@ int Game::countNbrOne(const unsigned long long bitboard) {
     return count;
 }
 
-void Game::nbr3InLine(const unsigned long long bitboard, int *score, const int multi) {
+int Game::nbr3InLine(const unsigned long long bitboard){//, int *score, const int multi) {
     int nbr_3_in_line = 0;
     // Points when there are 3 disks next to each other
     int tmp = bitboard & (bitboard >> 8) & (bitboard >> 16);
@@ -73,10 +72,11 @@ void Game::nbr3InLine(const unsigned long long bitboard, int *score, const int m
     if (tmp != 0) {
         nbr_3_in_line += countNbrOne(tmp);
     }
-    *score += multi*nbr_3_in_line;
+    // *score += multi*nbr_3_in_line;
+    return nbr_3_in_line;
 }
 
-void Game::nbr2InLine(const unsigned long long bitboard, int *score, const int multi) {
+int Game::nbr2InLine(const unsigned long long bitboard){//, int *score, const int multi) {
     int nbr_2_in_line = 0;
     // Points when there are 2 disks next to each other
     int tmp = bitboard & (bitboard >> 8);
@@ -95,7 +95,8 @@ void Game::nbr2InLine(const unsigned long long bitboard, int *score, const int m
     if (tmp != 0) {
         nbr_2_in_line += countNbrOne(tmp);
     }
-    *score += multi*nbr_2_in_line;
+    // *score += multi*nbr_2_in_line;
+    return nbr_2_in_line;
 }
 
 double Game::evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth) {
@@ -108,19 +109,14 @@ double Game::evaluateBoard(const unsigned long long bitboard, const unsigned lon
         return -INFINITY;
     }
 
-    // t1(nbr3InLine, bitboard, &score, 20);
-    // t2(nbr3InLine, oppBitboard, &score, -20);
-    // t3(nbr2InLine, bitboard, &score, 2);
-    // t4(nbr2InLine, oppBitboard, &score, -2);
-    nbr3InLine(bitboard, &score, 20);
-    nbr3InLine(oppBitboard, &score, -20);
-    nbr2InLine(bitboard, &score, 2);
-    nbr2InLine(oppBitboard, &score, -2);
-
-	// t1.join();
-	// t2.join();
-	// t3.join();
-	// t4.join();
+    // nbr3InLine(bitboard, &score, 20);
+    // nbr3InLine(oppBitboard, &score, -20);
+    // nbr2InLine(bitboard, &score, 2);
+    // nbr2InLine(oppBitboard, &score, -2);
+    score += nbr3InLine(bitboard) * 20;
+    score -= nbr3InLine(oppBitboard) * 20;
+    score += nbr2InLine(bitboard) * 2;
+    score -= nbr2InLine(oppBitboard) * 2;
 
     // if board is maxed out (excluding top row)
     if ((bitboard | oppBitboard) == 280371153272574) {
@@ -214,18 +210,18 @@ int Game::bestStartingMove(const uint8_t *heights) {
     exit(-1);
 }
 
-void Game::start_search(value_search values, int column_played) {
-    int dpRes = putPiece(&values.player, values.column_played, values.heights);
+void Game::start_search(value_search values, int column_played, double *best_score, int *best_move) {
+    int dpRes = putPiece(&values.player, column_played, values.heights);
     if (dpRes == NOT_ALLOWED) {
         return;
     }
 
     double score = minimax(&values.player, &values.opponent, values.heights, values.depth, false, -INFINITY, INFINITY);
-    removePiece(&values.player, values.column_played, values.heights);
+    removePiece(&values.player, column_played, values.heights);
 
-    if (score > *values.best_score) {
-        *values.best_score = score;
-        *values.best_move = column_played;
+    if (score > *best_score) {
+        *best_score = score;
+        *best_move = column_played;
     }
 }
 
@@ -233,13 +229,14 @@ int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent,
     ThreadPool thread_pool(thread_count);
     int bestMove = bestStartingMove(heights);
     double bestScore = -INFINITY;
+    value_search tmp(*player, *opponent, depth, heights);
 
     for (int i = 0; i < NBR_COL; i++) {
-        value_search tmp(*player, *opponent, depth, heights, bestScore, bestMove, i);
-        thread_pool.addTask([this, tmp, i]{
-            start_search(tmp, i);
+        thread_pool.addTask([this, tmp, i, &bestScore, &bestMove]{
+            start_search(tmp, i, &bestScore, &bestMove);
         });
     }
+    thread_pool.waitForCompletion();
     return bestMove;
 }
 
@@ -301,18 +298,18 @@ int Game::run() {
             }
         } else {
             clock_t start = clock();
-            printf("AI is thinking... ");
+            printf("AI is thinking... \n");
             aiMove(depth);
             clock_t end = clock();
             printf("and it took %lf seconds\n", (double)(end - start) / CLOCKS_PER_SEC);
         }
         current_player = ((current_player == HUMAN) ? AI : HUMAN);
         int result = evaluateBoard(ai_board, human_board, 1);
-        if (result > 10000) {
+        if (result > 30000) {
             printf("AI WINS!\n");
             printBoard();
             return EXIT_SUCCESS;
-        } else if (result < -10000) {
+        } else if (result < -30000) {
             printf("HUMAN WINS!\n");
             printBoard();
             return EXIT_SUCCESS;
@@ -345,13 +342,15 @@ int main(int argc, char **argv) {
  * @brief Allow to use those functions in a python program
  * 
  */
-BOOST_PYTHON_MODULE(libai) {
-    boost::python::class_<Game>("Game")
-        .def("aiMove", &Game::aiMove)
-        .def("humanMove", &Game::humanMove)
-        .def("resetBoard", &Game::resetBoard)
-        .def("printBoard", &Game::printBoard)
-        .def("run", &Game::run)
-        .def("count", &Game::getCount)
-    ;
-}
+#ifdef BOOST_PYTHON_USED
+    BOOST_PYTHON_MODULE(libai) {
+        boost::python::class_<Game>("Game")
+            .def("aiMove", &Game::aiMove)
+            .def("humanMove", &Game::humanMove)
+            .def("resetBoard", &Game::resetBoard)
+            .def("printBoard", &Game::printBoard)
+            .def("run", &Game::run)
+            .def("count", &Game::getCount)
+        ;
+    }
+#endif

@@ -5,10 +5,10 @@ import libai
 from time import time
 
 nbr_test = 100
-nbr_depth = 11
+max_depth = 9
 compiler = input("Compiler: ")
 id_test = input("Id: ")
-for depth in range(1, nbr_depth+1):
+for depth in range(1, max_depth+1):
     t = 0
     for i in range(1, nbr_test):
         g = libai.Game()
