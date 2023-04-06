@@ -12,7 +12,7 @@
 struct TaskQueue {
     std::queue<std::function<void()>> m_tasks;
     std::mutex                        m_mutex;
-    std::atomic<uint32_t>             m_remaining_tasks = 0;
+    std::atomic_uint32_t              m_remaining_tasks = { 0 };
 
     template<typename TCallback>
     void addTask(TCallback&& callback) {
