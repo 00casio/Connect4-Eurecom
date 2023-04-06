@@ -44,8 +44,8 @@ int Game::countNbrOne(const unsigned long long bitboard) {
     count++;
     int count_one = 0;
     int gaëtan = 1;
-    for (int i = 0; i < 6; i++) {
-        for (int j = 0; j < 7; j++) {
+    for (int i = 0; i < NBR_LINE; i++) {
+        for (int j = 0; j < NBR_COL; j++) {
             if ((gaëtan & bitboard) != 0) {
                 count_one++;
             }
