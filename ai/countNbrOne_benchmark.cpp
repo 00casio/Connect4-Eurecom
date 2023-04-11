@@ -56,7 +56,9 @@ int main() {
         countNbrOne_2(a);
         end = clock();
         t_2 += (double) (end - start) / CLOCKS_PER_SEC;
-        printf("\r%i", i);
+        if (i%200 == 0) {
+            printf("\r%i", i);
+        }
     }
     printf("\n1st: %f\n2nd: %f", t_1, t_2);
     return 0;

@@ -56,48 +56,47 @@ int Game::countNbrOne(const unsigned long long bitboard) {
     return count_one;
 }
 
-int Game::nbr3InLine(const unsigned long long bitboard){
+int Game::countPoints(const unsigned long long bitboard){
     int nbr_3_in_line = 0;
-    // Points when there are 3 disks next to each other
-    int tmp = bitboard & (bitboard >> 8) & (bitboard >> 16);
-    if (tmp != 0) {
-        nbr_3_in_line += countNbrOne(tmp);
-    }
-    tmp = bitboard & (bitboard >> 1) & (bitboard >> 2);
-    if (tmp != 0) {
-        nbr_3_in_line += countNbrOne(tmp);
-    }
-    tmp = bitboard & (bitboard >> 7) & (bitboard >> 14);
-    if (tmp != 0) {
-        nbr_3_in_line += countNbrOne(tmp);
-    }
-    tmp = bitboard & (bitboard >> 9) & (bitboard >> 18);
-    if (tmp != 0) {
-        nbr_3_in_line += countNbrOne(tmp);
-    }
-    return nbr_3_in_line;
-}
-
-int Game::nbr2InLine(const unsigned long long bitboard){
     int nbr_2_in_line = 0;
-    // Points when there are 2 disks next to each other
+
     int tmp = bitboard & (bitboard >> 8);
     if (tmp != 0) {
         nbr_2_in_line += countNbrOne(tmp);
+        tmp &= (bitboard >> 16);
+        if (tmp != 0) {
+            nbr_3_in_line += countNbrOne(tmp);
+        }
     }
+
     tmp = bitboard & (bitboard >> 1);
     if (tmp != 0) {
         nbr_2_in_line += countNbrOne(tmp);
+        tmp &= (bitboard >> 2);
+        if (tmp != 0) {
+            nbr_3_in_line += countNbrOne(tmp);
+        }
     }
+
     tmp = bitboard & (bitboard >> 7);
     if (tmp != 0) {
         nbr_2_in_line += countNbrOne(tmp);
+        tmp &= (bitboard >> 14);
+        if (tmp != 0) {
+            nbr_3_in_line += countNbrOne(tmp);
+        }
     }
+
     tmp = bitboard & (bitboard >> 9);
     if (tmp != 0) {
         nbr_2_in_line += countNbrOne(tmp);
+        tmp &= (bitboard >> 18);
+        if (tmp != 0) {
+            nbr_3_in_line += countNbrOne(tmp);
+        }
     }
-    return nbr_2_in_line;
+
+    return nbr_3_in_line * 20 + nbr_2_in_line * 2;
 }
 
 double Game::evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth) {
@@ -110,10 +109,8 @@ double Game::evaluateBoard(const unsigned long long bitboard, const unsigned lon
         return -INFINITY;
     }
 
-    score += nbr3InLine(bitboard) * 20;
-    score -= nbr3InLine(oppBitboard) * 20;
-    score += nbr2InLine(bitboard) * 2;
-    score -= nbr2InLine(oppBitboard) * 2;
+    score += countPoints(bitboard);
+    score -= countPoints(oppBitboard);
 
     // if board is maxed out (excluding top row)
     if ((bitboard | oppBitboard) == 280371153272574) {

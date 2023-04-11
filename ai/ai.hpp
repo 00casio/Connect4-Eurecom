@@ -81,21 +81,12 @@ private:
     int countNbrOne(const unsigned long long bitboard);
 
     /**
-     * @brief Count the number of 3 aligned disks
+     * @brief Count the number of 3 and 2 aligned disks
      * 
      * @param bitboard The board representation
      * @return the number of aligned disks
      */
-    int nbr3InLine(const unsigned long long bitboard);
-
-
-    /**
-     * @brief Count the number of 2 aligned disks
-     * 
-     * @param bitboard The board representation
-     * @return the number of aligned disks
-     */
-    int nbr2InLine(const unsigned long long bitboard);
+    int countPoints(const unsigned long long bitboard);
 
     /**
      * @brief Compute the score of the board
