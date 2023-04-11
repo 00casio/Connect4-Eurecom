@@ -75,9 +75,10 @@ private:
      * @brief Count the number of 4, 3, and 2 aligned disks
      * 
      * @param bitboard The board representation
-     * @return the number of aligned disks
+     * @param state The state of the board (if winning or not)
+     * @return the score associatedwith the bitboard
      */
-    int countPoints(const unsigned long long bitboard);
+    int countPoints(const unsigned long long bitboard, bool *state);
 
     /**
      * @brief Compute the score of the board
@@ -186,7 +187,13 @@ public:
      * @return the status code
      */
     int run();
-    long getCount() {
+
+    /**
+     * @brief Get the count object
+     * 
+     * @return long 
+     */
+    long get_count() {
         return count;
     }
 };

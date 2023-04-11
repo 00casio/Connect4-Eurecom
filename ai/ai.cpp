@@ -35,7 +35,7 @@ int Game::countNbrOne(const unsigned long long bitboard) {
     return count_one;
 }
 
-int Game::countPoints(const unsigned long long bitboard) {
+int Game::countPoints(const unsigned long long bitboard, bool *state) {
     int nbr_3_in_line = 0;
     int nbr_2_in_line = 0;
 
@@ -45,7 +45,8 @@ int Game::countPoints(const unsigned long long bitboard) {
         tmp &= (bitboard >> 16);
         if (tmp != 0) {
             if (tmp & (bitboard >> 24)) {
-                return INFINITY;
+                *state = true;
+                return 0;
             }
             nbr_3_in_line += countNbrOne(tmp);
         }
@@ -57,7 +58,8 @@ int Game::countPoints(const unsigned long long bitboard) {
         tmp &= (bitboard >> 2);
         if (tmp != 0) {
             if (tmp & (bitboard >> 3)) {
-                return INFINITY;
+                *state = true;
+                return 0;
             }
             nbr_3_in_line += countNbrOne(tmp);
         }
@@ -69,7 +71,8 @@ int Game::countPoints(const unsigned long long bitboard) {
         tmp &= (bitboard >> 14);
         if (tmp != 0) {
             if (tmp & (bitboard >> 21)) {
-                return INFINITY;
+                *state = true;
+                return 0;
             }
             nbr_3_in_line += countNbrOne(tmp);
         }
@@ -81,7 +84,8 @@ int Game::countPoints(const unsigned long long bitboard) {
         tmp &= (bitboard >> 18);
         if (tmp != 0) {
             if (tmp & (bitboard >> 27)) {
-                return INFINITY;
+                *state = true;
+                return 0;
             }
             nbr_3_in_line += countNbrOne(tmp);
         }
@@ -92,9 +96,17 @@ int Game::countPoints(const unsigned long long bitboard) {
 
 double Game::evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth) {
     double score = 0;
+    bool winning = false;
+    bool losing = false;
 
-    score += countPoints(bitboard);
-    score -= countPoints(oppBitboard);
+    score += countPoints(bitboard, &winning);
+    if (winning) {
+        return INFINITY;
+    }
+    score -= countPoints(oppBitboard, &losing);
+    if (losing) {
+        return -INFINITY;
+    }
 
     // if board is maxed out (excluding top row)
     if ((bitboard | oppBitboard) == 280371153272574) {
@@ -311,7 +323,7 @@ int main(int argc, char **argv) {
             .def("resetBoard", &Game::resetBoard)
             .def("printBoard", &Game::printBoard)
             .def("run", &Game::run)
-            .def("count", &Game::getCount)
+            .def("count", &Game::get_count)
         ;
     }
 #endif
