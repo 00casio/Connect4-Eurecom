@@ -64,15 +64,6 @@ private:
     void removePiece(unsigned long long *player, const int col, uint8_t *heights);
 
     /**
-     * @brief Check if a player is winning
-     * 
-     * @param bitboard The board representation
-     * @return true if the player has won
-     * @return false if the player has not won
-     */
-    bool winning(const unsigned long long bitboard);
-
-    /**
      * @brief Count the number of 1 in bitboard
      * 
      * @param bitboard The board representation
@@ -81,7 +72,7 @@ private:
     int countNbrOne(const unsigned long long bitboard);
 
     /**
-     * @brief Count the number of 3 and 2 aligned disks
+     * @brief Count the number of 4, 3, and 2 aligned disks
      * 
      * @param bitboard The board representation
      * @return the number of aligned disks

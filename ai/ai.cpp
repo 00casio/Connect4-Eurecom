@@ -19,27 +19,6 @@ void Game::removePiece(unsigned long long *player, const int col, uint8_t *heigh
     *player &= ~(1ULL << (BOARDLEN - 1 - heights[col]));
 }
 
-bool Game::winning(const unsigned long long bitboard) {
-    unsigned long long m;
-    m = (bitboard & (bitboard >> 8));
-    if ((m & (m >> 16)) != 0) {
-        return true;
-    }
-    m = (bitboard & (bitboard >> 1));
-    if ((m & (m >> 2)) != 0) {
-        return true;
-    }
-    m = (bitboard & (bitboard >> 7));
-    if ((m & (m >> 14)) != 0) {
-        return true;
-    }
-    m = (bitboard & (bitboard >> 9));
-    if ((m & (m >> 18)) != 0) {
-        return true;
-    }
-    return false;
-}
-
 int Game::countNbrOne(const unsigned long long bitboard) {
     count++;
     int count_one = 0;
@@ -56,15 +35,18 @@ int Game::countNbrOne(const unsigned long long bitboard) {
     return count_one;
 }
 
-int Game::countPoints(const unsigned long long bitboard){
+int Game::countPoints(const unsigned long long bitboard) {
     int nbr_3_in_line = 0;
     int nbr_2_in_line = 0;
 
-    int tmp = bitboard & (bitboard >> 8);
+    unsigned long long tmp = bitboard & (bitboard >> 8);
     if (tmp != 0) {
         nbr_2_in_line += countNbrOne(tmp);
         tmp &= (bitboard >> 16);
         if (tmp != 0) {
+            if (tmp & (bitboard >> 24)) {
+                return INFINITY;
+            }
             nbr_3_in_line += countNbrOne(tmp);
         }
     }
@@ -74,6 +56,9 @@ int Game::countPoints(const unsigned long long bitboard){
         nbr_2_in_line += countNbrOne(tmp);
         tmp &= (bitboard >> 2);
         if (tmp != 0) {
+            if (tmp & (bitboard >> 3)) {
+                return INFINITY;
+            }
             nbr_3_in_line += countNbrOne(tmp);
         }
     }
@@ -83,6 +68,9 @@ int Game::countPoints(const unsigned long long bitboard){
         nbr_2_in_line += countNbrOne(tmp);
         tmp &= (bitboard >> 14);
         if (tmp != 0) {
+            if (tmp & (bitboard >> 21)) {
+                return INFINITY;
+            }
             nbr_3_in_line += countNbrOne(tmp);
         }
     }
@@ -92,6 +80,9 @@ int Game::countPoints(const unsigned long long bitboard){
         nbr_2_in_line += countNbrOne(tmp);
         tmp &= (bitboard >> 18);
         if (tmp != 0) {
+            if (tmp & (bitboard >> 27)) {
+                return INFINITY;
+            }
             nbr_3_in_line += countNbrOne(tmp);
         }
     }
@@ -100,14 +91,7 @@ int Game::countPoints(const unsigned long long bitboard){
 }
 
 double Game::evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth) {
-    int score = 0;
-
-    // Vertical check
-    if (winning(bitboard)) {
-        return INFINITY;
-    } else if (winning(oppBitboard)) {
-        return -INFINITY;
-    }
+    double score = 0;
 
     score += countPoints(bitboard);
     score -= countPoints(oppBitboard);
