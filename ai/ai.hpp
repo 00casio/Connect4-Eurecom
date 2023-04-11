@@ -33,10 +33,10 @@ private:
     // Multithreading variables
     int thread_count = 4;
 
-    // Connect 4 variables
+    // Players variables
     int HUMAN = 1;
     int AI = ~HUMAN; // This way we are sure they are not the same
-    int current_player = HUMAN;
+    int current_player = HUMAN; // Not used when in mode shared library
 
     // The bitboards for the two players
     unsigned long long human_board = 0b0;
@@ -55,7 +55,7 @@ private:
     int putPiece(unsigned long long *player, const int col, uint8_t *heights);
 
     /**
-     * @brief Remove the piece at the top of the column choosen
+     * @brief Remove the piece at the top of the column chosen
      * 
      * @param player The board representation
      * @param col The column we want to remove the piece
