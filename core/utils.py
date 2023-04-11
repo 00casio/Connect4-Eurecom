@@ -6,7 +6,9 @@ from typing import Any, Sequence
 
 # from headers import Rect, Color, Surface
 import pygame as pg
-from core.variables import Variables, Color, Rect, Surface
+
+from core.variables import Color, Rect, Surface, Variables
+
 
 def opponent(symbol_player: Any) -> Any:  # Gives symbol of the opponent
     if symbol_player == Variables().symbol_player_1:
@@ -206,7 +208,9 @@ class Tools:
         icon = pg.transform.scale(img, size)
         return icon
 
-    def draw_icon(self, image: str, size: tuple[int, int], position: tuple[int, int]) -> Rect:
+    def draw_icon(
+        self, image: str, size: tuple[int, int], position: tuple[int, int]
+    ) -> Rect:
         p = self.var.text_box_spacing
         icon = self.make_icon(image, size)
         box = Rect(position[0] - p, position[1] - p, size[0] + 2 * p, size[1] + 2 * p)

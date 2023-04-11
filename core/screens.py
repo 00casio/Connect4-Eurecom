@@ -2,16 +2,19 @@
 # -*- coding: utf-8 -*-
 
 import sys
-import pygame as pg
-import numpy as np
-import cv2
+from time import time
 from typing import Any, Iterator, Optional
 
-from extern.gesture import *
+import cv2
+import numpy as np
+import pygame as pg
+from playsound import playsound
+
 # from headers import Surface, Color, Rect, Optional, Game
 from core.utils import Tools
-from core.variables import Variables, Color, Rect, Surface
-from playsound import playsound
+from core.variables import Color, Rect, Surface, Variables
+from extern.communication import Communication
+from extern.gesture import *
 
 
 class Screen(Tools):
@@ -141,6 +144,8 @@ class Screen(Tools):
         sound: str = Variables().sound_click_box,
         print_disk: bool = False,
         color_disk: Color = Variables().white,
+        func: Callable = None,
+        **args,
     ) -> tuple[int, int]:
         """Quit the function only when there is a click. Return the position of the click.
         If f is not None, then the function is called whith the argument 'event' at every iteration"""
@@ -156,6 +161,8 @@ class Screen(Tools):
                     allow_quit = True
                 if print_disk:
                     self.human_move(color_disk)
+                if func is not None:
+                    func(**args)
         click = self.get_mouse_pos()
         if self.is_canceled(click):
             self.box_clicked = self.var.boxAI_cancel
@@ -290,6 +297,51 @@ class Screen_AI(Screen):
                 pg.display.update()
 
 
+class OpponentSelectionScreen(Screen):
+    def __init__(
+        self,
+        var: Variables,
+        screen: Surface,
+        gesture: GestureController,
+        comm: Communication,
+        volume: bool,
+        camera: bool,
+    ) -> None:
+        Screen.__init__(self, var, screen, gesture, volume, camera)
+        self.opp = None
+        self.poss = []
+        self.rect_boxes = []
+        self.comm = comm
+        self.time_update = 5
+        self.last_update = 0
+
+    def update(self) -> None:
+        if (time() - self.last_update) < self.time_update:
+            return
+        self.poss = self.comm.receive()
+        i = 0
+        list_poss_player = []
+        while i < len(poss):
+            p_1 = self.create_text_rendered(poss[i])
+            p_2 = self.create_text_rendered(poss[i + 1])
+            list_poss_player.append([p_1, p_2])
+            i += 2
+        self.rect_boxes = self.center_all(list_poss_player)
+
+    def select(self):
+        while self.opp is None and self.box_clicked != self.var.boxAI_cancel:
+            mouse = self.click(func=self.update)
+            for i in range(len(self.rect_boxes)):
+                if self.x_in_rect(mouse, self.rect_boxes[i][0]):
+                    self.opp = self.poss[2 * i]
+                    break
+                elif self.x_in_rect(mouse, self.rect_boxes[i][1]):
+                    self.opp = self.poss[2 * i + 1]
+                    break
+        if self.opp is not None:
+            self.comm.send(self.opp)
+
+
 """
 Options to do:
 Language (Cymraeg, Arabic)
@@ -324,7 +376,13 @@ class OptionsScreen(Screen):
         self.flags = list(self.draw_language())
         pg.display.update()
 
-    def dfites(self, testing: bool, position: tuple[int, int], first_image: str, second_image: str) -> Rect:
+    def dfites(
+        self,
+        testing: bool,
+        position: tuple[int, int],
+        first_image: str,
+        second_image: str,
+    ) -> Rect:
         if testing:
             box = self.draw_icon(first_image, self.size, position)
         else:

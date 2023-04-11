@@ -1,12 +1,13 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from typing import Any, Iterator
+
 import numpy as np
 
-from typing import Any, Iterator
-from core.variables import Variables
+from core.structure import Board, Node
 from core.utils import Symbol, opponent
-from core.structure import Node, Board
+from core.variables import Variables
 
 vzuydskqdkz = Variables()
 symbol_player_1 = vzuydskqdkz.symbol_player_1
@@ -32,7 +33,9 @@ def count(buffer: list[Any], symbol: Any, number: int) -> bool:
     return buffer.count(symbol) == number
 
 
-def count_point(line: np.ndarray[Any, np.dtype[Any]] | list[Any], symbol_player: Any) -> int:
+def count_point(
+    line: np.ndarray[Any, np.dtype[Any]] | list[Any], symbol_player: Any
+) -> int:
     buffer = list(line)
     score = 0
     opp_player = opponent(symbol_player)
@@ -95,7 +98,7 @@ def score_board(board: Board, symbol_player: Any) -> int:
     for i in range(3):
         for j in range(4):
             s += count_point([board[i + 3 - k, j + k] for k in range(4)], symbol_player)
-    print ("Board is : ", board)
+    print("Board is : ", board)
     print("Score is : ", s)
     return s
 
@@ -134,4 +137,4 @@ def minimax(node: Node, alpha: int, beta: int, maximising: bool) -> tuple[int, i
             if score < value:
                 value = score
                 column_chosen = column_played
-    return score, column_chosen 
+    return score, column_chosen

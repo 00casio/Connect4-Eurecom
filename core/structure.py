@@ -2,8 +2,11 @@
 # -*- coding: utf-8 -*-
 
 from typing import Any, Iterator, Optional
-from core.utils import Symbol, opponent
+
 import numpy as np
+
+from core.utils import Symbol, opponent
+
 # from headers import Node
 from core.variables import Variables
 
@@ -57,7 +60,9 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
         # Nothing found
         return False
 
-    def is_valid_col(self, col: int) -> bool:  # on regarde si la colonne est pleine ou pas
+    def is_valid_col(
+        self, col: int
+    ) -> bool:  # on regarde si la colonne est pleine ou pas
         return self[0, col] == Variables().symbol_no_player
 
     def list_valid_col(self) -> list[int]:  # liste des colonnes où l'on peut jouer
@@ -67,6 +72,7 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
             if self.is_valid_col(col):
                 valid_col.append(col)
         return valid_col
+
 
 class Node_H:
     def __init__(self):
@@ -78,7 +84,7 @@ class Node_H:
         self.children = []
         self.depth = -1
         self.nbr_move = 0
-    
+
     def is_terminal(self) -> bool:
         raise NotImplementedError()
 
@@ -88,7 +94,12 @@ class Node_H:
 
 class Node(Node_H):
     def __init__(
-        self, move: int, parent: Optional[Node_H], symbol: Symbol, depth: int, nbr: int = 0
+        self,
+        move: int,
+        parent: Optional[Node_H],
+        symbol: Symbol,
+        depth: int,
+        nbr: int = 0,
     ) -> None:
         super().__init__()
         self.column_played = move

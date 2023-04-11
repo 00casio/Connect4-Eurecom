@@ -1,19 +1,20 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
+from argparse import Namespace
+from typing import Any, Iterator, Optional
+
 import numpy as np
 import pygame as pg
-from typing import Any, Iterator, Optional
-from argparse import Namespace
+from playsound import playsound
 
-from extern.gesture import *
 # from headers import Rect
 from ai.minimax_ai import minimax, opponent
 from core.screens import GamingScreen, OptionsScreen, Screen, Screen_AI
+from core.structure import Board, Node
 from core.utils import Config, Symbol
-from core.structure import Node, Board
-from core.variables import Variables, Rect
-from playsound import playsound
+from core.variables import Rect, Variables
+from extern.gesture import *
 
 pg.init()
 
@@ -46,7 +47,7 @@ class Player:
             if ai_cpp is None:
                 score, col = minimax(root, 0, 0, True)
             else:
-                col = ai_cpp.aiMove(2*self.ai_difficulty+1)
+                col = ai_cpp.aiMove(2 * self.ai_difficulty + 1)
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
