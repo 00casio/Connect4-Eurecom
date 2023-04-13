@@ -6,8 +6,6 @@ from typing import Any, Iterator, Optional
 import numpy as np
 
 from core.utils import Symbol, opponent
-
-# from headers import Node
 from core.variables import Variables
 
 

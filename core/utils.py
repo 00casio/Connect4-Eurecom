@@ -4,7 +4,6 @@
 from argparse import Namespace
 from typing import Any, Sequence
 
-# from headers import Rect, Color, Surface
 import pygame as pg
 
 from core.variables import Color, Rect, Surface, Variables

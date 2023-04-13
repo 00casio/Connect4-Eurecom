@@ -39,5 +39,7 @@ venv
 **.so
 **.o
 
+ai/libai.py
+
 # VSCode
 .vscode

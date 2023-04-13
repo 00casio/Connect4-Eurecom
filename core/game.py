@@ -8,7 +8,6 @@ import numpy as np
 import pygame as pg
 from playsound import playsound
 
-# from headers import Rect
 from ai.minimax_ai import minimax, opponent
 from core.screens import GamingScreen, OptionsScreen, Screen, Screen_AI
 from core.structure import Board, Node

@@ -9,5 +9,5 @@ class Communication:
     def send(where: tuple):
         pass
 
-    def receive() -> List[tuple]:
+    def receive() -> list[tuple]:
         pass

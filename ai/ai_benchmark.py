@@ -7,8 +7,8 @@ import libai
 
 nbr_test = 100
 max_depth = 10
-compiler = "i"#input("Compiler: ")
-id_test = "a"#input("Id: ")
+compiler = "i"  # input("Compiler: ")
+id_test = "a"  # input("Id: ")
 for depth in range(1, max_depth + 1):
     t = 0
     for i in range(1, nbr_test):

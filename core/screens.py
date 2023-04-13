@@ -3,14 +3,13 @@
 
 import sys
 from time import time
-from typing import Any, Iterator, Optional
+from typing import Any, Callable, Iterator, Optional
 
 import cv2
 import numpy as np
 import pygame as pg
 from playsound import playsound
 
-# from headers import Surface, Color, Rect, Optional, Game
 from core.utils import Tools
 from core.variables import Color, Rect, Surface, Variables
 from extern.communication import Communication
