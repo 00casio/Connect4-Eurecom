@@ -3,7 +3,7 @@
  * or another program that would output the same thing
 */
 
-#include "ai.hpp"
+#include "ai.h"
 
 int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) {
     if (heights[col] < 16 || col < 0 || col > 6) {
@@ -213,7 +213,7 @@ int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent,
     return bestMove;
 }
 
-int Game::aiMove(const int depth) {
+int Game::aiMove(int depth) {
     int ai_col = aiSearchMove(&ai_board, &human_board, depth, col_heights);
     return putPiece(&ai_board, ai_col, col_heights);
 }
@@ -299,31 +299,14 @@ int Game::run() {
     return EXIT_SUCCESS;
 }
 
-int main(int argc, char **argv) {
-    Game g;
-    return g.run();
-    // char *tmp;
-    // g.human_board = strtoul(argv[1], &tmp, 10);
-    // g.ai_board = strtoul(argv[2], &tmp, 10);
+// int main(int argc, char **argv) {
+//     Game g;
+//     return g.run();
+//     // char *tmp;
+//     // g.human_board = strtoul(argv[1], &tmp, 10);
+//     // g.ai_board = strtoul(argv[2], &tmp, 10);
 
-    // g.printBoard();
-    // printf("%i", g.aiMove(*argv[3] - '0'));
-    // return 0;
-}
-
-/**
- * @brief Allow to use those functions in a python program
- * 
- */
-#ifdef BOOST_PYTHON_USED
-    BOOST_PYTHON_MODULE(libai) {
-        boost::python::class_<Game>("Game")
-            .def("aiMove", &Game::aiMove)
-            .def("humanMove", &Game::humanMove)
-            .def("resetBoard", &Game::resetBoard)
-            .def("printBoard", &Game::printBoard)
-            .def("run", &Game::run)
-            .def("count", &Game::get_count)
-        ;
-    }
-#endif
+//     // g.printBoard();
+//     // printf("%i", g.aiMove(*argv[3] - '0'));
+//     // return 0;
+// }

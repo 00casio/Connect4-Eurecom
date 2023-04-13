@@ -1,7 +1,7 @@
 #!/bin/bash
 
-# echo "If you want to compile ai.cpp, don't forget to use the -03 flag."
-# echo "For now, (without multithreading) g++ seems to produce better binary than clang++-16"
+# echo "If you want to compile ai.cpp, don't forget to use the -O3 flag."
+# echo "If possible, try to use clang++-16 because the binary produced are the fastest amongst all"
 # echo "You can benchmark this by using the ai_benchmark.cpp program"
 
 test_python() {
@@ -33,13 +33,14 @@ for module in ${to_install}; do
     install_pypi ${com} ${module}
 done
 
+
 python_ver=$(${com} -c "from sys import version_info as v; print(f'python{v[0]}.{v[1]}')")
-boost_lib="boost_$(echo ${python_ver//.})"
-ldconfig -p | grep ${boost_lib} 2>/dev/null 1>&2
+swig -version 2>/dev/null 1>&2
 if [ $? -eq 0 ]; then
-  g++ -shared ai/ai.cpp -o ai/libai.so -O3 -I /usr/include/${python_ver} -l "${boost_lib}" -fPIC
+  swig -Wall -python -c++ -o ai/ai_wrap.cxx ai/ai.i
+  g++ -shared -O3 -fPIC ai/ai.cpp ai/ai_wrap.cxx -o ai/_libai.so -I /usr/include/${python_ver}
   ${com} main.py --no-camera --no-sound
 else
-  echo "Could not find the boost library on your machine, deactivating it" | tee >&2
+  echo "Could not find the swig, deactivating it for now. Please install it" | tee >&2
   ${com} main.py --no-camera --no-sound --no-libai
 fi

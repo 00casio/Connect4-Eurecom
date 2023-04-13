@@ -33,7 +33,11 @@ venv
 **.log
 **.pdf
 **.tmp
+
+# C/C++
+**.cxx
 **.so
+**.o
 
 # VSCode
 .vscode

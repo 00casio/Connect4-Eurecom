@@ -1,8 +1,3 @@
-#if true // Change this to 'false' to compile for the shared library
-    #include <boost/python.hpp>
-    #define BOOST_PYTHON_USED
-#endif
-
 #include "threads.hpp"
 #include <cmath>
 #include <cstdint>
@@ -43,7 +38,7 @@ private:
     unsigned long long ai_board = 0b0;
     uint8_t col_heights[7] = {56, 57, 58, 59, 60, 61, 62};
 
-    long count = 0; // This is used to know how many times something is done
+    int count = 0; // This is used to know how many times something is done
     /**
      * @brief Place the new piece on the board
      * 
@@ -193,7 +188,7 @@ public:
      * 
      * @return long 
      */
-    long get_count() {
+    int get_count() {
         return count;
     }
 };
