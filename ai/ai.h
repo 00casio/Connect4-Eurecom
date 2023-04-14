@@ -39,6 +39,7 @@ private:
     uint8_t col_heights[7] = {56, 57, 58, 59, 60, 61, 62};
 
     int count = 0; // This is used to know how many times something is done
+
     /**
      * @brief Place the new piece on the board
      * 
@@ -71,7 +72,7 @@ private:
      * 
      * @param bitboard The board representation
      * @param state The state of the board (if winning or not)
-     * @return the score associatedwith the bitboard
+     * @return the score associated with the bitboard
      */
     int countPoints(const unsigned long long bitboard, bool *state);
 

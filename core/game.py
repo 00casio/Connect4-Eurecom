@@ -24,6 +24,7 @@ class Player:
     def __init__(
         self, var: Variables, number: int, AI: bool, difficulty: int = -1
     ) -> None:
+        """ Initialize the values for the Players """
         self.var = var
         if number == 0:
             self.symbol = Symbol(self.var.symbol_no_player)
@@ -42,6 +43,7 @@ class Player:
     def play(
         self, board: Board, root: Node, screen: Screen, volume: bool, ai_cpp
     ) -> tuple[int, int]:
+        """ The function used when it's the player's turn """
         if self.is_ai:
             if ai_cpp is None:
                 score, col = minimax(root, 0, 0, True)
@@ -70,6 +72,7 @@ class Player:
         return (col, row, root)
 
     def __eq__(self, other: object) -> bool:
+        """ Allow to compare a player and another object """
         eq: bool = False
         if isinstance(other, Player):
             eq = self.symbol == other.symbol
