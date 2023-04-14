@@ -121,8 +121,16 @@ double Game::evaluateBoard(const unsigned long long bitboard, const unsigned lon
 
 double Game::minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta) {
     double result = evaluateBoard(*player, *opponent, depth);
-    if (depth == 0 || result != 111)
+    if (depth == 0) {
         return result;
+    }
+
+    if (result != 111) {
+        if (isMaximising) {
+            return result - depth;
+        }
+        return result + depth;
+    }
 
     if (isMaximising) {
         double bestScore = -INFINITY;
