@@ -4,6 +4,7 @@
 # echo "If possible, try to use clang++-16 because the binary produced are the fastest amongst all"
 # echo "You can benchmark this by using the ai/ai_benchmark.py program"
 
+# Find correct Python version
 test_python() {
   if [ "$1" == "" ]; then
     echo "Could not find any correct python version, quitting now" | tee >&2
@@ -22,27 +23,22 @@ test_python() {
 com=$(test_python "python" "python3.11" "python3.10" "python3.9")
 if [ "${com}" == "" ]; then exit; fi
 
-install_pypi() {
-  $1 -c "import $2" 2>/dev/null 1>&2
-  if [ $? != 0 ]; then
-    $1 -m pip install -U $2
-  fi
-}
-to_install="pygame numpy mediapipe pyautogui playsound pygobject protobuf==3.20.1 swig"
-for module in ${to_install}; do
-  install_pypi ${com} ${module}
-done
+# Install packages
+${com} -m pip install -r requirements.txt
 
+# Change python headers location based on OS
 python_ver=$(${com} -c "from sys import version_info as v; print(f'{v[0]}.{v[1]}')")
 n=$(uname -s)
 if [ $? -ne 0 ]; then
   echo "You are most probably on windows, or your installation has a lot of problems"
   exit
-elif [ "$n" ==  "Darwin" ]; then
+elif [ "$n" ==  "Darwin" ]; then # MacOS
   PYTHON_HEADERS="/Library/Frameworks/Python.framework/Versions/${python_ver}/include/python${python_ver} -std=c++17 -undefined dynamic_lookup"
-else
-  PYTHON_HEADERS="/usr/local/include/${python_ver}"
+else # *UNIX
+  PYTHON_HEADERS="/usr/include/python${python_ver}"
 fi
+
+# If swig is present, use it for the AI
 swig -version 2>/dev/null 1>&2
 if [ $? -eq 0 ]; then
   swig -Wall -python -c++ -o ai/ai_wrap.cxx ai/ai.i
