@@ -19,7 +19,7 @@ test_python() {
     echo "$1"
   fi
 }
-com=$(test_python "python3.11" "python3.10" "python3.9")
+com=$(test_python "python" "python3.11" "python3.10" "python3.9")
 if [ "${com}" == "" ]; then exit; fi
 
 install_pypi() {
@@ -28,7 +28,7 @@ install_pypi() {
     $1 -m pip install -U $2
   fi
 }
-to_install="pygame numpy mediapipe pyautogui playsound pygobject protobuf==3.20.1"
+to_install="pygame numpy mediapipe pyautogui playsound pygobject protobuf==3.20.1 swig"
 for module in ${to_install}; do
   install_pypi ${com} ${module}
 done
