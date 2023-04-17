@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from argparse import Namespace
-from typing import Any, Sequence
+from typing import Any, Sequence, Union
 
 import pygame as pg
 
@@ -171,7 +171,7 @@ class Tools:
 
     def create_text_rendered(
         self,
-        text: str | Sequence[str],
+        text: Union[str, Sequence[str]],
         color: Color = Variables().color_options_text,
         font: str = Variables().text_font,
         size: int = Variables().text_size,
