@@ -19,7 +19,7 @@ test_python() {
     echo "$1"
   fi
 }
-com=$(test_python "python" "python3.11" "python3.10" "python3.9")
+com=$(test_python "python3.11" "python3.10" "python3.9")
 if [ "${com}" == "" ]; then exit; fi
 
 install_pypi() {
@@ -33,11 +33,20 @@ for module in ${to_install}; do
   install_pypi ${com} ${module}
 done
 
-python_ver=$(${com} -c "from sys import version_info as v; print(f'python{v[0]}.{v[1]}')")
+python_ver=$(${com} -c "from sys import version_info as v; print(f'{v[0]}.{v[1]}')")
+n=$(uname -s)
+if [ $? -ne 0 ]; then
+  echo "You are most probably on windows, or your installation has a lot of problems"
+  exit
+elif [ "$n" ==  "Darwin" ]; then
+  PYTHON_HEADERS="/Library/Frameworks/Python.framework/Versions/${python_ver}/include/python${python_ver} -std=c++17 -undefined dynamic_lookup"
+else
+  PYTHON_HEADERS="/usr/local/include/${python_ver}"
+fi
 swig -version 2>/dev/null 1>&2
 if [ $? -eq 0 ]; then
   swig -Wall -python -c++ -o ai/ai_wrap.cxx ai/ai.i
-  g++ -shared -O3 -fPIC ai/ai.cpp ai/ai_wrap.cxx -o ai/_libai.so -I /usr/include/${python_ver}
+  g++ -shared -O3 -fPIC ai/ai.cpp ai/ai_wrap.cxx -o ai/_libai.so -I ${PYTHON_HEADERS}
   ${com} main.py --no-camera --no-sound
 else
   echo "Could not find swig, deactivating it for now. Please install it" | tee >&2
