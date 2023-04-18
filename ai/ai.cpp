@@ -258,9 +258,11 @@ int Game::humanMove(const int col) {
 }
 
 void Game::resetBoard() {
-    unsigned long long human_board = 0b0;
-    unsigned long long ai_board = 0b0;
-    uint8_t col_heights[7] = {7, 6, 5, 4, 3, 2, 1};
+    this->human_board = 0b0;
+    this->ai_board = 0b0;
+    for (int i = 0; i < NBR_COL; i++) {
+        this->col_heights[i] = NBR_COL - i;
+    }
 }
 
 void Game::printBoard() {
@@ -301,7 +303,7 @@ int Game::run() {
             int col;
             printf("Your move [0-6]: ");
             trash = scanf("%d", &col);
-            while ( (col < 0) || (col > 6) || (humanMove(col) == NOT_ALLOWED)) {
+            while (humanMove(col) == NOT_ALLOWED) {
                 printf("Reenter your move [0-6]: ");
                 trash = scanf("%d", &col);
             }
