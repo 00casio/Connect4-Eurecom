@@ -258,8 +258,8 @@ int Game::humanMove(const int col) {
 }
 
 void Game::resetBoard() {
-    human_board = 0b0;
-    ai_board = 0b0;
+    unsigned long long human_board = 0b0;
+    unsigned long long ai_board = 0b0;
     uint8_t col_heights[7] = {7, 6, 5, 4, 3, 2, 1};
 }
 

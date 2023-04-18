@@ -3,14 +3,15 @@
 
 import libai
 
-nb_parties = 100
+nb_parties = 1000
 depth_ai1 = 4
-depth_ai2 = 3
+depth_ai2 = 2
 nb_win_ai1 = 0
-
+nb_win_ai2 = 0
+nb_draw = 0
 
 for k in range(nb_parties):
-    print(k, end="\r")
+    print(f"{k}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, (draw = {nb_draw})", end="\r")
     ai1 = libai.Game()
     ai2 = libai.Game()
     i = 0
@@ -22,7 +23,10 @@ for k in range(nb_parties):
         i+= 1
         # print(ai1.printBoard())
     if ai1.ai_winning():
-        nb_win_ai1+=1
-    print("%i %i" %(k, i))
+        nb_win_ai1 += 1
+    elif ai2.ai_winning():
+        nb_win_ai2 += 1
+    else:
+        nb_draw += 1
 print(nb_parties)
 print("AI_1 won %i times" %nb_win_ai1)
