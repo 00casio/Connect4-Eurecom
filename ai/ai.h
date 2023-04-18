@@ -192,4 +192,10 @@ public:
     int get_count() {
         return count;
     }
+
+    int human_winning();
+
+    int ai_winning();
+
+    int draw();
 };
