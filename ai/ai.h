@@ -198,5 +198,5 @@ public:
 
     int ai_winning();
 
-    int draw();
+    bool draw();
 };

@@ -11,7 +11,7 @@ nb_win_ai1 = 0
 for k in range(nb_parties):
     ai1 = libai.Game()
     ai2 = libai.Game()
-    while not ai1.ai_winning() or not ai1.human_winning() or ai1.draw() != -1:
+    while not ai1.ai_winning() or not ai1.human_winning() or ai1.draw():
         ai1_m = ai1.aiMove(depth_ai1)
         ai2.humanMove(ai1_m)
         ai2_m = ai2.aiMove(depth_ai2)
