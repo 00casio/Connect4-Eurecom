@@ -48,13 +48,13 @@ int Game::ai_winning() {
 }
 
 int Game::draw(const uint8_t *heights) {
-    if (heights[3] > 15) return 3;
-    if (heights[2] > 15) return 2;
-    if (heights[4] > 15) return 4;
-    if (heights[1] > 15) return 1;
-    if (heights[5] > 15) return 5;
-    if (heights[0] > 15) return 0;
-    if (heights[6] > 15) return 6;
+    if (heights[3] < MAX_ALLOWED_HEIGHT) return 3;
+    if (heights[2] < MAX_ALLOWED_HEIGHT) return 2;
+    if (heights[4] < MAX_ALLOWED_HEIGHT) return 4;
+    if (heights[1] < MAX_ALLOWED_HEIGHT) return 1;
+    if (heights[5] < MAX_ALLOWED_HEIGHT) return 5;
+    if (heights[0] < MAX_ALLOWED_HEIGHT) return 0;
+    if (heights[6] < MAX_ALLOWED_HEIGHT) return 6;
     return -1;
 }
 
