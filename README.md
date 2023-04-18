@@ -25,6 +25,8 @@ The objectives of this project are the following:
 
 We may be able to use the time between out move and the opponent's move to squeeze in some more time to compute things.
 
+If we can use the [boost.Python](https://github.com/boostorg/python) library on the raspberry, it would bring many speed improvements over SWIG.
+
 #### Interface
 
 - [x] Choose mode
