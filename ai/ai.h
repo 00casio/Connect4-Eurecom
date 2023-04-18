@@ -14,6 +14,7 @@ pieces are handled, and it may slow down a lot the algorithm.
 #define NBR_LINE 6
 #define NBR_COL 7
 #define BOARDLEN 64
+#define MAX_ALLOWED_HEIGHT 40
 #define SYMBOL_AI "x"
 #define SYMBOL_HUMAN "o"
 #define NOT_ALLOWED -1
@@ -36,7 +37,7 @@ private:
     // The bitboards for the two players
     unsigned long long human_board = 0b0;
     unsigned long long ai_board = 0b0;
-    uint8_t col_heights[7] = {56, 57, 58, 59, 60, 61, 62};
+    uint8_t col_heights[7] = {7, 6, 5, 4, 3, 2, 1};
 
     int count = 0; // This is used to know how many times something is done
 

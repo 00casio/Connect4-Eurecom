@@ -24,6 +24,7 @@ com=$(test_python "python" "python3.11" "python3.10" "python3.9")
 if [ "${com}" == "" ]; then exit; fi
 
 # Install packages
+${com} -m pip install wheel # Needed for playsound
 ${com} -m pip install -r requirements.txt
 
 # Change python headers location based on OS
