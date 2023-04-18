@@ -206,6 +206,11 @@ int Game::bestStartingMove(const uint8_t *heights) {
     if (heights[5] < MAX_ALLOWED_HEIGHT) return 5;
     if (heights[0] < MAX_ALLOWED_HEIGHT) return 0;
     if (heights[6] < MAX_ALLOWED_HEIGHT) return 6;
+    printBoard();
+    for (int i = 0; i < NBR_COL; i++){
+        printf(" %d  ", heights[i]);
+    }
+    printf("\n");
     fprintf(stderr, "All columns are full\n");
     exit(-1);
 }
