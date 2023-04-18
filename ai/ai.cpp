@@ -6,17 +6,17 @@
 #include "ai.h"
 
 int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) {
-    if (heights[col] < 16 || col < 0 || col > 6) {
+    if (heights[col] > MAX_ALLOWED_HEIGHT) {
         return NOT_ALLOWED;
     }
-    *player ^= 1ULL << (BOARDLEN - 1 - heights[col]);
-    heights[col] -= 8;
+    *player ^= 1ULL << heights[col];
+    heights[col] += 8;
     return col;
 }
 
 void Game::removePiece(unsigned long long *player, const int col, uint8_t *heights) {
-    heights[col] += 8;
-    *player &= ~(1ULL << (BOARDLEN - 1 - heights[col]));
+    heights[col] -= 8;
+    *player &= ~(1ULL << heights[col]);
 }
 
 int Game::countNbrOne(const unsigned long long bitboard) {
@@ -180,13 +180,13 @@ double Game::minimax(unsigned long long *player, unsigned long long *opponent, u
 }
 
 int Game::bestStartingMove(const uint8_t *heights) {
-    if (heights[3] > 15) return 3;
-    if (heights[2] > 15) return 2;
-    if (heights[4] > 15) return 4;
-    if (heights[1] > 15) return 1;
-    if (heights[5] > 15) return 5;
-    if (heights[0] > 15) return 0;
-    if (heights[6] > 15) return 6;
+    if (heights[3] < MAX_ALLOWED_HEIGHT) return 3;
+    if (heights[2] < MAX_ALLOWED_HEIGHT) return 2;
+    if (heights[4] < MAX_ALLOWED_HEIGHT) return 4;
+    if (heights[1] < MAX_ALLOWED_HEIGHT) return 1;
+    if (heights[5] < MAX_ALLOWED_HEIGHT) return 5;
+    if (heights[0] < MAX_ALLOWED_HEIGHT) return 0;
+    if (heights[6] < MAX_ALLOWED_HEIGHT) return 6;
     fprintf(stderr, "All columns are full\n");
     exit(-1);
 }
@@ -227,13 +227,16 @@ int Game::aiMove(int depth) {
 }
 
 int Game::humanMove(const int col) {
+    if (col < 0 || col > 6) {
+        return NOT_ALLOWED;
+    }
     return putPiece(&human_board, col, col_heights);
 }
 
 void Game::resetBoard() {
     human_board = 0b0;
     ai_board = 0b0;
-    uint8_t col_heights[7] = {56, 57, 58, 59, 60, 61, 62};
+    uint8_t col_heights[7] = {7, 6, 5, 4, 3, 2, 1};
 }
 
 void Game::printBoard() {
@@ -265,17 +268,18 @@ void Game::printBoard() {
 
 int Game::run() {
     int depth;
+    int trash;
     printf("AI depth: ");
-    scanf("%d", &depth);
+    trash = scanf("%d", &depth);
     while (true) {
         if (current_player == HUMAN) {
             printBoard();
             int col;
             printf("Your move [0-6]: ");
-            scanf("%d", &col);
-            while (humanMove(col) == NOT_ALLOWED) {
+            trash = scanf("%d", &col);
+            while ( (col < 0) || (col > 6) || (humanMove(col) == NOT_ALLOWED)) {
                 printf("Reenter your move [0-6]: ");
-                scanf("%d", &col);
+                trash = scanf("%d", &col);
             }
         } else {
             clock_t start = clock();
@@ -307,14 +311,14 @@ int Game::run() {
     return EXIT_SUCCESS;
 }
 
-// int main(int argc, char **argv) {
-//     Game g;
-//     return g.run();
-//     // char *tmp;
-//     // g.human_board = strtoul(argv[1], &tmp, 10);
-//     // g.ai_board = strtoul(argv[2], &tmp, 10);
+int main(int argc, char **argv) {
+    Game g;
+    return g.run();
+    // char *tmp;
+    // g.human_board = strtoul(argv[1], &tmp, 10);
+    // g.ai_board = strtoul(argv[2], &tmp, 10);
 
-//     // g.printBoard();
-//     // printf("%i", g.aiMove(*argv[3] - '0'));
-//     // return 0;
-// }
+    // g.printBoard();
+    // printf("%i", g.aiMove(*argv[3] - '0'));
+    // return 0;
+}
