@@ -4,6 +4,7 @@
 */
 
 #include "ai.h"
+#include <algorithm>
 
 int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) {
     if (heights[col] > MAX_ALLOWED_HEIGHT) {
@@ -138,9 +139,41 @@ double Game::evaluateBoard(const unsigned long long bitboard, const unsigned lon
     return 111;
 }
 
+double Game::negamax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const int sign_result, double alpha, double beta) {
+    double result = evaluateBoard(*player, *opponent, depth);
+    if (depth <= 0) {
+        return result;
+    }
+
+    if (result != 111) {
+        return result - sign_result * depth;
+    }
+
+    double bestScore = -INFINITY;
+    for (int i = 0; i < NBR_COL; i++) {
+        int dpRes = putPiece(player, i, heights);
+        if (dpRes == NOT_ALLOWED) {
+            continue;
+        }
+        double score = - negamax(player, opponent, heights, depth - 1, - sign_result, - beta, - alpha);
+        removePiece(player, i, heights);
+
+        if (score > bestScore) {
+            bestScore = score;
+        }
+        if (alpha > score) {
+            alpha = score;
+        }
+        if (alpha >= beta) {
+            break;
+        }
+    }
+    return bestScore;
+}
+
 double Game::minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta) {
     double result = evaluateBoard(*player, *opponent, depth);
-    if (depth == 0) {
+    if (depth <= 0) {
         return result;
     }
 

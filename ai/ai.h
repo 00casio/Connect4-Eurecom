@@ -88,6 +88,20 @@ private:
     double evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth);
 
     /**
+     * @brief The negamax variant of the minimax algorithm
+     * 
+     * @param player The board representation of the player
+     * @param opponent The board representation of the opponent
+     * @param heights The list of the heights of the different columns
+     * @param depth The maximum depth of the minmax algorithm at this moment
+     * @param sign_result The sign of the result
+     * @param alpha The alpha parameter
+     * @param beta The beta parameter
+     * @return The score of the negamax algorithm at this level
+     */
+    double negamax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const int sign_result, double alpha, double beta);
+
+    /**
      * @brief Apply the minmax algorithm with alpha-beta prunning
      * 
      * @param player The board representation of the player
@@ -97,7 +111,7 @@ private:
      * @param isMaximising Is we want to maximize or minimize the score the player
      * @param alpha The alpha parameter
      * @param beta The beta parameter
-     * @return The score of the minmax algorithm at this level
+     * @return The score of the minimax algorithm at this level
      */
     double minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta);
 
