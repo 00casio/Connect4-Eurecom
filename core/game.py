@@ -8,6 +8,7 @@ import numpy as np
 import pygame as pg
 from playsound import playsound
 
+import ai.libai as libai
 from ai.minimax_ai import minimax, opponent
 from core.screens import GamingScreen, OptionsScreen, Screen, Screen_AI
 from core.structure import Board, Node
@@ -84,7 +85,8 @@ class Player:
 class Game:
     """The big class that will regulate everything"""
 
-    def __init__(self, args: Namespace, ai_cpp_1, ai_cpp_2) -> None:
+    def __init__(self, args: Namespace, ai_cpp_1: libai.Game, ai_cpp_2: libai.Game) -> None:
+        """ Initialize the value needed for the game """
         # Gestures
         self.gestures = GestureController()
 
@@ -118,6 +120,7 @@ class Game:
             )
 
     def who_is_winner(self) -> Player:
+        """ Return the symbol of the player currently playing """
         if self.board.state_win(self.player_1.symbol):
             return self.player_1
         elif self.board.state_win(self.player_2.symbol):
@@ -125,8 +128,9 @@ class Game:
         else:
             return self.player_null
 
-    def start(self, skip_start=False) -> None:
-        if not skip_start:
+    def start(self, skip_start_screen=False) -> None:
+        """ The start function to use when wanting to start the program """
+        if not skip_start_screen:
             self.draw_start_screen()
         else:
             self.draw_play_options()
@@ -136,6 +140,7 @@ class Game:
         self.start_game()
 
     def start_game(self) -> None:
+        """ Start the game """
         gaming = GamingScreen(
             self.var, self.screen, self.gestures, self.volume, self.camera
         )
@@ -167,6 +172,7 @@ class Game:
         self.draw_winner(gaming, (col, row))
 
     def draw_winner(self, screen: GamingScreen, lastclick: tuple[int, int]) -> None:
+        """ Draw the winner on the screen, with the line that made it win """
         winner = self.who_is_winner()
         sound = self.var.sound_winner_victory
         End = Screen(
@@ -220,9 +226,10 @@ class Game:
 
         pg.display.update()
         screen.click()
-        self.start(skip_start=True)
+        self.start(skip_start_screen=True)
 
     def draw_options_screen(self) -> None:
+        """ Draw the options screen (language, if camera, if sound, etc.) """
         options = OptionsScreen(
             self.var, self, self.screen, self.gestures, self.volume, self.camera
         )
@@ -296,8 +303,7 @@ class Game:
                 self.draw_play_options()
 
     def draw_start_screen(self) -> None:
-        """Show the start screen.
-        For now it is only the play button but soon there will be more options"""
+        """Show the starting screen, choose between the different possinilities """
 
         start_screen = Screen(
             self.var,

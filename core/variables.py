@@ -10,6 +10,7 @@ Surface = pg.Surface
 
 
 class Variables:
+    """ Contains all variables in the game """
     def __init__(self) -> None:
         # Texts
         self.texts = {

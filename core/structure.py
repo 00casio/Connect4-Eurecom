@@ -10,6 +10,7 @@ from core.variables import Variables
 
 
 class Board(np.ndarray[Any, np.dtype[Any]]):
+    """ The Board class contains the state of the board """
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
         self = np.array([[Variables().symbol_no_player] * 7 for i in range(6)]).view(
             cls
@@ -35,6 +36,7 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
         return n
 
     def state_win(self, symbol: Symbol) -> bool:
+        """ Return if the symbol passed has won the game """
         self.state = np.zeros(self.shape, dtype=np.uint8)
         self.state[np.where(self == symbol)] = 1
         bits = int(self.state_to_bits(), 2)
@@ -61,9 +63,11 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
     def is_valid_col(
         self, col: int
     ) -> bool:  # on regarde si la colonne est pleine ou pas
+        """ Return if the column we want to play in is not full """
         return self[0, col] == Variables().symbol_no_player
 
-    def list_valid_col(self) -> list[int]:  # liste des colonnes où l'on peut jouer
+    def list_valid_col(self) -> list[int]:
+        """ liste des colonnes où l'on peut jouer """
         possible_col = [3, 4, 2, 5, 1, 6, 0]
         valid_col = []
         for col in possible_col:
@@ -89,6 +93,8 @@ class Node_H:
     def create_tree(self, depth: int) -> None:
         raise NotImplementedError()
 
+
+""" Below are structures made to be used with the minimax_ai file """
 
 class Node(Node_H):
     def __init__(

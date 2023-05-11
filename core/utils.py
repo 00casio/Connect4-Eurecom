@@ -9,7 +9,8 @@ import pygame as pg
 from core.variables import Color, Rect, Surface, Variables
 
 
-def opponent(symbol_player: Any) -> Any:  # Gives symbol of the opponent
+def opponent(symbol_player: Any) -> Any:
+    """ Gives symbol of the opponent """
     if symbol_player == Variables().symbol_player_1:
         return Variables().symbol_player_2
     else:
@@ -32,6 +33,7 @@ class Symbol:
 
 
 class Config:
+    """ The config class cotains all possible variables for the game """
     def __init__(self, var: Variables, arguments: Namespace) -> None:
         self.arg = arguments
         self.var = var
@@ -41,6 +43,7 @@ class Config:
         self.load_language(self.arg.language)
 
     def load_language(self, language: str) -> None:
+        """ Load the correct language in the variables """
         if language not in ["en", "fr"]:
             print("This language is not translated.\nI will use English")
             language = "en"
@@ -69,9 +72,11 @@ class Config:
 
 
 class Tools:
+    """ A class aggregating many tools """
     def __init__(
         self, var: Variables, screen: Surface, volume: bool, camera: bool
     ) -> None:
+        """ Initialize the values """
         self.screen = screen
         self.volume = volume
         self.camera = camera
@@ -203,15 +208,17 @@ class Tools:
         return box
 
     def make_icon(self, image: str, size: tuple[int, int]) -> Surface:
+        """ Scale the image to the wanted size """
         img = pg.image.load(image)
         icon = pg.transform.scale(img, size)
         return icon
 
     def draw_icon(
-        self, image: str, size: tuple[int, int], position: tuple[int, int]
+        self, image_path: str, size: tuple[int, int], position: tuple[int, int]
     ) -> Rect:
+        """ Draw the image at image_path with the size and position wanted """
         p = self.var.text_box_spacing
-        icon = self.make_icon(image, size)
+        icon = self.make_icon(image_path, size)
         box = Rect(position[0] - p, position[1] - p, size[0] + 2 * p, size[1] + 2 * p)
         pg.draw.rect(self.screen, self.var.very_light_blue, box)
         self.screen.blit(icon, position)

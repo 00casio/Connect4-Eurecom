@@ -30,6 +30,7 @@ class Screen(Tools):
         quit_box: bool = True,
         color_fill: Color = Variables().color_options_screen,
     ) -> None:
+        """ Initialize the values """
         Tools.__init__(self, var, screen, volume, camera)
         self.gestures = gesture
         self.cancel_box: Optional[Rect] = None
@@ -70,6 +71,7 @@ class Screen(Tools):
         text: list[list[Surface]],
         colors_boxes: list[Color],
     ) -> None:
+        """ Reset the screen to a "blank" state """
         self.screen.fill(color_screen)
         self.center_all(text, colors_boxes)
         if self.draw_cancel:
@@ -84,6 +86,7 @@ class Screen(Tools):
         return pg.mouse.get_pos()
 
     def human_move(self, color: Color) -> None:
+        """ Function to use when it's the human's turn to move """
         self.screen.fill(self.var.color_screen)
         mouse_x, mouse_y = self.get_mouse_pos()
         if mouse_x < self.var.pos_min_x:
@@ -101,6 +104,7 @@ class Screen(Tools):
         pg.display.update((mouse_x - p // 2, 0, p, p))
 
     def update_gesture(self, image: np.ndarray[Any, np.dtype[Any]]) -> None:
+        """ Update the gesture class """
         image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
         image.flags.writeable = False
         results = self.gestures.hands.process(image)
@@ -172,6 +176,7 @@ class Screen(Tools):
         return click
 
     def is_canceled(self, click: tuple[int, int]) -> bool:
+        """ Return if the cancel button was pressed """
         if self.cancel_box is None:
             return False
         return self.x_in_rect(click, self.cancel_box)
@@ -249,6 +254,7 @@ class Screen_AI(Screen):
         self.screen_loop()
 
     def screen_loop(self) -> None:
+        """ Select the possibble value for the AI (if AI, AI(s) level) """
         while self.box_clicked not in [self.var.boxAI_play, self.var.boxAI_cancel]:
             mouse_click = self.click()
             index_box = self.handle_click(mouse_click, self.options_levels)
@@ -297,6 +303,7 @@ class Screen_AI(Screen):
 
 
 class OpponentSelectionScreen(Screen):
+    """ Not completed, will allow the user to chose it's oppponent """
     def __init__(
         self,
         var: Variables,
@@ -315,6 +322,7 @@ class OpponentSelectionScreen(Screen):
         self.last_update = 0
 
     def update(self) -> None:
+        """ Update the screen with the raspberry pi we can connect to """
         if (time() - self.last_update) < self.time_update:
             return
         self.poss = self.comm.receive()
@@ -328,6 +336,7 @@ class OpponentSelectionScreen(Screen):
         self.rect_boxes = self.center_all(list_poss_player)
 
     def select(self):
+        """ Select a raspberry pi as the opponent """
         while self.opp is None and self.box_clicked != self.var.boxAI_cancel:
             mouse = self.click(func=self.update)
             for i in range(len(self.rect_boxes)):
@@ -366,6 +375,7 @@ class OptionsScreen(Screen):
         pg.display.update()
 
     def reset_options_screen(self) -> None:
+        """ Reset the appearance of the option screen to the default """
         self.screen.fill(self.var.color_options_screen)
         if self.draw_cancel:
             self.draw_cancel_box()
@@ -382,6 +392,7 @@ class OptionsScreen(Screen):
         first_image: str,
         second_image: str,
     ) -> Rect:
+        """ Draw First Image (if) True Else Second (image) """
         if testing:
             box = self.draw_icon(first_image, self.size, position)
         else:
@@ -389,6 +400,7 @@ class OptionsScreen(Screen):
         return box
 
     def draw_vol_cam(self) -> tuple[Rect, Rect]:
+        """ Draw the icon for the volume and the camera """
         cs = self.var.center_screen
         sp = self.var.options_spacing
         x_now = cs[0] - self.size[0] - sp
@@ -406,6 +418,7 @@ class OptionsScreen(Screen):
         return vol, cam
 
     def draw_language(self) -> Iterator[Rect]:
+        """ Draw the languages """
         cs = self.var.center_screen
         sp = self.var.options_spacing
         y_now = cs[1] + 3 * sp // 2
@@ -443,10 +456,12 @@ class GamingScreen(Screen):
         pg.draw.circle(self.board_surface, color, (x, y), r)
 
     def blit_board(self) -> None:
+        """ Paste the state of the board onto the screen """
         self.screen.blit(self.board_surface, (self.var.padding, self.var.padding))
         self.draw_quit_box()
 
     def draw_board(self) -> None:
+        """ Draw the board on the screen (needed to be sure to see the board) """
         self.screen.fill(self.color_screen)
         pg.draw.rect(
             self.board_surface,
@@ -460,6 +475,7 @@ class GamingScreen(Screen):
         pg.display.update()
 
     def animate_fall(self, col: int, row: int, color_player: Color) -> None:
+        """ Animate the fall of a disk """
         x = self.var.padding + col * self.var.size_cell + self.var.size_cell // 2
         for y in range(
             self.var.padding // 2,
