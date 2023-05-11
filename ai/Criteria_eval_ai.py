@@ -33,15 +33,15 @@ def tests_criteria(nb_parties, depth_ai1, depth_ai2):
             nb_win_ai2 += 1
         else:
             nb_draw += 1
-    print(f"{nb_parties}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, draw = {nb_draw})")
-    percentage_win_AI_1 =  (100*nb_win_ai1)/nb_parties
+    print(f"{nb_parties}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, draw = {nb_draw}")
+    percentage_win_AI_1 = (100*nb_win_ai1)/nb_parties
     print("percentage winning AI 1 : ", percentage_win_AI_1)
 
     of = open("criteria_AI.txt", "a")
     #of.write("Criteria judged : Testing if AI at given level wins against lower level AI opponent\n")
     of.write("Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent \n")
-    of.write("AI_1 is depth %d while AI_2 is depth %d. AI_1 starts the game\n" % (depth_ai1, depth_ai2))
-    of.write(f"Nb_games = {nb_parties}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, draw = {nb_draw}), percentage win AI_1 = {percentage_win_AI_1:.2f})\n \n")
+    of.write(f"AI_1 is depth {depth_ai1} while AI_2 is depth {depth_ai2}. AI_1 starts the game\n")
+    of.write(f"Nb_games = {nb_parties}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, draw = {nb_draw}, percentage win AI_1 = {percentage_win_AI_1:.2f}\n \n")
     of.close()
 
 tests_criteria(1000, 1, 1)
