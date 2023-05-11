@@ -221,7 +221,7 @@ void Game::start_search(value_search values, int column_played, double *best_sco
         return;
     }
 
-    double score = minimax(&values.player, &values.opponent, values.heights, values.depth, false, -INFINITY, INFINITY);
+    double score = minimax(&values.player, &values.opponent, values.heights, values.depth - 1, false, -INFINITY, INFINITY);
     removePiece(&values.player, column_played, values.heights);
 
     if (score > *best_score) {
