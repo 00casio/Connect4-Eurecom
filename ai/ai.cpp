@@ -4,7 +4,6 @@
 */
 
 #include "ai.h"
-#include <algorithm>
 
 int Game::putPiece(unsigned long long *player, const int col, uint8_t *heights) {
     if (heights[col] > MAX_ALLOWED_HEIGHT) {
@@ -149,13 +148,14 @@ double Game::negamax(unsigned long long *player, unsigned long long *opponent, u
         return result - sign_result * depth;
     }
 
-    double bestScore = -INFINITY;
+    double bestScore = - INFINITY;
     for (int i = 0; i < NBR_COL; i++) {
         int dpRes = putPiece(player, i, heights);
         if (dpRes == NOT_ALLOWED) {
             continue;
         }
-        double score = - negamax(player, opponent, heights, depth - 1, - sign_result, - beta, - alpha);
+
+        double score = - negamax(opponent, player, heights, depth - 1, - sign_result, - beta, - alpha);
         removePiece(player, i, heights);
 
         if (score > bestScore) {
@@ -254,7 +254,11 @@ void Game::start_search(value_search values, int column_played, double *best_sco
         return;
     }
 
-    double score = minimax(&values.player, &values.opponent, values.heights, values.depth - 1, false, -INFINITY, INFINITY);
+    double score;
+    if (false) {
+        score = minimax(&values.player, &values.opponent, values.heights, values.depth - 1, false, - INFINITY, + INFINITY);
+    } else {
+        score = - negamax(&values.opponent, &values.player, values.heights, values.depth - 1, -1, - INFINITY, + INFINITY);}
     removePiece(&values.player, column_played, values.heights);
 
     if (score > *best_score) {
@@ -266,13 +270,14 @@ void Game::start_search(value_search values, int column_played, double *best_sco
 int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent, const int depth, uint8_t *heights) {
     ThreadPool thread_pool(thread_count);
     int bestMove = bestStartingMove(heights);
-    double bestScore = -INFINITY;
+    double bestScore = - INFINITY;
     value_search tmp(*player, *opponent, depth, heights);
 
     for (int i = 0; i < NBR_COL; i++) {
-        thread_pool.addTask([this, tmp, i, &bestScore, &bestMove]{
-            start_search(tmp, i, &bestScore, &bestMove);
-        });
+        //thread_pool.addTask([this, tmp, i, &bestScore, &bestMove]{
+        //     start_search(tmp, i, &bestScore, &bestMove);
+        // });
+        start_search(tmp, i, &bestScore, &bestMove);
     }
     thread_pool.waitForCompletion();
     return bestMove;

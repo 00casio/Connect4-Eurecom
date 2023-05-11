@@ -42,8 +42,10 @@ fi
 # If swig is present, use it for the AI
 swig -version 2>/dev/null 1>&2
 if [ $? -eq 0 ]; then
+  echo "Compiling the library..."
   swig -Wall -python -c++ -o ai/ai_wrap.cxx ai/ai.i
   g++ -shared -O3 -fPIC ai/ai.cpp ai/ai_wrap.cxx -o ai/_libai.so -I ${PYTHON_HEADERS}
+  echo "Compiled the library, launching the game now"
   ${com} main.py --no-camera --no-sound
 else
   echo "Could not find swig, deactivating it for now. Please install it" | tee >&2
