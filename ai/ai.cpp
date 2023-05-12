@@ -4,8 +4,10 @@
 */
 
 #include "ai.h"
+#include <cmath>
+#include <cstdint>
 
-int8_t Game::putPiece(uint64_t *player, const int8_t col, uint8_t *heights) {
+int Game::putPiece(uint64_t *player, const int col, uint8_t *heights) {
     if (heights[col] > MAX_ALLOWED_HEIGHT) {
         return NOT_ALLOWED;
     }
@@ -15,17 +17,17 @@ int8_t Game::putPiece(uint64_t *player, const int8_t col, uint8_t *heights) {
     return col;
 }
 
-void Game::removePiece(uint64_t *player, const int8_t col, uint8_t *heights) {
+void Game::removePiece(uint64_t *player, const int col, uint8_t *heights) {
     heights[col] -= 8;
     this->current_depth--;
     *player &= ~(1ULL << heights[col]);
 }
 
-int8_t Game::countNbrOne(const uint64_t bitboard) {
-    int8_t count_one = 0;
+int Game::countNbrOne(const uint64_t bitboard) {
+    int count_one = 0;
     int64_t gaëtan = 1;
-    for (int8_t i = 0; i < NBR_LINE; i++) {
-        for (int8_t j = 0; j < NBR_COL; j++) {
+    for (int i = 0; i < NBR_LINE; i++) {
+        for (int j = 0; j < NBR_COL; j++) {
             if ((gaëtan & bitboard) != 0) {
                 count_one++;
             }
@@ -36,13 +38,13 @@ int8_t Game::countNbrOne(const uint64_t bitboard) {
     return count_one;
 }
 
-int8_t Game::human_winning() {
+bool Game::human_winning() {
     bool winning = false;
     countPoints(human_board, &winning);
     return winning;
 }
 
-int8_t Game::ai_winning() {
+bool Game::ai_winning() {
     bool winning = false;
     countPoints(ai_board, &winning);
     return winning;
@@ -55,9 +57,9 @@ bool Game::draw() {
     return false;
 }
 
-int8_t Game::countPoints(const uint64_t bitboard, bool *state) {
-    int8_t nbr_3_in_line = 0;
-    int8_t nbr_2_in_line = 0;
+int Game::countPoints(const uint64_t bitboard, bool *state) {
+    int nbr_3_in_line = 0;
+    int nbr_2_in_line = 0;
 
     uint64_t tmp = bitboard & (bitboard >> 8);
     if (tmp != 0) {
@@ -114,7 +116,7 @@ int8_t Game::countPoints(const uint64_t bitboard, bool *state) {
     return nbr_3_in_line * 20 + nbr_2_in_line * 2;
 }
 
-double Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, const int8_t depth) {
+double Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, const int depth) {
     double score = 0;
     bool winning = false;
     bool losing = false;
@@ -139,27 +141,34 @@ double Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, 
     return 111;
 }
 
-double Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, double alpha, double beta) {
-// double Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int8_t depth, const int8_t sign_result, double alpha, double beta) {
+int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int max_depth, double alpha, double beta) {
+// double Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int depth, const int sign_result, double alpha, double beta) {
     count++;
     if (this->current_depth >= NBR_COL*NBR_LINE) {
         return 0;
     }
+    // if (max_depth <= 0) {
+    //     return evaluateBoard(*player, *opponent, 0);
+    // }
 
     bool winning = false;
-    for (int8_t col = 0; col < NBR_COL; col++) {
-        int8_t dpRes = putPiece(player, col, heights);
+    for (int col = 0; col < NBR_COL; col++) {
+        int dpRes = putPiece(player, col, heights);
         if (dpRes == NOT_ALLOWED) {
             continue;
         }
         countPoints(*player, &winning);
         removePiece(player, col, heights);
         if (winning) {
-            return (double) (NBR_COL*NBR_LINE + 1 - this->current_depth)/2;
+            // return (NBR_COL*NBR_LINE + 1 - this->current_depth)/2;
+            return INFINITY;
         }
     }
 
-    int8_t maxScore = (NBR_COL*NBR_LINE - 1 - this->current_depth)/2;
+    int maxScore = (NBR_COL*NBR_LINE - 1 - this->current_depth)/2;
+    if (int value = transTable.get(*player)) {
+        maxScore = value + MIN_SCORE - 1;
+    }
     if (beta > maxScore) {
         beta = maxScore;
         if (alpha >= beta) {
@@ -167,14 +176,14 @@ double Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, dou
         }
     }
 
-    // int8_t bestScore = - NBR_COL*NBR_LINE;
-    for (int8_t i = 0; i < NBR_COL; i++) {
-        int8_t col = col_ordering[i];
-        int8_t dpRes = putPiece(player, col, heights);
+    // int bestScore = - NBR_COL*NBR_LINE;
+    for (int i = 0; i < NBR_COL; i++) {
+        int col = col_ordering[i];
+        int dpRes = putPiece(player, col, heights);
         if (dpRes == NOT_ALLOWED) {
             continue;
         }
-        double score = - negamax(opponent, player, heights, - beta, - alpha);
+        double score = - negamax(opponent, player, heights, max_depth - 1, - beta, - alpha);
         removePiece(player, col, heights);
 
         if (score >= beta) {
@@ -184,41 +193,12 @@ double Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, dou
             alpha = score;
         }
     }
+    transTable.put(2**player+*opponent, alpha - MIN_SCORE + 1);
+    // 2* the value of player + the value of opponent
     return alpha;
-
-/*     double result = evaluateBoard(*player, *opponent, depth);
-    if (depth <= 0) {
-        return result;
-    }
-
-    if (result != 111) {
-        return result - sign_result * depth;
-    }
-
-    double bestScore = - INFINITY;
-    for (int8_t i = 0; i < NBR_COL; i++) {
-        int8_t dpRes = putPiece(player, i, heights);
-        if (dpRes == NOT_ALLOWED) {
-            continue;
-        }
-
-        double score = - negamax(opponent, player, heights, depth - 1, - sign_result, - beta, - alpha);
-        removePiece(player, i, heights);
-
-        if (score > bestScore) {
-            bestScore = score;
-        }
-        if (alpha > score) {
-            alpha = score;
-        }
-        if (alpha >= beta) {
-            break;
-        }
-    }
-    return bestScore; */
 }
 
-double Game::minimax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int8_t depth, const bool isMaximising, double alpha, double beta) {
+double Game::minimax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta) {
     double result = evaluateBoard(*player, *opponent, depth);
     if (depth <= 0) {
         return result;
@@ -233,8 +213,8 @@ double Game::minimax(uint64_t *player, uint64_t *opponent, uint8_t *heights, con
 
     if (isMaximising) {
         double bestScore = -INFINITY;
-        for (int8_t i = 0; i < NBR_COL; i++) {
-            int8_t dpRes = putPiece(player, i, heights);
+        for (int i = 0; i < NBR_COL; i++) {
+            int dpRes = putPiece(player, i, heights);
             if (dpRes == NOT_ALLOWED) {
                 continue;
             }
@@ -255,8 +235,8 @@ double Game::minimax(uint64_t *player, uint64_t *opponent, uint8_t *heights, con
         return bestScore;
     } else {
         double bestScore = INFINITY;
-        for (int8_t i = 0; i < NBR_COL; i++) {
-            int8_t dpRes = putPiece(opponent, i, heights);
+        for (int i = 0; i < NBR_COL; i++) {
+            int dpRes = putPiece(opponent, i, heights);
             if (dpRes == NOT_ALLOWED) {
                 continue;
             }
@@ -278,7 +258,7 @@ double Game::minimax(uint64_t *player, uint64_t *opponent, uint8_t *heights, con
     }
 }
 
-int8_t Game::bestStartingMove(const uint8_t *heights) {
+int Game::bestStartingMove(const uint8_t *heights) {
     if (heights[3] < MAX_ALLOWED_HEIGHT) return 3;
     if (heights[2] < MAX_ALLOWED_HEIGHT) return 2;
     if (heights[4] < MAX_ALLOWED_HEIGHT) return 4;
@@ -287,7 +267,7 @@ int8_t Game::bestStartingMove(const uint8_t *heights) {
     if (heights[0] < MAX_ALLOWED_HEIGHT) return 0;
     if (heights[6] < MAX_ALLOWED_HEIGHT) return 6;
     printBoard();
-    for (int8_t i = 0; i < NBR_COL; i++){
+    for (int i = 0; i < NBR_COL; i++){
         printf(" %d  ", heights[i]);
     }
     printf("\n");
@@ -295,8 +275,8 @@ int8_t Game::bestStartingMove(const uint8_t *heights) {
     exit(-1);
 }
 
-void Game::start_search(value_search values, int8_t column_played, double *best_score, int8_t *best_move) {
-    int8_t dpRes = putPiece(&values.player, column_played, values.heights);
+void Game::start_search(value_search values, int column_played, double *best_score, int *best_move) {
+    int dpRes = putPiece(&values.player, column_played, values.heights);
     if (dpRes == NOT_ALLOWED) {
         return;
     }
@@ -305,7 +285,7 @@ void Game::start_search(value_search values, int8_t column_played, double *best_
     if (true) {
         score = minimax(&values.player, &values.opponent, values.heights, values.depth - 1, false, - INFINITY, + INFINITY);
     } else {
-        score = - negamax(&values.opponent, &values.player, values.heights, - INFINITY, + INFINITY);
+        score = - negamax(&values.opponent, &values.player, values.heights, values.depth, - INFINITY, + INFINITY);
         // score += column_played;
     }
     removePiece(&values.player, column_played, values.heights);
@@ -316,22 +296,22 @@ void Game::start_search(value_search values, int8_t column_played, double *best_
     }
 }
 
-int8_t Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int8_t depth, uint8_t *heights) {
+int Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, uint8_t *heights) {
     if ((*player == 0) && (*opponent == 0)) {
         return 3;
     }
-    int8_t bestMove = bestStartingMove(heights);
-    int8_t bestScore = - NBR_COL*NBR_LINE;
+    int bestMove = bestStartingMove(heights);
+    int bestScore = - NBR_COL*NBR_LINE;
     double alpha = - INFINITY;
     double beta = INFINITY;
 
-    for (int8_t i = 0; i < NBR_COL; i++) {
-        int8_t col = col_ordering[i];
-        int8_t dpRes = putPiece(player, col, heights);
+    for (int i = 0; i < NBR_COL; i++) {
+        int col = col_ordering[i];
+        int dpRes = putPiece(player, col, heights);
         if (dpRes == NOT_ALLOWED) {
             continue;
         }
-        double score = - negamax(opponent, player, heights, - beta, - alpha);
+        double score = - negamax(opponent, player, heights, depth - 1, - beta, - alpha);
         removePiece(player, col, heights);
 
         if (score > bestScore) {
@@ -346,11 +326,11 @@ int8_t Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int8_t dep
 
     // return negamax(player, opponent, heights, depth, +1, - INFINITY, +INFINITY);
 /*     ThreadPool thread_pool(thread_count);
-    int8_t bestMove = bestStartingMove(heights);
+    int bestMove = bestStartingMove(heights);
     double bestScore = - INFINITY;
     value_search tmp(*player, *opponent, depth, heights);
 
-    for (int8_t i = 0; i < NBR_COL; i++) {
+    for (int i = 0; i < NBR_COL; i++) {
         //thread_pool.addTask([this, tmp, i, &bestScore, &bestMove]{
         //     start_search(tmp, i, &bestScore, &bestMove);
         // });
@@ -360,31 +340,32 @@ int8_t Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int8_t dep
     return bestMove; */
 }
 
-int8_t Game::aiMove(int8_t depth) {
-    int8_t ai_col = aiSearchMove(&ai_board, &human_board, depth, col_heights);
+int Game::aiMove(const int depth) {
+    int ai_col = aiSearchMove(&ai_board, &human_board, depth, col_heights);
     return putPiece(&ai_board, ai_col, col_heights);
 }
 
-int8_t Game::humanMove(const int8_t col) {
+int Game::humanMove(const int col) {
     if (col < 0 || col > 6) {
         return NOT_ALLOWED;
     }
     return putPiece(&human_board, col, col_heights);
 }
 
-int8_t Game::forceAIMove(const int8_t col) {
+int Game::forceAIMove(const int col) {
     return putPiece(&ai_board, col, col_heights);
 }
 
-int8_t Game::scoreAIpos() {
-    return negamax(&ai_board, &human_board, col_heights, -INFINITY, INFINITY);
+int Game::scoreAIpos() {
+    return negamax(&ai_board, &human_board, col_heights, INT8_MAX, -INFINITY, INFINITY);
 }
 
 void Game::resetBoard() {
     this->human_board = 0b0;
     this->ai_board = 0b0;
     this->current_depth = 0;
-    for (int8_t i = 0; i < NBR_COL; i++) {
+    this->count = 0;
+    for (int i = 0; i < NBR_COL; i++) {
         this->col_heights[i] = NBR_COL - i;
     }
 }
@@ -392,7 +373,7 @@ void Game::resetBoard() {
 void Game::printBoard() {
     unsigned short column = 0;
     uint64_t place = 1UL << 47;
-    for (int8_t i = 16; i < BOARDLEN; i++) {
+    for (int i = 16; i < BOARDLEN; i++) {
         if ((i % 8 == 7)) {
             place >>= 1;
             continue;
@@ -411,25 +392,25 @@ void Game::printBoard() {
         place >>= 1;
     }
     printf("-----------------------------\n ");
-    for (int8_t i = 0; i < NBR_COL; i++)
+    for (int i = 0; i < NBR_COL; i++)
         printf(" %d  ", i);
     printf("\n");
 }
 
-int8_t Game::run() {
-    int8_t depth;
-    int8_t trash;
+int Game::run() {
+    int depth;
+    int trash;
     printf("AI depth: ");
-    trash = scanf("%s", &depth);
+    trash = scanf("%d", &depth);
     while (true) {
         if (current_player == HUMAN) {
             printBoard();
-            int8_t col;
+            int col;
             printf("Your move [0-6]: ");
-            trash = scanf("%s", &col);
+            trash = scanf("%d", &col);
             while (humanMove(col) == NOT_ALLOWED) {
                 printf("Reenter your move [0-6]: ");
-                trash = scanf("%s", &col);
+                trash = scanf("%d", &col);
             }
         } else {
             clock_t start = clock();

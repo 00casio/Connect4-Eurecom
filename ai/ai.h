@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <cstdio>
 #include <ctime>
+#include <vector>
 
 /*
 The reason we are using (internally) a 8x8 board is because we are using an
@@ -19,6 +20,39 @@ pieces are handled, and it may slow down a lot the algorithm.
 #define SYMBOL_HUMAN "o"
 #define NOT_ALLOWED -1
 #define SCORE_NOT_ALLOWED 42587268
+#define SIZE_VECT 8388593
+#define MIN_SCORE -(NBR_LINE*NBR_COL)/2+3
+
+
+// Adapted from PascalPons' connect 4 AI
+class Table {
+private:
+    struct Entry {
+        uint64_t id: 56;
+        int8_t value;
+    };
+    std::vector<Entry> t;
+
+public:
+    Table(): t(SIZE_VECT) {
+    };
+
+    void put(uint64_t id, int8_t value) {
+        int i = id % SIZE_VECT;
+        t[i].id = id;
+        t[i].value = value;
+    }
+
+    int8_t get(uint64_t id) {
+        int i = id % SIZE_VECT;
+        if (t[i].id == id) {
+            return t[i].value;
+        } else {
+            return 0;
+        }
+    }
+};
+
 
 /**
  * @brief The class that contains all information about the game
@@ -27,24 +61,25 @@ pieces are handled, and it may slow down a lot the algorithm.
 class Game {
 private:
     // Multithreading variables
-    int8_t thread_count = 4;
+    int thread_count = 4;
 
     // Players variables
-    int8_t HUMAN = 1;
-    int8_t AI = ~HUMAN; // This way we are sure they are not the same
-    int8_t current_player = HUMAN; // Not used when in mode shared library
+    int HUMAN = 1;
+    int AI = ~HUMAN; // This way we are sure they are not the same
+    int current_player = HUMAN; // Not used when in mode shared library
 
     // The depth of the current move
-    int16_t current_depth = 0;
+    int current_depth = 0;
 
     int8_t col_ordering[7] = {3, 4, 2, 5, 1, 6, 0};
+    Table transTable; // Should reverse 2GB of memory
 
     // The bitboards for the two players
     uint64_t human_board = 0b0;
     uint64_t ai_board = 0b0;
     uint8_t col_heights[7] = {7, 6, 5, 4, 3, 2, 1};
 
-    int64_t count = 0; // This is used to know how many times something is done
+    int count = 0; // This is used to know how many times something is done
 
     /**
      * @brief Place the new piece on the board
@@ -54,7 +89,7 @@ private:
      * @param heights The list of the heights of the different columns
      * @return Return NOT_ALLOWED if the column is not valid (full or out of bound), or the column otherwise
      */
-    int8_t putPiece(uint64_t *player, const int8_t col, uint8_t *heights);
+    int putPiece(uint64_t *player, const int col, uint8_t *heights);
 
     /**
      * @brief Remove the piece at the top of the column chosen
@@ -63,7 +98,7 @@ private:
      * @param col The column we want to remove the piece
      * @param heights The list of the heights of the different columns
      */
-    void removePiece(uint64_t *player, const int8_t col, uint8_t *heights);
+    void removePiece(uint64_t *player, const int col, uint8_t *heights);
 
     /**
      * @brief Count the number of 1 in bitboard
@@ -71,7 +106,7 @@ private:
      * @param bitboard The board representation
      * @return the number of 1
      */
-    int8_t countNbrOne(const uint64_t bitboard);
+    int countNbrOne(const uint64_t bitboard);
 
     /**
      * @brief Count the number of 4, 3, and 2 aligned disks
@@ -80,7 +115,7 @@ private:
      * @param state The state of the board (if winning or not)
      * @return the score associated with the bitboard
      */
-    int8_t countPoints(const uint64_t bitboard, bool *state);
+    int countPoints(const uint64_t bitboard, bool *state);
 
     /**
      * @brief Compute the score of the board
@@ -90,7 +125,7 @@ private:
      * @param depth The depth at wich we are looking
      * @return The score computed
      */
-    double evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, const int8_t depth);
+    double evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, const int depth);
 
     /**
      * @brief The negamax variant of the minimax algorithm
@@ -98,11 +133,12 @@ private:
      * @param player The board representation of the player
      * @param opponent The board representation of the opponent
      * @param heights The list of the heights of the different columns
+     * @param max_depth The maximun depth to search
      * @param alpha The alpha parameter
      * @param beta The beta parameter
      * @return The score of the negamax algorithm at this level
      */
-    double negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, double alpha, double beta);
+    int negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int max_depth, double alpha, double beta);
 
     /**
      * @brief Apply the minmax algorithm with alpha-beta prunning
@@ -116,7 +152,7 @@ private:
      * @param beta The beta parameter
      * @return The score of the minimax algorithm at this level
      */
-    double minimax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int8_t depth, const bool isMaximising, double alpha, double beta);
+    double minimax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta);
 
     /**
      * @brief Return the best starting move when no evaluation is done
@@ -124,7 +160,7 @@ private:
      * @param heights The list of the heights of the different columns
      * @return the column played
      */
-    int8_t bestStartingMove(const uint8_t *heights);
+    int bestStartingMove(const uint8_t *heights);
 
     /**
      * @brief A structure to copy the important values for multithreading
@@ -133,14 +169,14 @@ private:
     struct value_search {
         uint64_t player;
         uint64_t opponent;
-        int8_t depth;
+        int depth;
         uint8_t heights[7];
 
-        value_search(uint64_t p, uint64_t o, int8_t d, uint8_t *h) {
+        value_search(uint64_t p, uint64_t o, int d, uint8_t *h) {
             player = p;
             opponent = o;
             depth = d;
-            for (int8_t i = 0; i < 7; i++) {heights[i] = h[i];}
+            for (int i = 0; i < 7; i++) {heights[i] = h[i];}
         }
     };
 
@@ -152,7 +188,7 @@ private:
      * @param best_score A pointer to the variable storing the best score
      * @param best_move A pointer to the variable storing the best move
      */
-    void start_search(value_search values, int8_t column_played, double *best_score, int8_t *best_move);
+    void start_search(value_search values, int column_played, double *best_score, int *best_move);
 
     /**
      * @brief Search the best move the AI can make
@@ -163,7 +199,7 @@ private:
      * @param heights The list of the heights of the different columns
      * @return The number of the column in which we should play
      */
-    int8_t aiSearchMove(uint64_t *player, uint64_t *opponent, const int8_t depth, uint8_t *heights);
+    int aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, uint8_t *heights);
 
 public:
 
@@ -173,7 +209,7 @@ public:
      * @param depth The depth at which the AI should look
      * @return The column in which the AI played or NOT_ALLOWED if the col is not valid
      */
-    int8_t aiMove(const int8_t depth);
+    int aiMove(const int depth);
 
     /**
      * @brief A wrapper around the Human
@@ -181,7 +217,7 @@ public:
      * @param col The column in which the human want to play
      * @return The column in which the Human played or NOT_ALLOWED if the col is not valid
      */
-    int8_t humanMove(const int8_t col);
+    int humanMove(const int col);
 
     /**
      * @brief Reset the state of the board
@@ -200,23 +236,21 @@ public:
      * 
      * @return the status code
      */
-    int8_t run();
+    int run();
 
     /**
      * @brief Get the count object
      * 
      * @return long 
      */
-    int64_t get_count() {
+    int get_count() {
         return count;
     }
 
-    int8_t human_winning();
-
-    int8_t ai_winning();
-
+    bool human_winning();
+    bool ai_winning();
     bool draw();
 
-    int8_t forceAIMove(const int8_t col);
-    int8_t scoreAIpos();
+    int forceAIMove(const int col);
+    int scoreAIpos();
 };
