@@ -34,6 +34,8 @@ private:
     int AI = ~HUMAN; // This way we are sure they are not the same
     int current_player = HUMAN; // Not used when in mode shared library
 
+    int current_depth = 0;
+
     // The bitboards for the two players
     unsigned long long human_board = 0b0;
     unsigned long long ai_board = 0b0;
@@ -211,6 +213,8 @@ public:
     int human_winning();
 
     int ai_winning();
+    int forceAIMove(const int col);
+    int scoreAIpos();
 
     bool draw();
 };

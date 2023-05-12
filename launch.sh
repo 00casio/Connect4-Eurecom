@@ -24,8 +24,10 @@ com=$(test_python "python" "python3.11" "python3.10" "python3.9")
 if [ "${com}" == "" ]; then exit; fi
 
 # Install packages
-${com} -m pip install wheel # Needed for playsound
-${com} -m pip install -r requirements.txt
+echo "Testing python packages..."
+${com} -m pip install wheel 1>/dev/null # Needed for playsound
+${com} -m pip install -r requirements.txt 1>/dev/null
+echo "Python packages tested"
 
 # Change python headers location based on OS
 python_ver=$(${com} -c "from sys import version_info as v; print(f'{v[0]}.{v[1]}')")
