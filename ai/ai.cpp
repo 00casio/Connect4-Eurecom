@@ -300,7 +300,7 @@ void Game::start_search(value_search values, int column_played, double *best_sco
     }
 
     double score;
-    if (false) {
+    if (true) {
         score = minimax(&values.player, &values.opponent, values.heights, values.depth - 1, false, - INFINITY, + INFINITY);
     } else {
         score = - negamax(&values.opponent, &values.player, values.heights, values.depth - 1, -1, - INFINITY, + INFINITY);
@@ -315,6 +315,7 @@ void Game::start_search(value_search values, int column_played, double *best_sco
 }
 
 int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent, const int depth, uint8_t *heights) {
+<<<<<<< HEAD
     int bestMove = bestStartingMove(heights);
     int bestScore = - NBR_COL*NBR_LINE;
     double alpha = - INFINITY;
@@ -340,6 +341,12 @@ int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent,
 
     // return negamax(player, opponent, heights, depth, +1, - INFINITY, +INFINITY);
 /*     ThreadPool thread_pool(thread_count);
+=======
+    if ((*player == 0) && (*opponent == 0)) {
+        return 3;
+    }
+    ThreadPool thread_pool(thread_count);
+>>>>>>> d2effdc (criteria tests + weird stats)
     int bestMove = bestStartingMove(heights);
     double bestScore = - INFINITY;
     value_search tmp(*player, *opponent, depth, heights);
