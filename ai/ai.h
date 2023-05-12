@@ -34,7 +34,10 @@ private:
     int AI = ~HUMAN; // This way we are sure they are not the same
     int current_player = HUMAN; // Not used when in mode shared library
 
+    // The depth of the current move
     int current_depth = 0;
+
+    int col_ordering[7] = {3, 4, 2, 5, 1, 6, 0};
 
     // The bitboards for the two players
     unsigned long long human_board = 0b0;
@@ -95,13 +98,11 @@ private:
      * @param player The board representation of the player
      * @param opponent The board representation of the opponent
      * @param heights The list of the heights of the different columns
-     * @param depth The maximum depth of the minmax algorithm at this moment
-     * @param sign_result The sign of the result
      * @param alpha The alpha parameter
      * @param beta The beta parameter
      * @return The score of the negamax algorithm at this level
      */
-    double negamax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const int sign_result, double alpha, double beta);
+    double negamax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, double alpha, double beta);
 
     /**
      * @brief Apply the minmax algorithm with alpha-beta prunning
@@ -213,8 +214,9 @@ public:
     int human_winning();
 
     int ai_winning();
-    int forceAIMove(const int col);
-    int scoreAIpos();
 
     bool draw();
+
+    int forceAIMove(const int col);
+    int scoreAIpos();
 };

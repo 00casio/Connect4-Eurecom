@@ -30,7 +30,7 @@ def tests(file: str):
         assert score == expected_score, f"{score}, {expected_score}"
         total_pos += libai.get_count()
         total_time += end-start
-        print(f"{i} in {end-start:.5f} s", end="\r")
+        print(f"{i} in {(end-start):.5f} s", end="\r")
         i += 1
         libai.resetBoard()
     print(f"mean time: {total_time/len(lines):.9f}s, mean nb pos: {total_pos/len(lines):.5f}")
