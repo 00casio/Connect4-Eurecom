@@ -16,6 +16,7 @@ pieces are handled, and it may slow down a lot the algorithm.
 #define NBR_COL 7
 #define BOARDLEN 64
 #define MAX_ALLOWED_HEIGHT 48
+#define MAX_NBR_MOVE NBR_LINE*NBR_COL
 #define SYMBOL_AI "x"
 #define SYMBOL_HUMAN "o"
 #define NOT_ALLOWED -1

@@ -247,6 +247,7 @@ double Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, con
         removePiece(player, dpRes, heights);
     }
 
+    // Do all move and look for the result of the opponent
     for (int i = 0; i < NBR_COL; i++) {
         int col = col_ordering[i];
         int dpRes = putPiece(player, col, heights);
@@ -366,11 +367,7 @@ void Game::start_search(value_search values, int column_played, double *best_sco
 }
 
 int Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, uint8_t *heights) {
-    // if ((*player == 0) && (*opponent == 0)) {
-    //     return 3;
-    // }
     int bestMove = bestStartingMove(heights);
-    // int bestScore = - NBR_COL*NBR_LINE;
     double alpha = - INFINITY;
     double beta = INFINITY;
 
@@ -423,7 +420,7 @@ int Game::forceAIMove(const int col) {
 }
 
 int Game::scoreAIpos() {
-    return negamax(&ai_board, &human_board, col_heights, INT8_MAX, -INFINITY, INFINITY);
+    return negamax(&ai_board, &human_board, col_heights, MAX_NBR_MOVE, -INFINITY, INFINITY);
 }
 
 void Game::resetBoard() {

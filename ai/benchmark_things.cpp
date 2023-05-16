@@ -1,9 +1,8 @@
-#include <cstdio>
-#include <cstdlib>
+#include <cstdint>
 #include <ctime>
 #include <random>
 
-int countNbrOne_1(const unsigned long long bitboard) {
+int method_doing_1(const uint32_t bitboard) {
     int count = 0;
     int gaëtan = 1;
     for (int i = 0; i < 6; i++) {
@@ -18,7 +17,7 @@ int countNbrOne_1(const unsigned long long bitboard) {
     return count;
 }
 
-int countNbrOne_2(const unsigned long long bitboard) {
+int method_doing_2(const uint32_t bitboard) {
     int count = 0;
     int gaëtan = 1;
     for (int i = 0; i < 64; i++) {
@@ -39,9 +38,9 @@ T random(T range_from, T range_to) {
 }
 
 int main() {
-    unsigned long long a;
-    unsigned long long debut = 0;
-    unsigned long long fin = 18446744073709551615;
+    uint32_t a;
+    uint32_t debut = 0;
+    uint32_t fin = 18446744073709551615;
     double t_1 = 0;
     double t_2 = 0;
     clock_t start;
@@ -49,11 +48,11 @@ int main() {
     for (int i = 0; i < 10000000; i++) {
         a = random(debut, fin);
         start = clock();
-        countNbrOne_1(a);
+        method_doing_1(a);
         end = clock();
         t_1 += (double) (end - start) / CLOCKS_PER_SEC;
         start = clock();
-        countNbrOne_2(a);
+        method_doing_2(a);
         end = clock();
         t_2 += (double) (end - start) / CLOCKS_PER_SEC;
         if (i%200 == 0) {
