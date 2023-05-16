@@ -117,6 +117,8 @@ private:
      */
     int countPoints(const uint64_t bitboard, bool *state);
 
+    bool quickWinning(const uint64_t bitboard);
+
     /**
      * @brief Compute the score of the board
      * 
@@ -138,7 +140,7 @@ private:
      * @param beta The beta parameter
      * @return The score of the negamax algorithm at this level
      */
-    int negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int max_depth, double alpha, double beta);
+    double negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int max_depth, double alpha, double beta);
 
     /**
      * @brief Apply the minmax algorithm with alpha-beta prunning
