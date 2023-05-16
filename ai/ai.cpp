@@ -4,8 +4,6 @@
 */
 
 #include "ai.h"
-#include <cmath>
-#include <cstdint>
 
 int Game::putPiece(uint64_t *player, const int col, uint8_t *heights) {
     if (heights[col] > MAX_ALLOWED_HEIGHT) {
@@ -13,13 +11,13 @@ int Game::putPiece(uint64_t *player, const int col, uint8_t *heights) {
     }
     *player ^= 1ULL << heights[col];
     heights[col] += 8;
-    this->current_depth++;
+    current_depth++;
     return col;
 }
 
 void Game::removePiece(uint64_t *player, const int col, uint8_t *heights) {
     heights[col] -= 8;
-    this->current_depth--;
+    current_depth--;
     *player &= ~(1ULL << heights[col]);
 }
 
@@ -143,12 +141,10 @@ double Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, 
 
     score += countPoints(bitboard, &winning);
     if (winning) {
-        printf("This should not be seen\n");
         return INFINITY;
     }
     score -= countPoints(oppBitboard, &losing);
     if (losing) {
-        printf("And that too\n");
         return - INFINITY;
     }
 
@@ -221,6 +217,7 @@ double Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, 
 } */
 
 double Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int depth, double alpha, double beta) {
+    count++;
     double result = evaluateBoard(*player, *opponent, depth);
     if (depth <= 0) {
         return result;

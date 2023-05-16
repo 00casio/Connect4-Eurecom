@@ -1,0 +1,84 @@
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 1 while AI_2 is depth 1. AI_1 starts the game
+Nb_games = 1000: AI_1 = 1000, AI_2 = 0, draw = 0, percentage win AI_1 = 100.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 3 while AI_2 is depth 3. AI_1 starts the game
+Nb_games = 1000: AI_1 = 1000, AI_2 = 0, draw = 0, percentage win AI_1 = 100.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 1 while AI_2 is depth 1. AI_1 starts the game
+Nb_games = 1000: AI_1 = 1000, AI_2 = 0, draw = 0, percentage win AI_1 = 100.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 3 while AI_2 is depth 3. AI_1 starts the game
+Nb_games = 1000: AI_1 = 1000, AI_2 = 0, draw = 0, percentage win AI_1 = 100.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 5 while AI_2 is depth 5. AI_1 starts the game
+Nb_games = 1000: AI_1 = 0, AI_2 = 0, draw = 1000, percentage win AI_1 = 0.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 7 while AI_2 is depth 7. AI_1 starts the game
+Nb_games = 100: AI_1 = 0, AI_2 = 100, draw = 0, percentage win AI_1 = 0.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 9 while AI_2 is depth 9. AI_1 starts the game
+Nb_games = 50: AI_1 = 50, AI_2 = 0, draw = 0, percentage win AI_1 = 100.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 1 while AI_2 is depth 1. AI_1 starts the game
+Nb_games = 1000: AI_1 = 1000, AI_2 = 0, draw = 0, percentage win AI_1 = 100.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 3 while AI_2 is depth 3. AI_1 starts the game
+Nb_games = 1000: AI_1 = 1000, AI_2 = 0, draw = 0, percentage win AI_1 = 100.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 5 while AI_2 is depth 5. AI_1 starts the game
+Nb_games = 1000: AI_1 = 0, AI_2 = 0, draw = 1000, percentage win AI_1 = 0.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 6 while AI_2 is depth 6. AI_1 starts the game
+Nb_games = 100: AI_1 = 0, AI_2 = 100, draw = 0, percentage win AI_1 = 0.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 7 while AI_2 is depth 7. AI_1 starts the game
+Nb_games = 100: AI_1 = 0, AI_2 = 100, draw = 0, percentage win AI_1 = 0.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 8 while AI_2 is depth 8. AI_1 starts the game
+Nb_games = 50: AI_1 = 0, AI_2 = 0, draw = 50, percentage win AI_1 = 0.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 9 while AI_2 is depth 9. AI_1 starts the game
+Nb_games = 50: AI_1 = 50, AI_2 = 0, draw = 0, percentage win AI_1 = 100.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 1 while AI_2 is depth 1. AI_1 starts the game
+Nb_games = 1000: AI_1 = 1000, AI_2 = 0, draw = 0, percentage win AI_1 = 100.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 3 while AI_2 is depth 3. AI_1 starts the game
+Nb_games = 1000: AI_1 = 1000, AI_2 = 0, draw = 0, percentage win AI_1 = 100.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 5 while AI_2 is depth 5. AI_1 starts the game
+Nb_games = 1000: AI_1 = 0, AI_2 = 0, draw = 1000, percentage win AI_1 = 0.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 6 while AI_2 is depth 6. AI_1 starts the game
+Nb_games = 100: AI_1 = 0, AI_2 = 100, draw = 0, percentage win AI_1 = 0.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 7 while AI_2 is depth 7. AI_1 starts the game
+Nb_games = 100: AI_1 = 0, AI_2 = 100, draw = 0, percentage win AI_1 = 0.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 8 while AI_2 is depth 8. AI_1 starts the game
+Nb_games = 50: AI_1 = 0, AI_2 = 0, draw = 50, percentage win AI_1 = 0.00
+ 
+Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent 
+AI_1 is depth 9 while AI_2 is depth 9. AI_1 starts the game
+Nb_games = 50: AI_1 = 50, AI_2 = 0, draw = 0, percentage win AI_1 = 100.00
+ 

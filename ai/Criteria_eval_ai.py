@@ -35,7 +35,7 @@ def tests_criteria(nb_parties, depth_ai1, depth_ai2):
             nb_win_ai2 += 1
         else:
             nb_draw += 1
-    print(f"{nb_parties}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, draw = {nb_draw}")
+    print(f"{nb_parties}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, draw = {nb_draw}, depth=({depth_ai1}, {depth_ai2})")
     percentage_win_AI_1 = (100*nb_win_ai1)/nb_parties
     print("percentage winning AI 1 : ", percentage_win_AI_1)
 
@@ -53,9 +53,9 @@ def tests_criteria(nb_parties, depth_ai1, depth_ai2):
 tests_criteria(1000, 1, 1)
 tests_criteria(1000, 3, 3)
 tests_criteria(1000, 5, 5)
-#tests_criteria(100, 6, 6) # beggining of weird stats, AI 2 wins most of the time
+tests_criteria(100, 6, 6) # beggining of weird stats, AI 2 wins most of the time
 tests_criteria(100, 7, 7) # AI 2 is always winning here, this is stange
-#tests_criteria(50, 8, 8)
+tests_criteria(50, 8, 8)
 tests_criteria(50, 9, 9) # my computer is too slow for this one, but seems like the same as the previous one
 
 # tests_criteria(1000, 1, 1)

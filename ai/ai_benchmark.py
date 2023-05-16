@@ -6,7 +6,7 @@ from time import time
 import libai
 
 nbr_test = 100
-max_depth = 10
+max_depth = 16
 compiler = input("Compiler: ")
 id_test = input("Id: ")
 for depth in range(1, max_depth + 1):
