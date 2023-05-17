@@ -8,7 +8,6 @@ import numpy as np
 import pygame as pg
 from playsound import playsound
 
-import ai.libai as libai
 from ai.minimax_ai import minimax, opponent
 from core.screens import GamingScreen, OptionsScreen, Screen, Screen_AI
 from core.structure import Board, Node
@@ -85,7 +84,7 @@ class Player:
 class Game:
     """The big class that will regulate everything"""
 
-    def __init__(self, args: Namespace, ai_cpp_1: libai.Game, ai_cpp_2: libai.Game) -> None:
+    def __init__(self, args: Namespace, ai_cpp_1, ai_cpp_2) -> None:
         """ Initialize the value needed for the game """
         # Gestures
         self.gestures = GestureController()
@@ -145,6 +144,8 @@ class Game:
             self.var, self.screen, self.gestures, self.volume, self.camera
         )
         gaming.draw_board()
+        pg.draw.circle(gaming.screen, self.player_1.color, (self.screen.get_width()//2, self.var.padding//2), self.var.radius_disk)
+        pg.display.update()
         self.player_playing = self.player_1
         if not self.libai:
             self.root = Node(-1, None, self.player_playing.symbol.v, 0)
@@ -251,8 +252,10 @@ class Game:
 
     def draw_play_options(self) -> None:
         """Show the different options when choosing to play"""
-        self.ai_cpp_1.resetBoard()
-        self.ai_cpp_2.resetBoard()
+        if self.ai_cpp_1 is not None:
+            self.ai_cpp_1.resetBoard()
+        if self.ai_cpp_2 is not None:
+            self.ai_cpp_2.resetBoard()
         screen = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
         text_HvH = screen.create_text_rendered(self.var.text_options_play_HvH)
         text_HvAI = screen.create_text_rendered(self.var.text_options_play_HvAI)

@@ -3,11 +3,10 @@
 #include <cstdint>
 #include <cstdio>
 #include <ctime>
-#include <vector>
 
 /*
 The reason we are using (internally) a 8x8 board is because we are using an
-uint64_t (so 64 bits long) variable to put the pieces in places. We
+unsigned long long (so 64 bits long) variable to put the pieces in places. We
 could use a 7*7 board or even a 7x6 but it would require to rework how the
 pieces are handled, and it may slow down a lot the algorithm.
 */
@@ -16,44 +15,10 @@ pieces are handled, and it may slow down a lot the algorithm.
 #define NBR_COL 7
 #define BOARDLEN 64
 #define MAX_ALLOWED_HEIGHT 48
-#define MAX_NBR_MOVE NBR_LINE*NBR_COL
 #define SYMBOL_AI "x"
 #define SYMBOL_HUMAN "o"
 #define NOT_ALLOWED -1
 #define SCORE_NOT_ALLOWED 42587268
-#define SIZE_VECT 8388593
-#define MIN_SCORE -(NBR_LINE*NBR_COL)/2+3
-
-
-// Adapted from PascalPons' connect 4 AI
-class Table {
-private:
-    struct Entry {
-        uint64_t id: 56;
-        int8_t value;
-    };
-    std::vector<Entry> t;
-
-public:
-    Table(): t(SIZE_VECT) {
-    };
-
-    void put(uint64_t id, int8_t value) {
-        int i = id % SIZE_VECT;
-        t[i].id = id;
-        t[i].value = value;
-    }
-
-    int8_t get(uint64_t id) {
-        int i = id % SIZE_VECT;
-        if (t[i].id == id) {
-            return t[i].value;
-        } else {
-            return 0;
-        }
-    }
-};
-
 
 /**
  * @brief The class that contains all information about the game
@@ -69,15 +34,9 @@ private:
     int AI = ~HUMAN; // This way we are sure they are not the same
     int current_player = HUMAN; // Not used when in mode shared library
 
-    // The depth of the current move
-    int current_depth = 0;
-
-    int8_t col_ordering[7] = {3, 4, 2, 5, 1, 6, 0};
-    Table transTable; // Should reverse 2GB of memory
-
     // The bitboards for the two players
-    uint64_t human_board = 0b0;
-    uint64_t ai_board = 0b0;
+    unsigned long long human_board = 0b0;
+    unsigned long long ai_board = 0b0;
     uint8_t col_heights[7] = {7, 6, 5, 4, 3, 2, 1};
 
     int count = 0; // This is used to know how many times something is done
@@ -90,7 +49,7 @@ private:
      * @param heights The list of the heights of the different columns
      * @return Return NOT_ALLOWED if the column is not valid (full or out of bound), or the column otherwise
      */
-    int putPiece(uint64_t *player, const int col, uint8_t *heights);
+    int putPiece(unsigned long long *player, const int col, uint8_t *heights);
 
     /**
      * @brief Remove the piece at the top of the column chosen
@@ -99,7 +58,7 @@ private:
      * @param col The column we want to remove the piece
      * @param heights The list of the heights of the different columns
      */
-    void removePiece(uint64_t *player, const int col, uint8_t *heights);
+    void removePiece(unsigned long long *player, const int col, uint8_t *heights);
 
     /**
      * @brief Count the number of 1 in bitboard
@@ -107,7 +66,7 @@ private:
      * @param bitboard The board representation
      * @return the number of 1
      */
-    int countNbrOne(const uint64_t bitboard);
+    int countNbrOne(const unsigned long long bitboard);
 
     /**
      * @brief Count the number of 4, 3, and 2 aligned disks
@@ -116,9 +75,7 @@ private:
      * @param state The state of the board (if winning or not)
      * @return the score associated with the bitboard
      */
-    int countPoints(const uint64_t bitboard, bool *state);
-
-    bool quickWinning(const uint64_t bitboard);
+    int countPoints(const unsigned long long bitboard, bool *state);
 
     /**
      * @brief Compute the score of the board
@@ -128,20 +85,7 @@ private:
      * @param depth The depth at wich we are looking
      * @return The score computed
      */
-    double evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, const int depth);
-
-    /**
-     * @brief The negamax variant of the minimax algorithm
-     * 
-     * @param player The board representation of the player
-     * @param opponent The board representation of the opponent
-     * @param heights The list of the heights of the different columns
-     * @param max_depth The maximun depth to search
-     * @param alpha The alpha parameter
-     * @param beta The beta parameter
-     * @return The score of the negamax algorithm at this level
-     */
-    double negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int max_depth, double alpha, double beta);
+    double evaluateBoard(const unsigned long long bitboard, const unsigned long long oppBitboard, const int depth);
 
     /**
      * @brief Apply the minmax algorithm with alpha-beta prunning
@@ -153,9 +97,9 @@ private:
      * @param isMaximising Is we want to maximize or minimize the score the player
      * @param alpha The alpha parameter
      * @param beta The beta parameter
-     * @return The score of the minimax algorithm at this level
+     * @return The score of the minmax algorithm at this level
      */
-    double minimax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta);
+    double minimax(unsigned long long *player, unsigned long long *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta);
 
     /**
      * @brief Return the best starting move when no evaluation is done
@@ -170,12 +114,12 @@ private:
      * 
      */
     struct value_search {
-        uint64_t player;
-        uint64_t opponent;
+        unsigned long long player;
+        unsigned long long opponent;
         int depth;
         uint8_t heights[7];
 
-        value_search(uint64_t p, uint64_t o, int d, uint8_t *h) {
+        value_search(unsigned long long p, unsigned long long o, int d, uint8_t *h) {
             player = p;
             opponent = o;
             depth = d;
@@ -202,7 +146,7 @@ private:
      * @param heights The list of the heights of the different columns
      * @return The number of the column in which we should play
      */
-    int aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, uint8_t *heights);
+    int aiSearchMove(unsigned long long *player, unsigned long long *opponent, const int depth, uint8_t *heights);
 
 public:
 
@@ -250,10 +194,9 @@ public:
         return count;
     }
 
-    bool human_winning();
-    bool ai_winning();
-    bool draw();
+    int human_winning();
 
-    int forceAIMove(const int col);
-    int scoreAIpos();
+    int ai_winning();
+
+    bool draw();
 };

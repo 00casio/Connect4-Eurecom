@@ -36,8 +36,11 @@ class Screen(Tools):
         self.cancel_box: Optional[Rect] = None
         self.box_clicked = self.var.box_out
         self.screen.fill(color_fill)
+        self.last_x = 0
+        self.last_y = 0
         self.draw_cancel = cancel_box
         self.draw_quit = quit_box
+        self.last_collumn_seetec = 3
         if cancel_box:
             self.draw_cancel_box()
         if quit_box:
@@ -84,24 +87,44 @@ class Screen(Tools):
         """Return the mouse position"""
         # print("Change this to have the position from the camera")
         return pg.mouse.get_pos()
+    
+    def jump_mouse(self):
+        x, y = self.gestures.x, self.gestures.y
+        delta_x, delta_y = x - self.last_x, y - self.last_y
+        if delta_x >= 100:
+            self.last_x = x
+            return 1 #move right
+        elif delta_x <= -100:
+            self.last_x = x
+            return -1 #move left
+        else:
+            return 0 #stationary
+
 
     def human_move(self, color: Color) -> None:
         """ Function to use when it's the human's turn to move """
-        self.screen.fill(self.var.color_screen)
-        mouse_x, mouse_y = self.get_mouse_pos()
-        if mouse_x < self.var.pos_min_x:
-            mouse_x = self.var.pos_min_x
-        elif mouse_x > self.var.pos_max_x:
-            mouse_x = self.var.pos_max_x
+        # self.screen.fill(self.var.color_screen)
+        direc = self.jump_mouse()
+        last = self.last_collumn_seetec
+        new_col = self.last_collumn_seetec + direc
+        # mouse_x, mouse_y = self.get_mouse_pos()
+        mouse_x = self.last_x
+        # if mouse_x < self.var.pos_min_x:
+        #     mouse_x = self.var.pos_min_x
+        # elif mouse_x > self.var.pos_max_x:
+        #     mouse_x = self.var.pos_max_x
 
         p = self.var.padding
-        if p < mouse_x < p + self.var.width_board:
-            col = (mouse_x - p) // self.var.size_cell
-            rect_col = Rect(p + col * self.var.size_cell, 0, self.var.size_cell, p)
-            pg.draw.rect(self.screen, self.var.color_highlight_column, rect_col)
+        sc = self.var.size_cell
+        # if p < mouse_x < p + self.var.width_board:
+        #     col = (mouse_x - p) // self.var.size_cell
+        #     rect_col = Rect(p + col * self.var.size_cell, 0, self.var.size_cell, p)
+        #     pg.draw.rect(self.screen, self.var.color_highlight_column, rect_col)
+        pg.draw.rect(self.screen, self.var.color_screen, (last*sc-p //2, 0, last*sc+p//2, p))
         self.draw_quit_box()
-        pg.draw.circle(self.screen, color, (mouse_x, p // 2), self.var.radius_disk)
-        pg.display.update((mouse_x - p // 2, 0, p, p))
+        pg.draw.circle(self.screen, color, (new_col*self.var.size_cell+p, p // 2), self.var.radius_disk)
+        pg.display.update((last*sc-p //2, 0, last*sc+p//2, p))
+        pg.display.update((new_col*sc-p//2, 0, p//2 + new_col*sc, p))
 
     def update_gesture(self, image: np.ndarray[Any, np.dtype[Any]]) -> None:
         """ Update the gesture class """
@@ -113,7 +136,7 @@ class Screen(Tools):
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
         if results.multi_hand_landmarks:
-            GestureController.classify_hands(results)
+            self.gestures.classify_hands(results)
             self.gestures.handmajor.update_hand_result(self.gestures.hr_major)
             self.gestures.handminor.update_hand_result(self.gestures.hr_minor)
 
@@ -122,12 +145,12 @@ class Screen(Tools):
             gest_name = self.gestures.handminor.get_gesture()
 
             if gest_name == Gest.PINCH_MINOR:
-                Controller.handle_controls(
+                self.handle_controls(
                     gest_name, self.gestures.handminor.hand_result
                 )
             else:
                 gest_name = self.gestures.handmajor.get_gesture()
-                Controller.handle_controls(
+                self.gestures.handle_controls(
                     gest_name, self.gestures.handmajor.hand_result
                 )
 
@@ -136,7 +159,7 @@ class Screen(Tools):
                     image, hand_landmarks, mp_hands.HAND_CONNECTIONS
                 )
         else:
-            Controller.prev_hand = None
+            self.prev_hand = None
         cv2.imshow("Gesture Controller", image)
         if cv2.waitKey(5) & 0xFF == 13:
             self.handle_quit(self.quit_box.center)
@@ -155,7 +178,7 @@ class Screen(Tools):
         allow_quit = False
         while not allow_quit:
             if self.camera:
-                success, image = GestureController.cap.read()
+                success, image = self.gestures.cap.read()
                 if success:
                     self.update_gesture(image)
 
