@@ -1,6 +1,7 @@
 /* To compile this as a shared library, use:
  * g++ -shared ai.cpp -o libai.so -O3 -I /usr/include/python3.11 -lboost_python311 -fPIC
  * or another program that would output the same thing
+ * The benchmark STRONGLY suggest that clang++ is better
 */
 
 #include "ai.h"
@@ -141,11 +142,11 @@ double Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, 
 
     score += countPoints(bitboard, &winning);
     if (winning) {
-        return INFINITY;
+        return SCORE_SOMEONE_WIN;
     }
     score -= countPoints(oppBitboard, &losing);
     if (losing) {
-        return - INFINITY;
+        return - SCORE_SOMEONE_WIN;
     }
 
     // if board is maxed out (excluding top row)
@@ -227,8 +228,15 @@ double Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, con
         return result;
     }
 
-    if (alpha >= beta) {
-        return beta;
+    int maxScore = SCORE_SOMEONE_WIN - current_depth;
+    if (int value = transTable.get(*player)) {
+        maxScore = value + result - 1;
+    }
+    if (beta > maxScore) {
+        beta = maxScore;
+        if (alpha >= beta) {
+            return beta;
+        }
     }
 
     // Testing if the player can win with his next move
@@ -239,7 +247,7 @@ double Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, con
         }
         if (quickWinning(*player)) {
             removePiece(player, dpRes, heights);
-            return INFINITY;
+            return SCORE_SOMEONE_WIN - depth;
         }
         removePiece(player, dpRes, heights);
     }
@@ -262,6 +270,8 @@ double Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, con
             alpha = score;
         }
     }
+    transTable.put(2**player+*opponent, alpha - result + 1);
+    // 2* the value of player + the value of opponent
     return alpha;
 }
 
@@ -365,8 +375,8 @@ void Game::start_search(value_search values, int column_played, double *best_sco
 
 int Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, uint8_t *heights) {
     int bestMove = bestStartingMove(heights);
-    double alpha = - INFINITY;
-    double beta = INFINITY;
+    double alpha = - SCORE_SOMEONE_WIN;
+    double beta = SCORE_SOMEONE_WIN;
 
     for (int i = 0; i < NBR_COL; i++) {
         int col = col_ordering[i];

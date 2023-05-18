@@ -21,8 +21,8 @@ pieces are handled, and it may slow down a lot the algorithm.
 #define SYMBOL_HUMAN "o"
 #define NOT_ALLOWED -1
 #define SCORE_NOT_ALLOWED 42587268
+#define SCORE_SOMEONE_WIN 10000
 #define SIZE_VECT 8388593
-#define MIN_SCORE -(NBR_LINE*NBR_COL)/2+3
 
 
 // Adapted from PascalPons' connect 4 AI
