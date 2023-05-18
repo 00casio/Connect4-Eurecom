@@ -89,6 +89,7 @@ class Variables:
         self.color_options_highlight_text = self.black
         self.color_options_box = self.blue
         self.color_options_text = self.white
+        self.color_hovering_box = self.red
 
         # Size
         self.size_cell = 100

@@ -138,6 +138,118 @@ class Game:
         self.num_turn = 0
         self.start_game()
 
+    def draw_start_screen(self) -> None:
+        """Show the starting screen, choose between the different possinilities """
+
+        start_screen = Screen(
+            self.var,
+            self.screen,
+            self.gestures,
+            cancel_box=False,
+            volume=self.volume,
+            camera=self.camera,
+        )
+        text_play = start_screen.create_text_rendered(self.var.text_options_play)
+        text_options = start_screen.create_text_rendered(self.var.text_options_options)
+        boxes_options = start_screen.center_all([[text_play], [text_options]])
+        rect_play = boxes_options[0][0]
+        rect_opti = boxes_options[1][0]
+        self.status = self.var.options_menu_start
+        while self.status == self.var.options_menu_start:
+            mouse = start_screen.click()
+            if start_screen.x_in_rect(mouse, rect_play):
+                self.draw_play_options()
+            elif start_screen.x_in_rect(mouse, rect_opti):
+                self.draw_options_screen()
+        if self.status == self.var.options_clicked_cancel:
+            self.draw_start_screen()
+        
+    def draw_options_screen(self) -> None:
+        """ Draw the options screen (language, if camera, if sound, etc.) """
+        options = OptionsScreen(
+            self.var, self, self.screen, self.gestures, self.volume, self.camera
+        )
+        click = options.click()
+        while options.box_clicked != self.var.boxAI_cancel:
+            if options.x_in_rect(click, options.vol):
+                self.volume = not self.volume
+                options.volume = self.volume
+            elif options.x_in_rect(click, options.cam):
+                self.camera = not self.camera
+                options.camera = self.camera
+            elif options.x_in_rect(click, options.flags[0]):
+                self.conf.load_language("en")
+            elif options.x_in_rect(click, options.flags[1]):
+                self.conf.load_language("fr")
+            options.reset_options_screen()
+            click = options.click()
+        self.status = self.var.options_clicked_cancel
+
+    def draw_play_options(self) -> None:
+        """Show the different options when choosing to play"""
+        if self.ai_cpp_1 is not None:
+            self.ai_cpp_1.resetBoard()
+        if self.ai_cpp_2 is not None:
+            self.ai_cpp_2.resetBoard()
+        screen = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
+        text_HvH = screen.create_text_rendered(self.var.text_options_play_HvH)
+        text_HvAI = screen.create_text_rendered(self.var.text_options_play_HvAI)
+        text_AIvAI = screen.create_text_rendered(self.var.text_options_play_AIvAI)
+        text_options = [[text_HvH], [text_HvAI], [text_AIvAI]]
+        boxes = screen.center_all(text_options)
+        self.status = self.var.options_menu_play
+        self.screen_AI = None
+        while self.status == self.var.options_menu_play:
+            mouse = screen.click()
+            if screen.x_in_rect(mouse, boxes[0][0]):
+                self.status = self.var.options_play_HvH
+                self.player_1 = Player(self.var, 1, False)
+                self.player_2 = Player(self.var, 2, False)
+            elif screen.x_in_rect(mouse, boxes[1][0]):
+                self.status = self.var.options_play_HvAI
+                self.screen_AI = Screen_AI(
+                    self.var,
+                    self.screen,
+                    self.gestures,
+                    volume=self.volume,
+                    camera=self.camera,
+                    number_AI=1,
+                )
+                self.player_1 = Player(self.var, 1, False)
+                self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_1)
+            elif screen.x_in_rect(mouse, boxes[2][0]):
+                self.status = self.var.options_play_AIvAI
+                self.screen_AI = Screen_AI(
+                    self.var,
+                    self.screen,
+                    self.gestures,
+                    volume=self.volume,
+                    camera=self.camera,
+                    number_AI=2,
+                )
+                self.player_1 = Player(self.var, 1, True, self.screen_AI.diff_AI_1)
+                self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_2)
+            if screen.x_in_rect(mouse, screen.cancel_box):
+                self.status = self.var.options_clicked_cancel
+        if (self.player_1.is_ai and self.player_1.ai_difficulty == -1) or (
+            self.player_2.is_ai and self.player_2.ai_difficulty == -1
+        ):
+            if self.status not in [
+                self.var.options_play_HvH,
+                self.var.options_clicked_cancel,
+            ]:
+                self.draw_play_options()
+        self.select_opponent()
+
+    def select_opponent(self):
+        """
+        TODO:
+            Choose if the opponent is local or remote
+            Put the communication part in here
+            Pick who is player 1 and player 2
+        """
+        pass
+
     def start_game(self) -> None:
         """ Start the game """
         gaming = GamingScreen(
@@ -228,105 +340,3 @@ class Game:
         pg.display.update()
         screen.click()
         self.start(skip_start_screen=True)
-
-    def draw_options_screen(self) -> None:
-        """ Draw the options screen (language, if camera, if sound, etc.) """
-        options = OptionsScreen(
-            self.var, self, self.screen, self.gestures, self.volume, self.camera
-        )
-        click = options.click()
-        while options.box_clicked != self.var.boxAI_cancel:
-            if options.x_in_rect(click, options.vol):
-                self.volume = not self.volume
-                options.volume = self.volume
-            elif options.x_in_rect(click, options.cam):
-                self.camera = not self.camera
-                options.camera = self.camera
-            elif options.x_in_rect(click, options.flags[0]):
-                self.conf.load_language("en")
-            elif options.x_in_rect(click, options.flags[1]):
-                self.conf.load_language("fr")
-            options.reset_options_screen()
-            click = options.click()
-        self.status = self.var.options_clicked_cancel
-
-    def draw_play_options(self) -> None:
-        """Show the different options when choosing to play"""
-        if self.ai_cpp_1 is not None:
-            self.ai_cpp_1.resetBoard()
-        if self.ai_cpp_2 is not None:
-            self.ai_cpp_2.resetBoard()
-        screen = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
-        text_HvH = screen.create_text_rendered(self.var.text_options_play_HvH)
-        text_HvAI = screen.create_text_rendered(self.var.text_options_play_HvAI)
-        text_AIvAI = screen.create_text_rendered(self.var.text_options_play_AIvAI)
-        text_options = [[text_HvH], [text_HvAI], [text_AIvAI]]
-        boxes = screen.center_all(text_options)
-        self.status = self.var.options_menu_play
-        self.screen_AI = None
-        while self.status == self.var.options_menu_play:
-            mouse = screen.click()
-            if screen.x_in_rect(mouse, boxes[0][0]):
-                self.status = self.var.options_play_HvH
-                self.player_1 = Player(self.var, 1, False)
-                self.player_2 = Player(self.var, 2, False)
-            elif screen.x_in_rect(mouse, boxes[1][0]):
-                self.status = self.var.options_play_HvAI
-                self.screen_AI = Screen_AI(
-                    self.var,
-                    self.screen,
-                    self.gestures,
-                    volume=self.volume,
-                    camera=self.camera,
-                    number_AI=1,
-                )
-                self.player_1 = Player(self.var, 1, False)
-                self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_1)
-            elif screen.x_in_rect(mouse, boxes[2][0]):
-                self.status = self.var.options_play_AIvAI
-                self.screen_AI = Screen_AI(
-                    self.var,
-                    self.screen,
-                    self.gestures,
-                    volume=self.volume,
-                    camera=self.camera,
-                    number_AI=2,
-                )
-                self.player_1 = Player(self.var, 1, True, self.screen_AI.diff_AI_1)
-                self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_2)
-            if screen.x_in_rect(mouse, screen.cancel_box):
-                self.status = self.var.options_clicked_cancel
-        if (self.player_1.is_ai and self.player_1.ai_difficulty == -1) or (
-            self.player_2.is_ai and self.player_2.ai_difficulty == -1
-        ):
-            if self.status not in [
-                self.var.options_play_HvH,
-                self.var.options_clicked_cancel,
-            ]:
-                self.draw_play_options()
-
-    def draw_start_screen(self) -> None:
-        """Show the starting screen, choose between the different possinilities """
-
-        start_screen = Screen(
-            self.var,
-            self.screen,
-            self.gestures,
-            cancel_box=False,
-            volume=self.volume,
-            camera=self.camera,
-        )
-        text_play = start_screen.create_text_rendered(self.var.text_options_play)
-        text_options = start_screen.create_text_rendered(self.var.text_options_options)
-        boxes_options = start_screen.center_all([[text_play], [text_options]])
-        rect_play = boxes_options[0][0]
-        rect_opti = boxes_options[1][0]
-        self.status = self.var.options_menu_start
-        while self.status == self.var.options_menu_start:
-            mouse = start_screen.click()
-            if start_screen.x_in_rect(mouse, rect_play):
-                self.draw_play_options()
-            elif start_screen.x_in_rect(mouse, rect_opti):
-                self.draw_options_screen()
-        if self.status == self.var.options_clicked_cancel:
-            self.draw_start_screen()

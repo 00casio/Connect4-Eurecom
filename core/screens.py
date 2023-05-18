@@ -82,6 +82,13 @@ class Screen(Tools):
         if self.draw_quit:
             self.draw_quit_box()
         pg.display.update()
+    
+    def hovering_box(self, box: Rect, hover=True):
+        color = self.var.color_options_box
+        if hover == True:
+            color = self.var.color_hovering_box
+        pg.draw.rect(self.screen, color, box, 5)
+        pg.display.update(box)
 
     def get_mouse_pos(self) -> tuple[int, int]:
         """Return the mouse position"""
