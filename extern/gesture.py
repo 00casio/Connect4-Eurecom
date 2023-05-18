@@ -293,10 +293,17 @@ class GestureController:
     hr_major = None  # Right Hand by default
     hr_minor = None  # Left hand by default
     dom_hand = True
-    
 
-    def __init__(self):
+    Nothing = 0
+    Moving = 1
+    Click = 2
+    possible_gesture = Gest
+
+    def __init__(self, screen_size: tuple[int, int]):
         """Initilaizes attributes."""
+        self.screen_size = screen_size
+        self.mouse = (screen_size[0]//2, screen_size[1]//2)
+        self.action = self.Nothing
         self.gc_mode = 1
         self.cap = cv2.VideoCapture(0)
         self.CAM_HEIGHT = self.cap.get(
@@ -325,9 +332,9 @@ class GestureController:
         """
         point = 9
         position = [hand_result.landmark[point].x, hand_result.landmark[point].y]
-        sx, sy = pyautogui.size() #size of the screen x and y
-        x_mid, ymid = sx//2, sy//2 
-        x_old, y_old = pyautogui.position() #mouse cursor position
+        sx, sy = self.screen_size #size of the screen x and y
+        x_mid, ymid = sx//2, sy//2
+        x_old, y_old = self.mouse #mouse cursor position
         x = int(position[0] * sx)
         y = int(position[1] * sy)
         if self.prev_hand is None:
@@ -346,7 +353,7 @@ class GestureController:
         else:
             ratio = 2.1
         x, y = x_old + delta_x * ratio, y_old + delta_y * ratio
-        return (x, y)
+        self.mouse = (x, y)
     
     def get_hand_movement(self, hand_result):
         point = 9
@@ -372,30 +379,39 @@ class GestureController:
             return 'none'
 
 
-    def handle_controls(self ,gesture, hand_result):
+    def handle_controls(self, gesture, hand_result):
         """Impliments all gesture functionality."""
-        x, y = None, None
-        if gesture != Gest.PALM:
-            x, y = self.get_position(hand_result)
 
-        # flag reset
-        if gesture != Gest.FIST and self.grabflag:
-            self.grabflag = False
-            self.action = "click left"
-            pyautogui.mouseUp(button="left")
+        # Action associated with click
+        if gesture == self.possible_gesture.FIST:
+            self.action = self.Click
+        
+        # Action associated with moving the hand
+        elif gesture == self.possible_gesture.V_GEST:
+            self.action = self.Moving
 
-        # implementation
-        if gesture == Gest.V_GEST:
-            self.flag = True
-            self.action = "move"
-            self.get_hand_movement(hand_result)
+        # Default action
+        else:
+            self.action = self.Nothing
+
+        # # flag reset
+        # if gesture != Gest.FIST and self.grabflag:
+        #     self.grabflag = False
+        #     self.action = "click left"
+        #     pyautogui.mouseUp(button="left")
+
+        # # implementation
+        # if gesture == Gest.V_GEST:
+        #     self.flag = True
+        #     self.action = "move"
+        #     self.get_hand_movement(hand_result)
             
 
-        elif gesture == Gest.FIST:
-            if not self.grabflag:
-                self.grabflag = True
-                pyautogui.click(button="left")
-            # pyautogui.moveTo(x, y, duration = 0.1)
+        # elif gesture == Gest.FIST:
+        #     if not self.grabflag:
+        #         self.grabflag = True
+        #         pyautogui.click(button="left")
+        #     # pyautogui.moveTo(x, y, duration = 0.1)
 
         # Merge this class with GestureController
         # either return or have the mouse position as variables

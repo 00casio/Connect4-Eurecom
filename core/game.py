@@ -86,26 +86,32 @@ class Game:
 
     def __init__(self, args: Namespace, ai_cpp_1, ai_cpp_2) -> None:
         """ Initialize the value needed for the game """
-        # Gestures
-        self.gestures = GestureController()
-
-        # Players
         self.var = Variables()
-        self.root: Optional[Node] = None
-        self.ai_cpp_1 = ai_cpp_1
-        self.ai_cpp_2 = ai_cpp_2
-        self.player_1 = Player(self.var, 1, False, None)
-        self.player_2 = Player(self.var, 2, False, None)
-        self.player_playing = self.player_1
-        self.player_null = Player(self.var, 0, False)
-        self.screen = pg.display.set_mode(
-            (self.var.width_screen, self.var.height_screen), 0, 32
-        )
-        pg.display.set_caption(self.var.screen_title)
         self.conf = Config(self.var, args)
         self.volume = self.var.sound
         self.camera = self.var.camera
         self.libai = self.var.libai
+        size_screen = (self.var.width_screen, self.var.height_screen)
+
+        # Gestures
+        self.gestures = GestureController(size_screen)
+
+        # TODO: communication
+
+        # AI
+        self.root: Optional[Node] = None
+        self.ai_cpp_1 = ai_cpp_1
+        self.ai_cpp_2 = ai_cpp_2
+
+        # Players
+        self.player_1 = Player(self.var, 1, False, None)
+        self.player_2 = Player(self.var, 2, False, None)
+        self.player_null = Player(self.var, 0, False)
+        self.player_playing = self.player_1
+
+        # Pygame
+        self.screen = pg.display.set_mode(size_screen, 0, 32)
+        pg.display.set_caption(self.var.screen_title)
 
     def inverse_player(self) -> None:
         """Return the symbols of the opponent of the player currently playing"""
@@ -163,7 +169,7 @@ class Game:
                 self.draw_options_screen()
         if self.status == self.var.options_clicked_cancel:
             self.draw_start_screen()
-        
+
     def draw_options_screen(self) -> None:
         """ Draw the options screen (language, if camera, if sound, etc.) """
         options = OptionsScreen(

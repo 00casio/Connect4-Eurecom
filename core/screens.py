@@ -40,7 +40,7 @@ class Screen(Tools):
         self.last_y = 0
         self.draw_cancel = cancel_box
         self.draw_quit = quit_box
-        self.last_collumn_seetec = 3
+        self.last_column_selected = 3
         if cancel_box:
             self.draw_cancel_box()
         if quit_box:
@@ -76,6 +76,7 @@ class Screen(Tools):
     ) -> None:
         """ Reset the screen to a "blank" state """
         self.screen.fill(color_screen)
+        self.all_boxes = []
         self.center_all(text, colors_boxes)
         if self.draw_cancel:
             self.draw_cancel_box()
@@ -90,10 +91,12 @@ class Screen(Tools):
         pg.draw.rect(self.screen, color, box, 5)
         pg.display.update(box)
 
-    def get_mouse_pos(self) -> tuple[int, int]:
+    def get_mouse_pos(self, force_mouse: bool=False) -> tuple[int, int]:
         """Return the mouse position"""
         # print("Change this to have the position from the camera")
-        return pg.mouse.get_pos()
+        if not self.camera or force_mouse:
+            return pg.mouse.get_pos()
+        return self.gestures.mouse_pos
     
     def jump_mouse(self):
         x, y = self.gestures.x, self.gestures.y
@@ -111,27 +114,35 @@ class Screen(Tools):
     def human_move(self, color: Color) -> None:
         """ Function to use when it's the human's turn to move """
         # self.screen.fill(self.var.color_screen)
-        direc = self.jump_mouse()
-        last = self.last_collumn_seetec
-        new_col = self.last_collumn_seetec + direc
-        # mouse_x, mouse_y = self.get_mouse_pos()
-        mouse_x = self.last_x
-        # if mouse_x < self.var.pos_min_x:
-        #     mouse_x = self.var.pos_min_x
-        # elif mouse_x > self.var.pos_max_x:
-        #     mouse_x = self.var.pos_max_x
-
         p = self.var.padding
         sc = self.var.size_cell
-        # if p < mouse_x < p + self.var.width_board:
-        #     col = (mouse_x - p) // self.var.size_cell
-        #     rect_col = Rect(p + col * self.var.size_cell, 0, self.var.size_cell, p)
-        #     pg.draw.rect(self.screen, self.var.color_highlight_column, rect_col)
-        pg.draw.rect(self.screen, self.var.color_screen, (last*sc-p //2, 0, last*sc+p//2, p))
+        last = self.last_column_selected
+
+        if self.camera:
+            direc = self.jump_mouse()
+            new_col = self.last_column_selected + direc
+            mouse_x = self.last_x
+        else:
+            mouse_x, mouse_y = self.get_mouse_pos()
+            if mouse_x < self.var.pos_min_x:
+                mouse_x = self.var.pos_min_x
+            elif mouse_x > self.var.pos_max_x:
+                mouse_x = self.var.pos_max_x
+
+        if p > mouse_x or mouse_x > p + self.var.width_board:
+            return
+
+        new_col = (mouse_x - p) // sc
+        self.last_column_selected = new_col
+        old_rect = (p + last*sc, 0, sc, p)
+        new_rect = (p + new_col*sc, 0, sc, p)
         self.draw_quit_box()
-        pg.draw.circle(self.screen, color, (new_col*self.var.size_cell+p, p // 2), self.var.radius_disk)
-        pg.display.update((last*sc-p //2, 0, last*sc+p//2, p))
-        pg.display.update((new_col*sc-p//2, 0, p//2 + new_col*sc, p))
+        pg.draw.rect(self.screen, self.var.color_screen, old_rect)
+        pg.draw.rect(self.screen, self.var.color_highlight_column, new_rect)
+        pg.draw.circle(self.screen, color, (p + new_col*sc + sc//2, p//2), self.var.radius_disk)
+
+        pg.display.update(old_rect)
+        pg.display.update(new_rect)
 
     def update_gesture(self, image: np.ndarray[Any, np.dtype[Any]]) -> None:
         """ Update the gesture class """
@@ -184,18 +195,34 @@ class Screen(Tools):
         If f is not None, then the function is called whith the argument 'event' at every iteration"""
         allow_quit = False
         while not allow_quit:
+            # (suppose and) Use the camera if usable
+            success = True
             if self.camera:
                 success, image = self.gestures.cap.read()
                 if success:
                     self.update_gesture(image)
+                    if self.gestures.action == self.gestures.Click:
+                        allow_quit = True
+                else:
+                    print("Could not use the camera, disregarding this frame")
 
-            for event in pg.event.get():
-                if event.type == pg.MOUSEBUTTONUP:
-                    allow_quit = True
-                if print_disk:
-                    self.human_move(color_disk)
-                if func is not None:
-                    func(**args)
+            # If there was a problem or we don't use the camera
+            if not (self.camera and success):
+                for event in pg.event.get():
+                    if event.type == pg.MOUSEBUTTONUP:
+                        allow_quit = True
+                    if func is not None:
+                        func(**args)
+
+            # Actions independant of the usage of the camera
+            if print_disk:
+                self.human_move(color_disk)
+            # We force the usage of the mouse if there was an error
+            mouse = self.get_mouse_pos(force_mouse=not success)
+            for box in self.all_boxes:
+                self.hovering_box(box, hover=self.x_in_rect(mouse, box))
+
+        # When a click is made we are here
         click = self.get_mouse_pos()
         if self.is_canceled(click):
             self.box_clicked = self.var.boxAI_cancel

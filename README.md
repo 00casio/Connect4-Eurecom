@@ -41,6 +41,9 @@ Optional:
 - [x] Options
 - [ ] Change theme
 - [ ] Background music
+- [ ] Tidy the codebase
+  - [ ] rewrite reset_screen
+  - [ ] create class for box (will have coordinate of rect, color of box, text, color of text, if the box is "clickable")
 
 #### AI
 

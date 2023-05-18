@@ -81,6 +81,7 @@ class Tools:
         self.volume = volume
         self.camera = camera
         self.var = var
+        self.all_boxes = []
 
     def compute_total_size(
         self, array_text: list[list[Surface]]
@@ -116,6 +117,7 @@ class Tools:
         b_rect = Rect(x, y, size[0] + 2 * spacing_x, size[1] + 2 * spacing_y)
         pg.draw.rect(self.screen, color_box, b_rect)
         self.screen.blit(text, (x + spacing_x, y + spacing_y))
+        self.all_boxes.append(b_rect)
         return b_rect
 
     def write_on_line(
