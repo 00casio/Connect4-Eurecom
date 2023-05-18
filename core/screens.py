@@ -41,6 +41,7 @@ class Screen(Tools):
         self.draw_cancel = cancel_box
         self.draw_quit = quit_box
         self.last_column_selected = 3
+        self.last_box_hovered = None
         if cancel_box:
             self.draw_cancel_box()
         if quit_box:
@@ -85,6 +86,8 @@ class Screen(Tools):
         pg.display.update()
     
     def hovering_box(self, box: Rect, hover=True):
+        if box is None:
+            return
         color = self.var.color_options_box
         if hover == True:
             color = self.var.color_hovering_box
@@ -97,7 +100,7 @@ class Screen(Tools):
         if not self.camera or force_mouse:
             return pg.mouse.get_pos()
         return self.gestures.mouse_pos
-    
+
     def jump_mouse(self):
         x, y = self.gestures.x, self.gestures.y
         delta_x, delta_y = x - self.last_x, y - self.last_y
@@ -207,7 +210,8 @@ class Screen(Tools):
                     print("Could not use the camera, disregarding this frame")
 
             # If there was a problem or we don't use the camera
-            if not (self.camera and success):
+            camera_did_not_work = not (self.camera and success)
+            if camera_did_not_work:
                 for event in pg.event.get():
                     if event.type == pg.MOUSEBUTTONUP:
                         allow_quit = True
@@ -219,8 +223,20 @@ class Screen(Tools):
                 self.human_move(color_disk)
             # We force the usage of the mouse if there was an error
             mouse = self.get_mouse_pos(force_mouse=not success)
+            nearest_box = None
+            dist = np.Infinity
             for box in self.all_boxes:
-                self.hovering_box(box, hover=self.x_in_rect(mouse, box))
+                d = np.sqrt((box.center[0] - mouse[0])**2 + (box.center[1] - mouse[1])**2)
+                if camera_did_not_work:
+                    if self.x_in_rect(mouse, box):
+                        nearest_box = box
+                elif d < dist:
+                    dist = d
+                    nearest_box = box
+            if self.last_box_hovered is not nearest_box:
+                self.hovering_box(self.last_box_hovered, hover=False)
+                self.hovering_box(nearest_box, hover=True)
+                self.last_box_hovered = nearest_box
 
         # When a click is made we are here
         click = self.get_mouse_pos()
