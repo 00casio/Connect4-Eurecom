@@ -16,7 +16,7 @@ def tests_criteria(nb_parties, depth_ai1, depth_ai2):
     nb_win_ai2 = 0
     nb_draw = 0
     for k in range(nb_parties):
-        print(f"{k}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, (draw = {nb_draw})", end="\r")
+        print(f"{k:3d}: AI_1 = {nb_win_ai1:3d}, AI_2 = {nb_win_ai2:3d}, (draw = {nb_draw:3d})", end="\r")
         ai1.resetBoard()
         ai2.resetBoard()
         i = 0
@@ -35,7 +35,7 @@ def tests_criteria(nb_parties, depth_ai1, depth_ai2):
             nb_win_ai2 += 1
         else:
             nb_draw += 1
-    print(f"{nb_parties}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, draw = {nb_draw}, depth=({depth_ai1}, {depth_ai2})")
+    print(f"{nb_parties:3d}: AI_1 = {nb_win_ai1:3d}, AI_2 = {nb_win_ai2:3d}, draw = {nb_draw:3d}, depth=({depth_ai1:2d}, {depth_ai2:2d})")
     percentage_win_AI_1 = (100*nb_win_ai1)/nb_parties
     print("percentage winning AI 1 : ", percentage_win_AI_1)
 
@@ -49,6 +49,10 @@ def tests_criteria(nb_parties, depth_ai1, depth_ai2):
     of.write(f"AI_1 is depth {depth_ai1} while AI_2 is depth {depth_ai2}. AI_1 starts the game\n")
     of.write(f"Nb_games = {nb_parties}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, draw = {nb_draw}, percentage win AI_1 = {percentage_win_AI_1:.2f}\n \n")
     of.close()
+
+# for i in range(1, 15):
+#     for j in range(1, 15):
+#         tests_criteria(10, i, j)
 
 tests_criteria(1000, 1, 1)
 tests_criteria(1000, 3, 3)

@@ -128,7 +128,7 @@ private:
      * @param depth The depth at wich we are looking
      * @return The score computed
      */
-    double evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, const int depth);
+    int evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, const int depth);
 
     /**
      * @brief The negamax variant of the minimax algorithm
@@ -141,7 +141,7 @@ private:
      * @param beta The beta parameter
      * @return The score of the negamax algorithm at this level
      */
-    double negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int max_depth, double alpha, double beta);
+    int negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int max_depth, int alpha, int beta);
 
     /**
      * @brief Apply the minmax algorithm with alpha-beta prunning
