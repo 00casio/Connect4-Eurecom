@@ -221,11 +221,11 @@ int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const 
     count++;
     int result = evaluateBoard(*player, *opponent, depth);
     if (depth <= 0) {
-        return result;
+        return result - current_depth;
     }
 
     if (result != 111) {
-        return result;
+        return result - current_depth;
     }
 
     int maxScore = SCORE_SOMEONE_WIN - current_depth;
@@ -247,7 +247,7 @@ int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const 
         }
         if (quickWinning(*player)) {
             removePiece(player, dpRes, heights);
-            return SCORE_SOMEONE_WIN - depth;
+            return SCORE_SOMEONE_WIN - current_depth;
         }
         removePiece(player, dpRes, heights);
     }
@@ -293,6 +293,9 @@ int Game::bestStartingMove(const uint8_t *heights) {
 }
 
 int Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, uint8_t *heights) {
+    // if ((ai_board == 0) && (human_board == 0)) {
+    //     return 3;
+    // }
     int bestMove = bestStartingMove(heights);
     int alpha = - SCORE_SOMEONE_WIN;
     int beta = SCORE_SOMEONE_WIN;

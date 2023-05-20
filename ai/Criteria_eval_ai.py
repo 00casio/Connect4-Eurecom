@@ -15,20 +15,25 @@ def tests_criteria(nb_parties, depth_ai1, depth_ai2):
     nb_win_ai1 = 0
     nb_win_ai2 = 0
     nb_draw = 0
+    parties = set([])
     for k in range(nb_parties):
-        print(f"{k:3d}: AI_1 = {nb_win_ai1:3d}, AI_2 = {nb_win_ai2:3d}, (draw = {nb_draw:3d})", end="\r")
+        print(f"{k:3d}: AI_1 = {nb_win_ai1:3d}, AI_2 = {nb_win_ai2:3d}, draw = {nb_draw:3d}", end="\r")
         ai1.resetBoard()
         ai2.resetBoard()
         i = 0
+        board = ""
         while not (ai1.ai_winning() or ai1.human_winning() or ai1.draw()):
             ai1_m = ai1.aiMove(depth_ai1)
             ai2.humanMove(ai1_m)
+            board += f"{ai1_m}"
             if ai1.ai_winning():
                 break
             ai2_m = ai2.aiMove(depth_ai2)
             # ai2_m = random.choice([0, 1, 2, 3, 4, 5, 6])
             ai1.humanMove(ai2_m)
-            i+= 1       
+            board += f"{ai2_m}"
+            i += 1
+        parties.add(board)
         if ai1.ai_winning():
             nb_win_ai1 += 1
         elif ai1.human_winning():
@@ -36,23 +41,25 @@ def tests_criteria(nb_parties, depth_ai1, depth_ai2):
         else:
             nb_draw += 1
     print(f"{nb_parties:3d}: AI_1 = {nb_win_ai1:3d}, AI_2 = {nb_win_ai2:3d}, draw = {nb_draw:3d}, depth=({depth_ai1:2d}, {depth_ai2:2d})")
-    percentage_win_AI_1 = (100*nb_win_ai1)/nb_parties
-    print("percentage winning AI 1 : ", percentage_win_AI_1)
+    print(parties)
+    # percentage_win_AI_1 = (100*nb_win_ai1)/nb_parties
+    # print("percentage winning AI 1 : ", percentage_win_AI_1)
 
-    of = open("criteria_AI.txt", "a")
+    # of = open("criteria_AI.txt", "a")
 
-    #of.write("Criteria judged : Testing if AI at given level wins against lower level AI opponent\n")
-    of.write("Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent \n")
-    #of.write("Criteria judged : Testing if AI wins at any depth against a random player \n")
+    # #of.write("Criteria judged : Testing if AI at given level wins against lower level AI opponent\n")
+    # of.write("Criteria judged : Testing if, when AI 1 plays first, it wins against same level AI opponent \n")
+    # #of.write("Criteria judged : Testing if AI wins at any depth against a random player \n")
 
-    #of.write(f"AI_1 is depth {depth_ai1} and is playing against random player")
-    of.write(f"AI_1 is depth {depth_ai1} while AI_2 is depth {depth_ai2}. AI_1 starts the game\n")
-    of.write(f"Nb_games = {nb_parties}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, draw = {nb_draw}, percentage win AI_1 = {percentage_win_AI_1:.2f}\n \n")
-    of.close()
+    # #of.write(f"AI_1 is depth {depth_ai1} and is playing against random player")
+    # of.write(f"AI_1 is depth {depth_ai1} while AI_2 is depth {depth_ai2}. AI_1 starts the game\n")
+    # of.write(f"Nb_games = {nb_parties}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, draw = {nb_draw}, percentage win AI_1 = {percentage_win_AI_1:.2f}\n \n")
+    # of.close()
 
-# for i in range(1, 15):
-#     for j in range(1, 15):
-#         tests_criteria(10, i, j)
+max_level = 14
+for i in range(1, max_level+1):
+    for j in range(1, max_level+1):
+        tests_criteria(20, i, j)
 
 tests_criteria(1000, 1, 1)
 tests_criteria(1000, 3, 3)
