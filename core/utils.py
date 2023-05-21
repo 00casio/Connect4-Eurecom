@@ -71,6 +71,58 @@ class Config:
         self.var.message_quit = self.var.texts[language]["message_quit"]
 
 
+class Box:
+    def __init__(self, text: str, color_text: Color, coordinate: tuple[int,int], color_rect: Color, align: tuple[int, int]= (0,0)) -> None:
+        """ Initialize all the variables fot this class.
+        'align' desribes how the text and box are written according to the coordinate.
+        For example, with align=(-1,0), the coordinates refer to the middle-left point of the box, and align=(1, -1) is the bottom-right corner"""
+
+        self.text = text
+        self.color_text = color_text
+        self.color_rect = color_rect
+        self.coor = coordinate
+        self.align = align
+        self.box: Optional[Rect] = None
+        self.size = Variables().text_size
+        self.font = Variables().text_font
+        tbs = Variables().text_box_spacing
+        self.spacings = [tbs, tbs, tbs, tbs]
+ 
+    def render(self, screen: Surface) -> None:
+        f = pg.font.SysFont(self.font, self.size)
+        text_rendered = f.render(self.text, True, self.color_text)
+        s = text_rendered.get_size()
+        spa = self.spacings
+        x = self.coor[0]
+        if self.align[0] > -1: # AKA == 0 or == 1
+            x += spa[0] + s[0]//2
+        if self.align[0] > 0: # AKA == 1
+            x += s[0]//2 + spa[2] + s[0]%2 # Correction if s[0] is odd
+        y = self.coor[1]
+        if self.align[1] > -1:
+            y += spa[1] + s[1]//2
+        if self.align[1] > 0:
+            y += s[1]//2 + spa[3] + s[1]%2 # Correction if s[0] is odd
+
+        self.box = Rect(x, y, spa[0] + spa[2] + s[0], spa[1] + spa[3] + s[1])
+        pg.draw.rect(screen, self.color_rect, self.box)
+        screen.blit(text_rendered, (x + spa[0], y + spa[1]))
+
+    def change_sfs(self, new_size: Optional[int] =None, new_font: Optional[int]=None, spacings: list[int]= []) -> None:
+        if new_size is not None:
+            self.size = new_size
+        if new_font is not None:
+            self.font = new_font
+        if len(spacings) == 0:
+            self.spacings = [tbs, tbs, tbs, tbs]
+        elif len(spacings) == 1:
+            self.spacings = [spacings[0] for _ in range(4)]
+        elif len(spacings) == 2:
+            self.spacings = [spacings[i%2] for i in range(4)]
+        elif len(spacings) == 4:
+            self.spacings = spacings
+
+
 class Tools:
     """ A class aggregating many tools """
     def __init__(
