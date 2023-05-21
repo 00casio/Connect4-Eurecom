@@ -131,7 +131,7 @@ class Variables:
             "options_difficulty_AIvAI"
         ]
         self.text_difficulty_options = [
-            "",
+            "Waouh, an easter egg !",
             self.text_options_difficulty_HvAI,
             self.text_options_difficulty_AIvAI,
         ]

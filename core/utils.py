@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from argparse import Namespace
-from typing import Any, Sequence, Union
+from typing import Any, Sequence, Union, Optional
 
 import pygame as pg
 
@@ -72,7 +72,7 @@ class Config:
 
 
 class Box:
-    def __init__(self, text: str, color_text: Color, coordinate: tuple[int,int], color_rect: Color, align: tuple[int, int]= (0,0)) -> None:
+    def __init__(self, text: str, color_text: Color=Variables().color_options_text, color_rect: Color=Variables().color_options_box, coordinate: tuple[int,int]=(-1, -1), align: tuple[int, int]= (0,0)) -> None:
         """ Initialize all the variables fot this class.
         'align' desribes how the text and box are written according to the coordinate.
         For example, with align=(-1,0), the coordinates refer to the middle-left point of the box, and align=(1, -1) is the bottom-right corner"""
@@ -83,36 +83,38 @@ class Box:
         self.coor = coordinate
         self.align = align
         self.box: Optional[Rect] = None
-        self.size = Variables().text_size
-        self.font = Variables().text_font
+        self.font_size = Variables().text_size
+        self.font_name = Variables().text_font
         tbs = Variables().text_box_spacing
         self.spacings = [tbs, tbs, tbs, tbs]
+        self.font_r = pg.font.SysFont(self.font_name, self.font_size)
+        self.text_r = self.font_r.render(self.text, True, self.color_text)
  
     def render(self, screen: Surface) -> None:
-        f = pg.font.SysFont(self.font, self.size)
-        text_rendered = f.render(self.text, True, self.color_text)
-        s = text_rendered.get_size()
+        self.font_r = pg.font.SysFont(self.font_name, self.font_size)
+        self.text_r = self.font_r.render(self.text, True, self.color_text)
+        s = self.text_r.get_size()
         spa = self.spacings
         x = self.coor[0]
         if self.align[0] > -1: # AKA == 0 or == 1
-            x += spa[0] + s[0]//2
+            x -= spa[0] + s[0]//2
         if self.align[0] > 0: # AKA == 1
-            x += s[0]//2 + spa[2] + s[0]%2 # Correction if s[0] is odd
+            x -= s[0]//2 + spa[2] + s[0]%2 # Correction if s[0] is odd
         y = self.coor[1]
-        if self.align[1] > -1:
-            y += spa[1] + s[1]//2
-        if self.align[1] > 0:
-            y += s[1]//2 + spa[3] + s[1]%2 # Correction if s[0] is odd
+        if self.align[1] < 1:
+            y -= spa[1] + s[1]//2
+        if self.align[1] < 0:
+            y -= s[1]//2 + spa[3] + s[1]%2 # Correction if s[0] is odd
 
         self.box = Rect(x, y, spa[0] + spa[2] + s[0], spa[1] + spa[3] + s[1])
         pg.draw.rect(screen, self.color_rect, self.box)
-        screen.blit(text_rendered, (x + spa[0], y + spa[1]))
+        screen.blit(self.text_r, (x + spa[0], y + spa[1]))
 
     def change_sfs(self, new_size: Optional[int] =None, new_font: Optional[int]=None, spacings: list[int]= []) -> None:
         if new_size is not None:
-            self.size = new_size
+            self.font_size = new_size
         if new_font is not None:
-            self.font = new_font
+            self.font_name = new_font
         if len(spacings) == 0:
             self.spacings = [tbs, tbs, tbs, tbs]
         elif len(spacings) == 1:
@@ -133,6 +135,19 @@ class Tools:
         self.volume = volume
         self.camera = camera
         self.var = var
+
+    def recompute_total_size(self, list_boxes: list[list[Box]]) -> list[tuple[int, int]]:
+        total_sizes = []
+        for line in list_boxes:
+            line_h = 0
+            line_w = 0
+            for box in line:
+                s = box.text_r.get_size()
+                spa = box.spacings
+                line_w += s[0] + spa[0] + spa[2]
+                line_h = max(s[1] + spa[1] + spa[3], line_h)
+            total_sizes.append((line_w + self.var.options_spacing * (len(line) - 1), line_h))
+        return total_sizes
 
     def compute_total_size(
         self, array_text: list[list[Surface]]
@@ -199,6 +214,24 @@ class Tools:
             write_x += text.get_size()[0] + 2 * space_x + space_box
         # pg.display.update()
         return boxes
+
+    def recenter_all(self, list_lines_boxes: list[list[Box]]) -> None:
+        n = len(list_lines_boxes)
+        lines_size = self.recompute_total_size(list_lines_boxes)
+        c = self.var.center_screen
+        os = self.var.options_spacing
+
+        y = c[1] - sum([lines_size[i][1] for i in range(n)]) // 2 - os * (n - 1) // 2
+        for i in range(n):
+            line = list_lines_boxes[i]
+            x = c[0] - (lines_size[i][0]) // 2
+            for box in line:
+                box.coor = (x, y)
+                box.align = (-1, 1)
+                box.render(self.screen)
+                x += box.spacings[0] + box.spacings[2] + box.text_r.get_size()[0] + os
+            y += lines_size[i][1] + os
+        pg.display.update()
 
     def center_all(
         self,

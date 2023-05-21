@@ -3,14 +3,14 @@
 
 import sys
 from time import time
-from typing import Any, Callable, Iterator, Optional
+from typing import Any, Callable, Iterator, Optional, Union
 
 import cv2
 import numpy as np
 import pygame as pg
 from playsound import playsound
 
-from core.utils import Tools
+from core.utils import Tools, Box
 from core.variables import Color, Rect, Surface, Variables
 from extern.communication import Communication
 from extern.gesture import *
@@ -45,25 +45,13 @@ class Screen(Tools):
 
     def draw_cancel_box(self) -> None:
         """Draw the box that allow the user to take a step back"""
-        cancel = self.create_text_rendered(self.var.text_cancel_box, self.var.black)
-        self.cancel_box = self.write_on_line(
-            [cancel],
-            self.var.white,
-            self.var.coor_cancel_box[0],
-            self.var.coor_cancel_box[1],
-            align=-1,
-        )[0]
+        self.cancel_box = Box(self.var.text_cancel_box, self.var.black, self.var.white, coordinate=self.var.coor_cancel_box, align=(-1, 1))
+        self.cancel_box.render(self.screen)
 
     def draw_quit_box(self) -> None:
         """Draw the box that allow the user to take a step back"""
-        quit_t = self.create_text_rendered(self.var.text_quit_box, self.var.black)
-        self.quit_box = self.write_on_line(
-            [quit_t],
-            self.var.white,
-            self.var.coor_quit_box[0],
-            self.var.coor_quit_box[1],
-            align=1,
-        )[0]
+        self.quit_box = Box(self.var.text_quit_box, self.var.black, self.var.white, coordinate=self.var.coor_quit_box, align=(1, 1))
+        self.quit_box.render(self.screen)
 
     def reset_screen(
         self,
@@ -74,6 +62,22 @@ class Screen(Tools):
         """ Reset the screen to a "blank" state """
         self.screen.fill(color_screen)
         self.center_all(text, colors_boxes)
+        if self.draw_cancel:
+            self.draw_cancel_box()
+        if self.draw_quit:
+            self.draw_quit_box()
+        pg.display.update()
+
+    def rereset_screen(
+        self,
+        color_screen: Color,
+        boxes: list[Box]
+    ) -> None:
+        """ Reset the screen to a "blank" state """
+        self.screen.fill(color_screen)
+        for line in boxes:
+            for b in line:
+                b.render(self.screen)
         if self.draw_cancel:
             self.draw_cancel_box()
         if self.draw_quit:
@@ -191,12 +195,14 @@ class Screen(Tools):
     def x_in_rect(
         self,
         coor: tuple[int, int],
-        rect: Optional[Rect],
+        rect: Optional[Union[Rect, Box]],
         sound: str = Variables().sound_click_box,
     ) -> bool:
         """Return whether coor is in the rectangle 'rect'"""
         if rect is None:
             return False
+        if isinstance(rect, Box):
+            rect = rect.box
         status = (
             rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
         )
@@ -204,7 +210,7 @@ class Screen(Tools):
             playsound(sound, block=False)
         return status
 
-    def handle_click(self, click_coor: tuple[int, int], list_rect: list[Rect]) -> int:
+    def handle_click(self, click_coor: tuple[int, int], list_rect: list[Union[Rect, Box]]) -> int:
         """Return the index of the box the click was in"""
         for i in range(len(list_rect)):
             if self.x_in_rect(click_coor, list_rect[i], ""):
@@ -226,31 +232,26 @@ class Screen_AI(Screen):
         self.number_AI = number_AI
         self.begin = 1
 
-        texts_level = [
-            self.create_text_rendered(f"Level {i}")
-            for i in range(len(self.var.boxAI_text_levels))
-        ]
+        self.boxes_options = [[Box(self.var.text_difficulty_options[number_AI])]]
+        boxes_ai_1 = []
+        for i in range(len(self.var.boxAI_text_levels)):
+            boxes_ai_1.append(Box(f"Level {i}", self.var.black, self.var.color_player_1))
+        boxes_ai_2 = []
+        for i in range(len(self.var.boxAI_text_levels)):
+            boxes_ai_2.append(Box(f"Level {i}", self.var.black, self.var.color_player_2))
+        self.boxes_options.append(boxes_ai_1)
 
-        self.text_options = [
-            [self.create_text_rendered(self.var.text_difficulty_options[number_AI])],
-            texts_level,
-        ]
-        self.options_colors = [self.var.color_options_box, self.var.color_player_1]
         if self.number_AI == 2:
-            self.options_colors.append(self.var.color_player_2)
-        self.boxes_levels = self.center_all(self.text_options, self.options_colors)
+            self.boxes_options.append(boxes_ai_2)
+            self.options_levels = [*boxes_ai_1, *boxes_ai_2]
+        else:
+            self.options_levels = [*boxes_ai_1]
+
+        self.recenter_all(self.boxes_options)
         self.play_box: Optional[Rect] = None
         self.diff_AI_1, self.diff_AI_2 = -1, -1
-        self.nbr_levels_AI_1 = len(self.boxes_levels[1])
-        if self.number_AI == 2:
-            self.text_options.append(texts_level)
-            self.boxes_levels = self.center_all(self.text_options, self.options_colors)
-            self.options_levels = [*self.boxes_levels[1], *self.boxes_levels[2]]
-        else:
-            self.options_levels = [*self.boxes_levels[1]]
-        self.reset_screen(
-            self.var.color_options_screen, self.text_options, self.options_colors
-        )
+        self.nbr_levels_AI_1 = len(self.boxes_options[1])
+        self.rereset_screen(self.var.color_options_screen, self.boxes_options)
         self.screen_loop()
 
     def screen_loop(self) -> None:
@@ -260,20 +261,8 @@ class Screen_AI(Screen):
             index_box = self.handle_click(mouse_click, self.options_levels)
             if index_box != -1:
                 if 0 <= index_box < self.nbr_levels_AI_1:
-                    self.write_on_line(
-                        self.text_options[1],
-                        self.var.color_player_1,
-                        self.var.width_screen,
-                        self.boxes_levels[1][0].top,
-                    )
                     self.diff_AI_1 = index_box
                 elif self.nbr_levels_AI_1 <= index_box < len(self.options_levels):
-                    self.write_on_line(
-                        self.text_options[2],
-                        self.var.color_player_2,
-                        self.var.width_screen,
-                        self.boxes_levels[2][0].top,
-                    )
                     self.diff_AI_2 = index_box % self.nbr_levels_AI_1
                 if self.diff_AI_1 != -1 and (
                     self.diff_AI_2 != -1 or self.number_AI == 1
@@ -294,12 +283,10 @@ class Screen_AI(Screen):
                 self.play_box = None
                 self.diff_AI_1 = -1
                 self.diff_AI_2 = -1
-                self.reset_screen(
+                self.rereset_screen(
                     self.var.color_options_screen,
-                    self.text_options,
-                    self.options_colors,
+                    self.boxes_options
                 )
-                pg.display.update()
 
 
 class OpponentSelectionScreen(Screen):

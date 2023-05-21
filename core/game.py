@@ -12,7 +12,7 @@ import ai.libai as libai
 from ai.minimax_ai import minimax, opponent
 from core.screens import GamingScreen, OptionsScreen, Screen, Screen_AI
 from core.structure import Board, Node
-from core.utils import Config, Symbol
+from core.utils import Config, Symbol, Box
 from core.variables import Rect, Variables
 from extern.gesture import *
 
@@ -254,20 +254,20 @@ class Game:
         self.ai_cpp_1.resetBoard()
         self.ai_cpp_2.resetBoard()
         screen = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
-        text_HvH = screen.create_text_rendered(self.var.text_options_play_HvH)
-        text_HvAI = screen.create_text_rendered(self.var.text_options_play_HvAI)
-        text_AIvAI = screen.create_text_rendered(self.var.text_options_play_AIvAI)
-        text_options = [[text_HvH], [text_HvAI], [text_AIvAI]]
-        boxes = screen.center_all(text_options)
+        box_HvH = Box(self.var.text_options_play_HvH)
+        box_HvAI = Box(self.var.text_options_play_HvAI)
+        box_AIvAI = Box(self.var.text_options_play_AIvAI)
+        screen.recenter_all([[box_HvH], [box_HvAI], [box_AIvAI]])
+
         self.status = self.var.options_menu_play
         self.screen_AI = None
         while self.status == self.var.options_menu_play:
             mouse = screen.click()
-            if screen.x_in_rect(mouse, boxes[0][0]):
+            if screen.x_in_rect(mouse, box_HvH):
                 self.status = self.var.options_play_HvH
                 self.player_1 = Player(self.var, 1, False)
                 self.player_2 = Player(self.var, 2, False)
-            elif screen.x_in_rect(mouse, boxes[1][0]):
+            elif screen.x_in_rect(mouse, box_HvAI):
                 self.status = self.var.options_play_HvAI
                 self.screen_AI = Screen_AI(
                     self.var,
@@ -279,7 +279,7 @@ class Game:
                 )
                 self.player_1 = Player(self.var, 1, False)
                 self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_1)
-            elif screen.x_in_rect(mouse, boxes[2][0]):
+            elif screen.x_in_rect(mouse, box_AIvAI):
                 self.status = self.var.options_play_AIvAI
                 self.screen_AI = Screen_AI(
                     self.var,
@@ -313,17 +313,16 @@ class Game:
             volume=self.volume,
             camera=self.camera,
         )
-        text_play = start_screen.create_text_rendered(self.var.text_options_play)
-        text_options = start_screen.create_text_rendered(self.var.text_options_options)
-        boxes_options = start_screen.center_all([[text_play], [text_options]])
-        rect_play = boxes_options[0][0]
-        rect_opti = boxes_options[1][0]
+        box_play = Box(self.var.text_options_play)
+        box_options = Box(self.var.text_options_options)
+        start_screen.recenter_all([[box_play], [box_options]])
+
         self.status = self.var.options_menu_start
         while self.status == self.var.options_menu_start:
             mouse = start_screen.click()
-            if start_screen.x_in_rect(mouse, rect_play):
+            if start_screen.x_in_rect(mouse, box_play.box):
                 self.draw_play_options()
-            elif start_screen.x_in_rect(mouse, rect_opti):
+            elif start_screen.x_in_rect(mouse, box_options.box):
                 self.draw_options_screen()
         if self.status == self.var.options_clicked_cancel:
             self.draw_start_screen()
