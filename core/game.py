@@ -257,7 +257,7 @@ class Game:
         box_HvH = Box(self.var.text_options_play_HvH)
         box_HvAI = Box(self.var.text_options_play_HvAI)
         box_AIvAI = Box(self.var.text_options_play_AIvAI)
-        screen.recenter_all([[box_HvH], [box_HvAI], [box_AIvAI]])
+        screen.center_all([[box_HvH], [box_HvAI], [box_AIvAI]])
 
         self.status = self.var.options_menu_play
         self.screen_AI = None
@@ -315,7 +315,7 @@ class Game:
         )
         box_play = Box(self.var.text_options_play)
         box_options = Box(self.var.text_options_options)
-        start_screen.recenter_all([[box_play], [box_options]])
+        start_screen.center_all([[box_play], [box_options]])
 
         self.status = self.var.options_menu_start
         while self.status == self.var.options_menu_start:

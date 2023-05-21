@@ -56,21 +56,6 @@ class Screen(Tools):
     def reset_screen(
         self,
         color_screen: Color,
-        text: list[list[Surface]],
-        colors_boxes: list[Color],
-    ) -> None:
-        """ Reset the screen to a "blank" state """
-        self.screen.fill(color_screen)
-        self.center_all(text, colors_boxes)
-        if self.draw_cancel:
-            self.draw_cancel_box()
-        if self.draw_quit:
-            self.draw_quit_box()
-        pg.display.update()
-
-    def rereset_screen(
-        self,
-        color_screen: Color,
         boxes: list[Box]
     ) -> None:
         """ Reset the screen to a "blank" state """
@@ -232,6 +217,7 @@ class Screen_AI(Screen):
         self.number_AI = number_AI
         self.begin = 1
 
+        # Creation of all boxes with message in them
         self.boxes_options = [[Box(self.var.text_difficulty_options[number_AI])]]
         boxes_ai_1 = []
         for i in range(len(self.var.boxAI_text_levels)):
@@ -241,17 +227,17 @@ class Screen_AI(Screen):
             boxes_ai_2.append(Box(f"Level {i}", self.var.black, self.var.color_player_2))
         self.boxes_options.append(boxes_ai_1)
 
+        # self.options_levels is used to know in which the user clicked
         if self.number_AI == 2:
             self.boxes_options.append(boxes_ai_2)
             self.options_levels = [*boxes_ai_1, *boxes_ai_2]
         else:
             self.options_levels = [*boxes_ai_1]
 
-        self.recenter_all(self.boxes_options)
         self.play_box: Optional[Rect] = None
         self.diff_AI_1, self.diff_AI_2 = -1, -1
         self.nbr_levels_AI_1 = len(self.boxes_options[1])
-        self.rereset_screen(self.var.color_options_screen, self.boxes_options)
+        self.center_all(self.boxes_options)
         self.screen_loop()
 
     def screen_loop(self) -> None:
@@ -261,9 +247,16 @@ class Screen_AI(Screen):
             index_box = self.handle_click(mouse_click, self.options_levels)
             if index_box != -1:
                 if 0 <= index_box < self.nbr_levels_AI_1:
+                    # We redraw all boxes on the line (remove highlight)
+                    for b in self.options_levels[:self.nbr_levels_AI_1]:
+                        b.render(self.screen)
                     self.diff_AI_1 = index_box
                 elif self.nbr_levels_AI_1 <= index_box < len(self.options_levels):
+                    # Same here
+                    for b in self.options_levels[self.nbr_levels_AI_1:]:
+                        b.render(self.screen)
                     self.diff_AI_2 = index_box % self.nbr_levels_AI_1
+
                 if self.diff_AI_1 != -1 and (
                     self.diff_AI_2 != -1 or self.number_AI == 1
                 ):
@@ -272,7 +265,6 @@ class Screen_AI(Screen):
                     self.options_levels[index_box],
                     self.var.color_options_highlight_box,
                     self.screen,
-                    f"Level {index_box % self.nbr_levels_AI_1}",
                     self.var.color_options_highlight_text,
                 )
             elif self.play_box is not None and self.x_in_rect(
@@ -283,7 +275,7 @@ class Screen_AI(Screen):
                 self.play_box = None
                 self.diff_AI_1 = -1
                 self.diff_AI_2 = -1
-                self.rereset_screen(
+                self.reset_screen(
                     self.var.color_options_screen,
                     self.boxes_options
                 )
