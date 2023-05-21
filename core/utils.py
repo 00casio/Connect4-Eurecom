@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from argparse import Namespace
-from typing import Any, Sequence, Union, Optional
+from typing import Any, Optional, Sequence, Union
 
 import pygame as pg
 
@@ -10,7 +10,7 @@ from core.variables import Color, Rect, Surface, Variables
 
 
 def opponent(symbol_player: Any) -> Any:
-    """ Gives symbol of the opponent """
+    """Gives symbol of the opponent"""
     if symbol_player == Variables().symbol_player_1:
         return Variables().symbol_player_2
     else:
@@ -33,7 +33,8 @@ class Symbol:
 
 
 class Config:
-    """ The config class cotains all possible variables for the game """
+    """The config class cotains all possible variables for the game"""
+
     def __init__(self, var: Variables, arguments: Namespace) -> None:
         self.arg = arguments
         self.var = var
@@ -43,7 +44,7 @@ class Config:
         self.load_language(self.arg.language)
 
     def load_language(self, language: str) -> None:
-        """ Load the correct language in the variables """
+        """Load the correct language in the variables"""
         if language not in ["en", "fr"]:
             print("This language is not translated.\nI will use English")
             language = "en"
@@ -72,8 +73,15 @@ class Config:
 
 
 class Box:
-    def __init__(self, text: str, color_text: Color=Variables().color_options_text, color_rect: Color=Variables().color_options_box, coordinate: tuple[int,int]=(-1, -1), align: tuple[int, int]= (0,0)) -> None:
-        """ Initialize all the variables fot this class.
+    def __init__(
+        self,
+        text: str,
+        color_text: Color = Variables().color_options_text,
+        color_rect: Color = Variables().color_options_box,
+        coordinate: tuple[int, int] = (-1, -1),
+        align: tuple[int, int] = (0, 0),
+    ) -> None:
+        """Initialize all the variables fot this class.
         'align' desribes how the text and box are written according to the coordinate.
         For example, with align=(-1,0), the coordinates refer to the middle-left point of the box, and align=(1, -1) is the bottom-right corner"""
 
@@ -89,28 +97,33 @@ class Box:
         self.spacings = [tbs, tbs, tbs, tbs]
         self.font_r = pg.font.SysFont(self.font_name, self.font_size)
         self.text_r = self.font_r.render(self.text, True, self.color_text)
- 
+
     def render(self, screen: Surface) -> None:
         self.font_r = pg.font.SysFont(self.font_name, self.font_size)
         self.text_r = self.font_r.render(self.text, True, self.color_text)
         s = self.text_r.get_size()
         spa = self.spacings
         x = self.coor[0]
-        if self.align[0] > -1: # AKA == 0 or == 1
-            x -= spa[0] + s[0]//2
-        if self.align[0] > 0: # AKA == 1
-            x -= s[0]//2 + spa[2] + s[0]%2 # Correction if s[0] is odd
+        if self.align[0] > -1:  # AKA == 0 or == 1
+            x -= spa[0] + s[0] // 2
+        if self.align[0] > 0:  # AKA == 1
+            x -= s[0] // 2 + spa[2] + s[0] % 2  # Correction if s[0] is odd
         y = self.coor[1]
         if self.align[1] < 1:
-            y -= spa[1] + s[1]//2
+            y -= spa[1] + s[1] // 2
         if self.align[1] < 0:
-            y -= s[1]//2 + spa[3] + s[1]%2 # Correction if s[0] is odd
+            y -= s[1] // 2 + spa[3] + s[1] % 2  # Correction if s[0] is odd
 
         self.box = Rect(x, y, spa[0] + spa[2] + s[0], spa[1] + spa[3] + s[1])
         pg.draw.rect(screen, self.color_rect, self.box)
         screen.blit(self.text_r, (x + spa[0], y + spa[1]))
 
-    def change_sfs(self, new_size: Optional[int] =None, new_font: Optional[int]=None, spacings: list[int]= []) -> None:
+    def change_sfs(
+        self,
+        new_size: Optional[int] = None,
+        new_font: Optional[int] = None,
+        spacings: list[int] = [],
+    ) -> None:
         if new_size is not None:
             self.font_size = new_size
         if new_font is not None:
@@ -120,17 +133,18 @@ class Box:
         elif len(spacings) == 1:
             self.spacings = [spacings[0] for _ in range(4)]
         elif len(spacings) == 2:
-            self.spacings = [spacings[i%2] for i in range(4)]
+            self.spacings = [spacings[i % 2] for i in range(4)]
         elif len(spacings) == 4:
             self.spacings = spacings
 
 
 class Tools:
-    """ A class aggregating many tools """
+    """A class aggregating many tools"""
+
     def __init__(
         self, var: Variables, screen: Surface, volume: bool, camera: bool
     ) -> None:
-        """ Initialize the values """
+        """Initialize the values"""
         self.screen = screen
         self.volume = volume
         self.camera = camera
@@ -146,7 +160,9 @@ class Tools:
                 spa = box.spacings
                 line_w += s[0] + spa[0] + spa[2]
                 line_h = max(s[1] + spa[1] + spa[3], line_h)
-            total_sizes.append((line_w + self.var.options_spacing * (len(line) - 1), line_h))
+            total_sizes.append(
+                (line_w + self.var.options_spacing * (len(line) - 1), line_h)
+            )
         return total_sizes
 
     def center_all(self, list_lines_boxes: list[list[Box]]) -> None:
@@ -176,13 +192,22 @@ class Tools:
 
     def draw_agreement_box(self, text: str, position: float = 0.75) -> Rect:
         """Draw a agreement box in the center of the screen at position (in %) of the height of the screen"""
-        agreement = Box(text, self.var.black, self.var.color_screen, coordinate=(self.var.center_screen[0], int(self.var.height_screen * position)), align=(0, 0))
+        agreement = Box(
+            text,
+            self.var.black,
+            self.var.color_screen,
+            coordinate=(
+                self.var.center_screen[0],
+                int(self.var.height_screen * position),
+            ),
+            align=(0, 0),
+        )
         agreement.render(self.screen)
         pg.display.update()
         return agreement.box
 
     def make_icon(self, image: str, size: tuple[int, int]) -> Surface:
-        """ Scale the image to the wanted size """
+        """Scale the image to the wanted size"""
         img = pg.image.load(image)
         icon = pg.transform.scale(img, size)
         return icon
@@ -190,7 +215,7 @@ class Tools:
     def draw_icon(
         self, image_path: str, size: tuple[int, int], position: tuple[int, int]
     ) -> Rect:
-        """ Draw the image at image_path with the size and position wanted """
+        """Draw the image at image_path with the size and position wanted"""
         p = self.var.text_box_spacing
         icon = self.make_icon(image_path, size)
         box = Rect(position[0] - p, position[1] - p, size[0] + 2 * p, size[1] + 2 * p)

@@ -1,9 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import libai
 import random
 import time
+
+import libai
+
 
 def tests_criteria(nb_parties, depth_ai1, depth_ai2):
     nb_win_ai1 = 0
@@ -17,7 +19,10 @@ def tests_criteria(nb_parties, depth_ai1, depth_ai2):
     nb_draw = 0
     parties = set([])
     for k in range(nb_parties):
-        print(f"{k:3d}: AI_1 = {nb_win_ai1:3d}, AI_2 = {nb_win_ai2:3d}, draw = {nb_draw:3d}", end="\r")
+        print(
+            f"{k:3d}: AI_1 = {nb_win_ai1:3d}, AI_2 = {nb_win_ai2:3d}, draw = {nb_draw:3d}",
+            end="\r",
+        )
         ai1.resetBoard()
         ai2.resetBoard()
         i = 0
@@ -40,7 +45,9 @@ def tests_criteria(nb_parties, depth_ai1, depth_ai2):
             nb_win_ai2 += 1
         else:
             nb_draw += 1
-    print(f"{nb_parties:3d}: AI_1 = {nb_win_ai1:3d}, AI_2 = {nb_win_ai2:3d}, draw = {nb_draw:3d}, depth=({depth_ai1:2d}, {depth_ai2:2d})")
+    print(
+        f"{nb_parties:3d}: AI_1 = {nb_win_ai1:3d}, AI_2 = {nb_win_ai2:3d}, draw = {nb_draw:3d}, depth=({depth_ai1:2d}, {depth_ai2:2d})"
+    )
     print(parties)
     # percentage_win_AI_1 = (100*nb_win_ai1)/nb_parties
     # print("percentage winning AI 1 : ", percentage_win_AI_1)
@@ -56,18 +63,21 @@ def tests_criteria(nb_parties, depth_ai1, depth_ai2):
     # of.write(f"Nb_games = {nb_parties}: AI_1 = {nb_win_ai1}, AI_2 = {nb_win_ai2}, draw = {nb_draw}, percentage win AI_1 = {percentage_win_AI_1:.2f}\n \n")
     # of.close()
 
+
 max_level = 14
-for i in range(1, max_level+1):
-    for j in range(1, max_level+1):
+for i in range(1, max_level + 1):
+    for j in range(1, max_level + 1):
         tests_criteria(20, i, j)
 
 tests_criteria(1000, 1, 1)
 tests_criteria(1000, 3, 3)
 tests_criteria(1000, 5, 5)
-tests_criteria(100, 6, 6) # beggining of weird stats, AI 2 wins most of the time
-tests_criteria(100, 7, 7) # AI 2 is always winning here, this is stange
+tests_criteria(100, 6, 6)  # beggining of weird stats, AI 2 wins most of the time
+tests_criteria(100, 7, 7)  # AI 2 is always winning here, this is stange
 tests_criteria(50, 8, 8)
-tests_criteria(50, 9, 9) # my computer is too slow for this one, but seems like the same as the previous one
+tests_criteria(
+    50, 9, 9
+)  # my computer is too slow for this one, but seems like the same as the previous one
 
 # tests_criteria(1000, 1, 1)
 # tests_criteria(1000, 3, 1)

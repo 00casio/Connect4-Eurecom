@@ -12,7 +12,7 @@ import ai.libai as libai
 from ai.minimax_ai import minimax, opponent
 from core.screens import GamingScreen, OptionsScreen, Screen, Screen_AI
 from core.structure import Board, Node
-from core.utils import Config, Symbol, Box
+from core.utils import Box, Config, Symbol
 from core.variables import Rect, Variables
 from extern.gesture import *
 
@@ -25,7 +25,7 @@ class Player:
     def __init__(
         self, var: Variables, number: int, AI: bool, difficulty: int = -1
     ) -> None:
-        """ Initialize the values for the Players """
+        """Initialize the values for the Players"""
         self.var = var
         if number == 0:
             self.symbol = Symbol(self.var.symbol_no_player)
@@ -44,7 +44,7 @@ class Player:
     def play(
         self, board: Board, root: Node, screen: Screen, volume: bool, ai_cpp
     ) -> tuple[int, int]:
-        """ The function used when it's the player's turn """
+        """The function used when it's the player's turn"""
         if self.is_ai:
             if ai_cpp is None:
                 score, col = minimax(root, 0, 0, True)
@@ -73,7 +73,7 @@ class Player:
         return (col, row, root)
 
     def __eq__(self, other: object) -> bool:
-        """ Allow to compare a player and another object """
+        """Allow to compare a player and another object"""
         eq: bool = False
         if isinstance(other, Player):
             eq = self.symbol == other.symbol
@@ -85,8 +85,10 @@ class Player:
 class Game:
     """The big class that will regulate everything"""
 
-    def __init__(self, args: Namespace, ai_cpp_1: libai.Game, ai_cpp_2: libai.Game) -> None:
-        """ Initialize the value needed for the game """
+    def __init__(
+        self, args: Namespace, ai_cpp_1: libai.Game, ai_cpp_2: libai.Game
+    ) -> None:
+        """Initialize the value needed for the game"""
         # Gestures
         self.gestures = GestureController()
 
@@ -120,7 +122,7 @@ class Game:
             )
 
     def who_is_winner(self) -> Player:
-        """ Return the symbol of the player currently playing """
+        """Return the symbol of the player currently playing"""
         if self.board.state_win(self.player_1.symbol):
             return self.player_1
         elif self.board.state_win(self.player_2.symbol):
@@ -129,7 +131,7 @@ class Game:
             return self.player_null
 
     def start(self, skip_start_screen=False) -> None:
-        """ The start function to use when wanting to start the program """
+        """The start function to use when wanting to start the program"""
         if not skip_start_screen:
             self.draw_start_screen()
         else:
@@ -140,7 +142,7 @@ class Game:
         self.start_game()
 
     def start_game(self) -> None:
-        """ Start the game """
+        """Start the game"""
         gaming = GamingScreen(
             self.var, self.screen, self.gestures, self.volume, self.camera
         )
@@ -172,7 +174,7 @@ class Game:
         self.draw_winner(gaming, (col, row))
 
     def draw_winner(self, screen: GamingScreen, lastclick: tuple[int, int]) -> None:
-        """ Draw the winner on the screen, with the line that made it win """
+        """Draw the winner on the screen, with the line that made it win"""
         winner = self.who_is_winner()
         sound = self.var.sound_winner_victory
         End = Screen(
@@ -229,7 +231,7 @@ class Game:
         self.start(skip_start_screen=True)
 
     def draw_options_screen(self) -> None:
-        """ Draw the options screen (language, if camera, if sound, etc.) """
+        """Draw the options screen (language, if camera, if sound, etc.)"""
         options = OptionsScreen(
             self.var, self, self.screen, self.gestures, self.volume, self.camera
         )
@@ -303,7 +305,7 @@ class Game:
                 self.draw_play_options()
 
     def draw_start_screen(self) -> None:
-        """Show the starting screen, choose between the different possinilities """
+        """Show the starting screen, choose between the different possinilities"""
 
         start_screen = Screen(
             self.var,

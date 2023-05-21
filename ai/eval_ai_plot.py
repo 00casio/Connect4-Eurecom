@@ -10,6 +10,7 @@ ai1_winning = 1
 ai2_winning = -1
 ai1_ai2_draw = 0
 
+
 def test_for_plot(depth_ai1, depth_ai2):
     ai1 = libai.Game()
     ai2 = libai.Game()
@@ -29,6 +30,7 @@ def test_for_plot(depth_ai1, depth_ai2):
     print(f"{i+1:2d} {j+1:2d} are done", end="\r")
     return result
 
+
 def plot_result(x, y, tableau):
     # We can change color, but we have to use the one at https://matplotlib.org/stable/_images/sphx_glr_named_colors_003.png
     cmap = mpl.colors.ListedColormap(["blueviolet", "royalblue", "yellowgreen"])
@@ -43,6 +45,7 @@ def plot_result(x, y, tableau):
     plt.savefig("result_1.png")
     plt.close()
 
+
 max_level = 13
 tableau = np.zeros((max_level, max_level))
 x = np.linspace(1, max_level, max_level)
@@ -50,5 +53,5 @@ y = np.linspace(1, max_level, max_level)
 
 for i in range(max_level):
     for j in range(max_level):
-        tableau[j, i] = test_for_plot(i+1, j+1)
+        tableau[j, i] = test_for_plot(i + 1, j + 1)
         plot_result(x, y, tableau)

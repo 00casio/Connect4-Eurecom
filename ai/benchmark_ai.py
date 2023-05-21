@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-import matplotlib.pyplot as plt
 from time import time
 
 import libai
+import matplotlib.pyplot as plt
 
 write = False
 plot = True
@@ -21,10 +21,12 @@ for depth in range(1, max_depth + 1):
         trash = g.aiMove(depth)
         end = time()
         total_t.append(end - start)
-        if depth >= 7 or i%25==0:
+        if depth >= 7 or i % 25 == 0:
             print(f"{depth:3d}: {i}", end="\r")
     t = sum(total_t)
-    print(f"{depth:3d}: done, it took {t:21.12f} seconds ({g.get_count():10d} nodes visited)")
+    print(
+        f"{depth:3d}: done, it took {t:21.12f} seconds ({g.get_count():10d} nodes visited)"
+    )
     if write:
         with open("benchmark_result.csv", "a") as fp:
             fp.write(
