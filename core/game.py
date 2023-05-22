@@ -89,8 +89,6 @@ class Game:
         self, args: Namespace, ai_cpp_1: libai.Game, ai_cpp_2: libai.Game
     ) -> None:
         """Initialize the value needed for the game"""
-        # Gestures
-        self.gestures = GestureController()
 
         # Players
         self.var = Variables()
@@ -307,22 +305,25 @@ class Game:
         )
         End.screen.fill(self.var.color_screen)
         End.draw_quit_box()
-        text_winner = End.create_text_rendered(f"Player {winner.symbol.v} won !")
         if winner == self.player_1:
+            text = f"Player {winner.symbol.v} won !"
             print("Winner is the first player")
         elif winner == self.player_2:
             print("Winner is the second player")
+            text = f"Player {winner.symbol.v} won !"
         else:
-            text_winner = End.create_text_rendered("No one won")
+            text = "No one won"
             print("That is a draw")
             sound = self.var.sound_winner_draw
+
         p = self.var.padding
+        box_winner = Box(text, color_text=self.var.black, color_rect=self.var.white, coordinate=(self.var.center_screen[0], p//2), align=(0, 0))
+        box_winner.font_size = 64
+        box_winner.render(self.screen)
+
         if self.volume:
             playsound(sound, block=False)
         self.screen.blit(screen.board_surface, (p, p))
-        box_winner = End.write_on_line(
-            [text_winner], winner.color, self.var.width_screen, p // 2
-        )
         bits = int(self.board.state_to_bits(), 2)
 
         def complete(bits: int, direction: int) -> None:

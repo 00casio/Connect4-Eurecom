@@ -86,9 +86,9 @@ class Screen(Tools):
             return
         color = box.color_rect
         if hover == True:
-            color = self.var.color_hovering_box
+            color = box.color_highlight
         pg.draw.rect(self.screen, color, box.box, 5)
-        pg.display.update(box)
+        pg.display.update(box.box)
 
     def get_mouse_pos(self, force_mouse: bool = False) -> tuple[int, int]:
         """Return the mouse position"""
@@ -226,8 +226,9 @@ class Screen(Tools):
             nearest_box = None
             dist = np.Infinity
             for box in self.all_boxes:
+                rect = box.box
                 d = np.sqrt(
-                    (box.center[0] - mouse[0]) ** 2 + (box.center[1] - mouse[1]) ** 2
+                    (rect.center[0] - mouse[0]) ** 2 + (rect.center[1] - mouse[1]) ** 2
                 )
                 if camera_did_not_work:
                     if self.x_in_rect(mouse, box):

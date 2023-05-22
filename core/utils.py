@@ -88,6 +88,7 @@ class Box:
         self.text = text
         self.color_text = color_text
         self.color_rect = color_rect
+        self.color_highlight = Color(255 - color_rect.r, 255 - color_rect.g, 255 - color_rect.b)
         self.coor = coordinate
         self.align = align
         self.box: Optional[Rect] = None
@@ -149,6 +150,7 @@ class Tools:
         self.volume = volume
         self.camera = camera
         self.var = var
+        self.all_boxes: list[Box] = []
 
     def compute_total_size(self, list_boxes: list[list[Box]]) -> list[tuple[int, int]]:
         total_sizes = []
@@ -180,6 +182,7 @@ class Tools:
                 box.align = (-1, 1)
                 box.render(self.screen)
                 x += box.spacings[0] + box.spacings[2] + box.text_r.get_size()[0] + os
+                self.all_boxes.append(box)
             y += lines_size[i][1] + os
         pg.display.update()
 

@@ -74,6 +74,7 @@ class Variables:
         self.green = Color(0, 255, 0)
         self.purple = Color(240, 50, 255)
         self.blue = Color(38, 60, 255)
+        self.yellow = Color(239, 248, 62)
         self.dark_blue = Color(0, 0, 229)
         self.light_blue = Color(30, 160, 255)
         self.very_light_blue = Color(20, 235, 255)
@@ -81,7 +82,7 @@ class Variables:
         self.grey = Color(200, 200, 200)
         self.color_trans = Color(0, 0, 0, 0)
         self.color_player_1 = self.red
-        self.color_player_2 = self.purple
+        self.color_player_2 = self.yellow
         self.color_board = self.blue
         self.color_screen = self.white
         self.color_highlight_column = self.grey
