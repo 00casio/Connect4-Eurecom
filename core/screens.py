@@ -99,7 +99,7 @@ class Screen(Tools):
         # print("Change this to have the position from the camera")
         if not self.camera or force_mouse:
             return pg.mouse.get_pos()
-        return self.gestures.mouse_pos
+        return self.gestures.mouse
 
     def jump_mouse(self):
         x, y = self.gestures.x, self.gestures.y
@@ -166,14 +166,16 @@ class Screen(Tools):
             gest_name = self.gestures.handminor.get_gesture()
 
             if gest_name == Gest.PINCH_MINOR:
-                self.handle_controls(
+                self.gestures.handle_controls(
                     gest_name, self.gestures.handminor.hand_result
                 )
+    
             else:
                 gest_name = self.gestures.handmajor.get_gesture()
                 self.gestures.handle_controls(
                     gest_name, self.gestures.handmajor.hand_result
                 )
+                print(self.gestures.action)
 
             for hand_landmarks in results.multi_hand_landmarks:
                 mp_drawing.draw_landmarks(
@@ -204,7 +206,9 @@ class Screen(Tools):
                 success, image = self.gestures.cap.read()
                 if success:
                     self.update_gesture(image)
+                    
                     if self.gestures.action == self.gestures.Click:
+                        print("hello") #for debuging
                         allow_quit = True
                 else:
                     print("Could not use the camera, disregarding this frame")
