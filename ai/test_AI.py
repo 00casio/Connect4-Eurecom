@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-from libai import Game
 import time
+
+from libai import Game
+
 
 def do_game(game: str, expec_score: int, num: int, ai_game: Game) -> tuple[float, int]:
     human = len(game) % 2
@@ -18,7 +20,7 @@ def do_game(game: str, expec_score: int, num: int, ai_game: Game) -> tuple[float
     if score != expec_score:
         print(f"{game}, found {score}, expected {expec_score}")
     # assert score == expec_score, f"test number {num} ({score} != {expec_score})"
-    return (end-start, ai_game.get_count())
+    return (end - start, ai_game.get_count())
 
 
 def tests(file: str):
@@ -30,7 +32,7 @@ def tests(file: str):
     total_pos = 0
     for i in range(len(lines)):
         l = lines[i]
-    # for l in lines:
+        # for l in lines:
         # if i not in [240]:
         #     continue
         game, expected_score = l.split(" ")[0], int(l.split(" ")[1])
@@ -39,11 +41,14 @@ def tests(file: str):
         total_pos += pos
         print(f"{i} in {(t):.9f}s", end="\r")
         ai_game.resetBoard()
-    print(f"mean time: {total_time/len(lines):.9f}s, mean nb pos: {total_pos/len(lines):.5f}")
+    print(
+        f"mean time: {total_time/len(lines):.9f}s, mean nb pos: {total_pos/len(lines):.5f}"
+    )
 
-tests("Test_L3_R1") # End-Easy
-tests("Test_L2_R1") # Middle-Easy
-tests("Test_L2_R2") # Middle-Medium
-tests("Test_L1_R1") # Begin-Easy
-tests("Test_L1_R2") # Begin-Medium
-tests("Test_L1_R3") # Begin-Hard
+
+tests("Test_L3_R1")  # End-Easy
+tests("Test_L2_R1")  # Middle-Easy
+tests("Test_L2_R2")  # Middle-Medium
+tests("Test_L1_R1")  # Begin-Easy
+tests("Test_L1_R2")  # Begin-Medium
+tests("Test_L1_R3")  # Begin-Hard
