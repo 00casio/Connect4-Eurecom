@@ -83,6 +83,8 @@ class Variables:
         self.color_trans = Color(0, 0, 0, 0)
         self.color_player_1 = self.red
         self.color_player_2 = self.yellow
+        self.color_hover_player_1 = self.color_player_2
+        self.color_hover_player_2 = self.color_player_1
         self.color_board = self.blue
         self.color_screen = self.white
         self.color_highlight_column = self.grey

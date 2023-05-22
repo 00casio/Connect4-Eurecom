@@ -57,6 +57,7 @@ class Screen(Tools):
             align=(-1, 1),
         )
         self.cancel_box.render(self.screen)
+        self.all_boxes.append(self.cancel_box)
 
     def draw_quit_box(self) -> None:
         """Draw the box that allow the user to take a step back"""
@@ -68,17 +69,20 @@ class Screen(Tools):
             align=(1, 1),
         )
         self.quit_box.render(self.screen)
+        self.all_boxes.append(self.quit_box)
 
     def reset_screen(self, color_screen: Color, boxes: list[Box]) -> None:
         """Reset the screen to a "blank" state"""
         self.screen.fill(color_screen)
-        for line in boxes:
-            for b in line:
-                b.render(self.screen)
-        if self.draw_cancel:
-            self.draw_cancel_box()
-        if self.draw_quit:
-            self.draw_quit_box()
+        for b in self.all_boxes:
+            b.render(self.screen)
+        # for line in boxes:
+        #     for b in line:
+        #         b.render(self.screen)
+        # if self.draw_cancel:
+        #     self.draw_cancel_box()
+        # if self.draw_quit:
+        #     self.draw_quit_box()
         pg.display.update()
 
     def hovering_box(self, box: Box, hover=True):
@@ -86,7 +90,7 @@ class Screen(Tools):
             return
         color = box.color_rect
         if hover == True:
-            color = box.color_highlight
+            color = box.color_hover
         pg.draw.rect(self.screen, color, box.box, 5)
         pg.display.update(box.box)
 
@@ -226,9 +230,10 @@ class Screen(Tools):
             nearest_box = None
             dist = np.Infinity
             for box in self.all_boxes:
-                rect = box.box
+                if box.hide:
+                    continue
                 d = np.sqrt(
-                    (rect.center[0] - mouse[0]) ** 2 + (rect.center[1] - mouse[1]) ** 2
+                    (box.box.center[0] - mouse[0]) ** 2 + (box.box.center[1] - mouse[1]) ** 2
                 )
                 if camera_did_not_work:
                     if self.x_in_rect(mouse, box):
@@ -307,16 +312,16 @@ class Screen_AI(Screen):
         self.begin = 1
 
         # Creation of all boxes with message in them
-        self.boxes_options = [[Box(self.var.text_difficulty_options[number_AI])]]
+        self.boxes_options = [[Box(self.var.text_difficulty_options[number_AI], color_hovering=self.var.color_options_box)]]
         boxes_ai_1 = []
         for i in range(len(self.var.boxAI_text_levels)):
             boxes_ai_1.append(
-                Box(f"Level {i}", self.var.black, self.var.color_player_1)
+                Box(f"Level {i}", self.var.black, self.var.color_player_1, self.var.color_hover_player_1)
             )
         boxes_ai_2 = []
         for i in range(len(self.var.boxAI_text_levels)):
             boxes_ai_2.append(
-                Box(f"Level {i}", self.var.black, self.var.color_player_2)
+                Box(f"Level {i}", self.var.black, self.var.color_player_2, self.var.color_hover_player_2)
             )
         self.boxes_options.append(boxes_ai_1)
 
@@ -327,7 +332,7 @@ class Screen_AI(Screen):
         else:
             self.options_levels = [*boxes_ai_1]
 
-        self.play_box: Optional[Rect] = None
+        self.play_box = self.draw_agreement_box("Sarah Connor ?")
         self.diff_AI_1, self.diff_AI_2 = -1, -1
         self.nbr_levels_AI_1 = len(self.boxes_options[1])
         self.center_all(self.boxes_options)
@@ -353,19 +358,20 @@ class Screen_AI(Screen):
                 if self.diff_AI_1 != -1 and (
                     self.diff_AI_2 != -1 or self.number_AI == 1
                 ):
-                    self.play_box = self.draw_agreement_box("Sarah Connor ?")
+                    self.play_box.hide = False
+                    self.play_box.render(self.screen)
                 self.highlight_box(
                     self.options_levels[index_box],
                     self.var.color_options_highlight_box,
                     self.screen,
                     self.var.color_options_highlight_text,
                 )
-            elif self.play_box is not None and self.x_in_rect(
+            elif not self.play_box.hide and self.x_in_rect(
                 mouse_click, self.play_box
             ):
                 self.box_clicked = self.var.boxAI_play
             else:
-                self.play_box = None
+                self.play_box.hide = True
                 self.diff_AI_1 = -1
                 self.diff_AI_2 = -1
                 self.reset_screen(self.var.color_options_screen, self.boxes_options)

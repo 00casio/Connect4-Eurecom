@@ -78,6 +78,7 @@ class Box:
         text: str,
         color_text: Color = Variables().color_options_text,
         color_rect: Color = Variables().color_options_box,
+        color_hovering: Color = Variables().color_hovering_box,
         coordinate: tuple[int, int] = (-1, -1),
         align: tuple[int, int] = (0, 0),
     ) -> None:
@@ -88,7 +89,7 @@ class Box:
         self.text = text
         self.color_text = color_text
         self.color_rect = color_rect
-        self.color_highlight = Color(255 - color_rect.r, 255 - color_rect.g, 255 - color_rect.b)
+        self.color_hover = color_hovering
         self.coor = coordinate
         self.align = align
         self.box: Optional[Rect] = None
@@ -98,6 +99,7 @@ class Box:
         self.spacings = [tbs, tbs, tbs, tbs]
         self.font_r = pg.font.SysFont(self.font_name, self.font_size)
         self.text_r = self.font_r.render(self.text, True, self.color_text)
+        self.hide = False
 
     def render(self, screen: Surface) -> None:
         self.font_r = pg.font.SysFont(self.font_name, self.font_size)
@@ -116,6 +118,9 @@ class Box:
             y -= s[1] // 2 + spa[3] + s[1] % 2  # Correction if s[0] is odd
 
         self.box = Rect(x, y, spa[0] + spa[2] + s[0], spa[1] + spa[3] + s[1])
+
+        if self.hide:
+            return
         pg.draw.rect(screen, self.color_rect, self.box)
         screen.blit(self.text_r, (x + spa[0], y + spa[1]))
 
@@ -190,7 +195,7 @@ class Tools:
         self, box: Box, color_box: Color, screen: Surface, color_text: Color
     ) -> None:
         """Highlight the clicked box to be in a color or another"""
-        Box(box.text, color_text, color_box, box.coor, box.align).render(screen)
+        Box(box.text, color_text, color_box, box.color_hover, box.coor, box.align).render(screen)
         pg.display.update()
 
     def draw_agreement_box(self, text: str, position: float = 0.75) -> Rect:
@@ -205,9 +210,11 @@ class Tools:
             ),
             align=(0, 0),
         )
+        agreement.hide = True
+        self.all_boxes.append(agreement)
         agreement.render(self.screen)
         pg.display.update()
-        return agreement.box
+        return agreement
 
     def make_icon(self, image: str, size: tuple[int, int]) -> Surface:
         """Scale the image to the wanted size"""
