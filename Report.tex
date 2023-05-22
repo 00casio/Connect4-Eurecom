@@ -78,12 +78,12 @@
 
 	\section{AI}\label{AI_section}
 
-	We went into several stages while implementing the artificial intelligence. Going further each time in order to have the best behavior possible for our artificial intelligence. (I’m assuming the core of the game is already done, we’ll see where we explain it)
-
+	We went into several stages while implementing the artificial intelligence. Going further each time in order to have the best behavior possible for our artificial intelligence. (I’m assuming the core of the game is already done, we’ll see where we explain it)\\
 
 The first stage was very simple:
  	We had to implement some basic game related functions such as one which allow us to create the board. We decided to use bit boards (binary representations of a state of the game) in order to save computing time. (Maybe explain more with examples?)
 	Then, we implemented functions In order to drop a piece in a column and another to scan the board in order to see if a player had won the game. At this point, by simply displaying the board, it was possible to play connect 4 with two human players. That’s a start but we are not quite finished yet. \\
+
 Second stage, implementation of a basic AI which to not foresee possibilities in the future:
 	We first needed to give the computer some indication so it can understand in which column he had to play. This is the start of our first heuristic function (or evaluation function): this is the scoring function that determines the score of a given state by using specific features of the state of the game. The specific features mentioned here were obviously the number of tokens that were aligned in each direction (horizontally, vertically and diagonally). We created a scanning function. It created a window of four emplacements of the board and it counted the number of player 1’s tokens, player 2’s tokens and the number of available emplacements. We then gave points to the columns according to the number of two in a rows and three in a row the column. Which means the more points a column had, the more likely future possibilities could be created. Of course, the heuristic is designed in a way that if a player can win or defend from the opponent’s three in a row, it will automatically do it.
 	This first artificial intelligence was simple, could win against player choosing a column randomly or even against very distracted players (we did lose ashamedly a couple of times). However there was no strategy at all, we could not settle for that. We had to go further. \\
@@ -93,29 +93,25 @@ Third stage, implementation of the minimax algorithm.
 	Alright so now we have created a structure in which the state of the future boards will be represented. Now we have to choose the method in order to move around in this structure and choose the best path possible each time. For that, we used the minimax algorithm. It is a recursive algorithm which is used in decision-making and game theory especially in AI game. It tries to analyze the possible paths and returns the optimal move for a player assuming that a player is also playing optimally. In order to accomplish that, there is a maximizing player (with which we try to have as many points as possible, using the same heuristic function) and a minimizing player (with which we try to have as less points as possible). The algorithm performs a depth-first search (DFS), it will explore the complete game tree as deep as possible, all the way down to the leaf nodes.
 The minimax was not hard to implement, and after this stage we had  decent AI. However the computational time was way too long, so we had to implement other features and optimizations of our code. \\
 
-
 Fourth stage, features and optimizations:
-	First, we implemented alpha-beta pruning. It introduces a score window [alpha, beta] within which you search the actual score of the game’s state. Hence, we do not have to explore paths and compute  additionally scores associated with boards that are not better than an already calculated score and the column linked to the path related. There are 3 possible cases :  
-	
+	First, we implemented alpha-beta pruning. It introduces a score window [alpha, beta] within which you search the actual score of the game’s state. Hence, we do not have to explore paths and compute  additionally scores associated with boards that are not better than an already calculated score and the column linked to the path related. There are 3 possible cases :  \\
 
-- If the actual score of the position is within the range, then the alpha-beta function should return the exact score.
-- If the actual score of the position is lower than alpha, then the alpha-beta function is allowed to return any upper bound of the actual score that is lower or equal to alpha.
-- If the actual score of the position greater than beta, then the alpha-beta function is allowed to return any lower bound of the actual score that is greater or equal to beta
-
+	\hspace*{1cm} If the actual score of the position is within the range, then the alpha-beta function should return the exact score.
+	\hspace*{1cm} If the actual score of the position is lower than alpha, then the alpha-beta function is allowed to return any upper bound of the actual score that is lower or equal to alpha.
+	\hspace*{1cm} If the actual score of the position greater than beta, then the alpha-beta function is allowed to return any lower bound of the actual score that is greater or equal to beta \\
 
 Thus, the exploration of the tree is narrowed , we are able to prune the search tree as soon as we have a computed score greater than beta.
-
 
 	Then, several other optimizations were made: we translated in C++ the minimax algorithm to reduce the computing time, we made the algorithm explore the columns starting in the middle and expanding one by one to the sides because there are more possibilities to win by playing in the middle. 
 	Since Connect 4 is a zero sum game, we also decided to use a variant form of the minimax : the Negamax. It simplified the search algorithm: instead of using two separate subroutines for the Minimizing player and the Maximizing player, the value of player 1 is the negation of the value of player 2. Thus, a single procedure can be used to evaluate the board’s state of both players.
 	Several other small computing time related optimizations were made. In order to judge those optimisations several benchmarks were made.
 
 
-Finally our artificial intelligence was made, and the deeper the level, the harder it was for us to beat it. The only time when losing gives a truly satisfying result ! But how could we judge the efficiency of our artificial intelligence ? We decided to create a small set of the following criteria to do so:
+Finally, our artificial intelligence was made, and the deeper the level, the harder it was for us to beat it. The only time when losing gives a truly satisfying result ! But how could we judge the efficiency of our artificial intelligence ? We decided to create a small set of the following criteria to do so: \\
 
-- An AI at any depth must always beat a player that is always choosing a column randomly.
-- An AI at any depth must beat an AI which is at a depth level strictly lower than itself.
-- For a given depth level, the AI who starts first must beat an AI at the same depth level.
+\hspace*{1cm} An AI at any depth must always beat a player that is always choosing a column randomly.
+\hspace*{1cm} An AI at any depth must beat an AI which is at a depth level strictly lower than itself.
+\hspace*{1cm} For a given depth level, the AI who starts first must beat an AI at the same depth level.\\
 
 Those criteria were evaluated and reported in the following graph (insert graph and comment results) \\
 
