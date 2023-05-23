@@ -13,7 +13,7 @@ from ai.minimax_ai import minimax, opponent
 from core.screens import GamingScreen, OptionsScreen, Screen, Screen_AI
 from core.structure import Board, Node
 from core.utils import Box, Config, Symbol
-from core.variables import Rect, Variables
+from core.variables import Rect, Variables, Surface
 from extern.gesture import *
 
 pg.init()
@@ -49,7 +49,7 @@ class Player:
             if ai_cpp is None:
                 score, col = minimax(root, 0, 0, True)
             else:
-                col = ai_cpp.aiMove(2 * self.ai_difficulty + 1)
+                col = ai_cpp.aiMove(3 * self.ai_difficulty + 1)
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
@@ -294,36 +294,34 @@ class Game:
             self.board[row, col] = self.player_playing.symbol.v
             self.inverse_player()
             self.num_turn += 1
-        self.draw_winner(gaming, (col, row))
+        self.draw_winner(gaming.board_surface, (col, row))
 
-    def draw_winner(self, screen: GamingScreen, lastclick: tuple[int, int]) -> None:
+    def draw_winner(self, board_surface: Surface, lastclick: tuple[int, int]) -> None:
         """Draw the winner on the screen, with the line that made it win"""
         winner = self.who_is_winner()
         sound = self.var.sound_winner_victory
         End = Screen(
-            self.var, self.screen, self.gestures, volume=self.volume, camera=self.camera
+            self.var, self.screen, self.gestures, volume=self.volume, camera=self.camera, cancel_box=False
         )
         End.screen.fill(self.var.color_screen)
         End.draw_quit_box()
         if winner == self.player_1:
             text = f"Player {winner.symbol.v} won !"
-            print("Winner is the first player")
         elif winner == self.player_2:
-            print("Winner is the second player")
             text = f"Player {winner.symbol.v} won !"
         else:
             text = "No one won"
-            print("That is a draw")
             sound = self.var.sound_winner_draw
+        print(text)
 
         p = self.var.padding
-        box_winner = Box(text, color_text=self.var.black, color_rect=self.var.white, coordinate=(self.var.center_screen[0], p//2), align=(0, 0))
+        box_winner = Box(text, color_text=self.var.black, color_rect=self.var.white, coordinate=(self.var.width_screen//2, p//2), align=(0, 0))
         box_winner.font_size = 64
         box_winner.render(self.screen)
 
         if self.volume:
             playsound(sound, block=False)
-        self.screen.blit(screen.board_surface, (p, p))
+        self.screen.blit(board_surface, (p, p))
         bits = int(self.board.state_to_bits(), 2)
 
         def complete(bits: int, direction: int) -> None:
@@ -353,5 +351,5 @@ class Game:
         complete(bits, 3)  # /
 
         pg.display.update()
-        screen.click()
+        End.click()
         self.start(skip_start_screen=True)

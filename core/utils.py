@@ -135,6 +135,7 @@ class Box:
         if new_font is not None:
             self.font_name = new_font
         if len(spacings) == 0:
+            tbs = Variables().text_box_spacing
             self.spacings = [tbs, tbs, tbs, tbs]
         elif len(spacings) == 1:
             self.spacings = [spacings[0] for _ in range(4)]

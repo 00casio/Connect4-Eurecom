@@ -51,5 +51,6 @@ if [ $? -eq 0 ]; then
   ${com} main.py --no-camera --no-sound
 else
   echo "Could not find swig, deactivating it for now. Please install it" | tee >&2
+  cp "ai/libai.pyi" "ai/libai.py"
   ${com} main.py --no-camera --no-sound --no-libai
 fi

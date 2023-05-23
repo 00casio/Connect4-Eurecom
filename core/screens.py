@@ -227,6 +227,8 @@ class Screen(Tools):
                 self.human_move(color_disk)
             # We force the usage of the mouse if there was an error
             mouse = self.get_mouse_pos(force_mouse=not success)
+
+            # Draw a rectangle in the selected box
             nearest_box = None
             dist = np.Infinity
             for box in self.all_boxes:
@@ -534,7 +536,7 @@ class GamingScreen(Screen):
     def blit_board(self) -> None:
         """Paste the state of the board onto the screen"""
         self.screen.blit(self.board_surface, (self.var.padding, self.var.padding))
-        self.draw_quit_box()
+        self.quit_box.render(self.screen)
 
     def draw_board(self) -> None:
         """Draw the board on the screen (needed to be sure to see the board)"""
