@@ -2,6 +2,8 @@
 \usepackage[utf8]{inputenc}
 % \usepackage{CormorantGaramond}
 \usepackage{hyperref}
+\usepackage{graphicx}
+\graphicspath{ {./docs/} }
 
 \hypersetup{
 	colorlinks=true,
@@ -72,15 +74,19 @@
 	Classes are made for each player, the board of the game, the gestures, the AI, and the communication, as well as for the game itself. \\
 	This way, all the code is well compartmented and we can easily change how something is done in the backend as long as we don't change the API (meaning, the arguments and return statements of the functions) calls. \\
 
-	The most challenging part in writing the interface was managing to integrate the communication, AI, and gestures recognition in the code in a way that makes it easy to modify things. Using classes was a way to solve those problems before they were big.
-	% J'ai l'impression de me justifier, et de le faire mal. A reformuler
+	The most challenging part in writing the interface was managing to integrate the communication, AI, and gestures recognition in the code in a way that makes it easy to modify things. Using classes was a way to solve those problems before they became hindrances.
 
 	\section{AI}\label{AI_section}
 
-	We went into several stages while implementing the artificial intelligence. Going further each time in order to have the best behavior possible for our artificial intelligence. (I’m assuming the core of the game is already done, we’ll see where we explain it)\\
+	We went through several stages while implementing the artificial intelligence. We improved the code step-by-step in order to have the best behaviour possible. \\
 
-The first stage was very simple:
- 	We had to implement some basic game related functions such as one which allow us to create the board. We decided to use bit boards (binary representations of a state of the game) in order to save computing time. (Maybe explain more with examples?)
+	\subsection{First stage}
+	The first stage was very simple, we had to implement some basic functions. \\
+	We decided to represent the state of a game using 64 bits numbers. This representation is called a bitboard. The presence of a token in a position is translated into a 1 in its place on the bitboard. \\
+	We use an 8 by 8 board, with the top row and right-most column always empty.
+
+	\includegraphics[scale=0.35]{example.png} \\
+
 	Then, we implemented functions In order to drop a piece in a column and another to scan the board in order to see if a player had won the game. At this point, by simply displaying the board, it was possible to play connect 4 with two human players. That’s a start but we are not quite finished yet. \\
 
 Second stage, implementation of a basic AI which to not foresee possibilities in the future:
