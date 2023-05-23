@@ -21,12 +21,11 @@
 
 	\chapter{Introduction}
 	The Connect 4 game is a classical and well-known game. It is often used as a mean to evaluate how comfortable someone is in it's programming capabilities. \\
-	Today, we are the one evaluated on it, but with a (more like three) twist. We have to create an AI to play the game, communicate with another player wirelessly, and accept input from signs someone makes to a camera.
-
+	Today, we are the one evaluated on it, but with a few twists. We have to create an AI to play the game, communicate with another player wirelessly, and accept inputs as signs that someone does to a camera. \\
 	This represents a four-way challenge.
 	\begin{itemize}
-		\item First, we have to code the logic behind the Connect 4 in a way that makes it easy for the other part to integrate with.
-		\item Second, our AI need to be fast, robust, and precise.\footnote{More on those terms in the dedicated section (\ref{AI_section}).}
+		\item First, we have to code the logic behind the Connect 4 in a way that makes it easy for the other part to work with.
+		\item Second, our AI need to be fast, robust, and precise.\footnote{More on those terms in the dedicated section (\ref{AI_section}).} (change them if needed)
 		\item Thirdly, we have to choose some gestures, make it fast and easy to use.
 		\item Last but not least, we need to define the protocols and technologies used to communicate.
 	\end{itemize}
@@ -36,25 +35,25 @@
 	\section{Specifications}
 	To use the whole project (meaning, with the camera, the AI in C++, the communication module), you need to have installed:
 	\begin{itemize}
-		\item A version of Python (preferably \>= 3.11),
-		\item A C/C++ compiler (clang++ produce better binary but g++ works too),
+		\item A version of Python (preferably >= 3.11),
+		\item A C++ compiler (\textit{clang++} produce better binary but \textit{g++} works too),
 		\item A working bash interpreter,
-		\item A Raspberry Pi with a camera module, a Bluetooth chip, and at least 2 GB of RAM.
+		\item A Raspberry Pi with a camera module, a Bluetooth chip, and at least 2 GB of RAM. make sure the code works on raspbian 32 bits
 	\end{itemize}
-	All of those requirements are easy to fulfil, and you should not have anything to install on your own. \\
+	All those requirements are easy to fulfil, and you should not have anything to install on your own. \\
 
 	\section{Setting up}
-	Those 3 software requirements fulfilled, you only need to use the \textit{launch.sh} script, and every other software and libraries required should be installed. \\
-	This script try to install what is needed, and if it does not find some things, then it launches the program with some options disabled.
+	When the previous requirements are fulfilled, you only need to use the \textit{launch.sh} script, and every other software and libraries required should be installed. \\
+	If the script does not find something, then it prints it and launches the program with some options disabled.
 
 	\section{Indications}
-	When the program open, you should be able to understand easily what to do, and how to do it. However, if it is needed, here is the explanation. \\
+	When the program open, you should be able to understand easily what to do, and how to do it. However, if it is needed, here is the explanation about the different screens of the game. \\
 
-	This first screen present you with the menu. You change the options or go to the play menu. \\
+	This first screen presents you with the menu. You may go to the options or play menu. \\
 	\hspace*{1cm} In the options screen, you can choose the language you want the program to use, if you want to use the camera, if you want to have sound when playing. To change those, just click on the relevant icon. \\
-	\hspace*{1cm} The play menu let you choose if you want to play against a human, against an AI, or if you want to watch two AI battle each other for domination. When choosing a game with an AI in it, you will be able to select the difficulty of it. \\
+	\hspace*{1cm} The play menu let you choose if you want to play against a human, against an AI, or if you want to watch two AI battle each other for domination. When choosing a game including an AI, you will be able to select its difficulty. \\
 
-	When playing, you can use your mouse or you hand (if you activated the camera), to select the column in which you want to put your disk in. The column selected will be highlighted.
+	When playing, you can use your mouse or you hand (if you activated the camera) to select the column in which you want to put your token in. The selected column will be highlighted.
 
 	\chapter{Technical manual}
 	% A technical manual that explains:
@@ -66,11 +65,11 @@
 	% \end{itemize}
 
 	\section{Interface}
-	For the interface, we chose to use Python for its ease of use. We used classes because this representation is very flexible and close to what to want. \\
+	For the interface, we chose to use Python for its ease of use. We used classes because this representation is very flexible and close to what we want. \\
 
-	Each “screen” of the game (All the menus + the game screen (with the board)) is its own class, inherited from a base class common to all screens. They have their own function to display different things, but with it displayed in the same way. \\ %pas content de cette phrase, faut la reformuler
+	Each “screen” of the game (All the menus + the game screen (with the board)) is its own class, inherited from a base class common to all screens. The basic principle to display things is the same, only the content is different. This way, a graphical continuity is preserved between all screens. \\
 
-	We have a class for each player, a class for the board of the game, a class for the gestures, for the AI, and for the communication, as well as a class for the game itself. \\
+	Classes are made for each player, the board of the game, the gestures, the AI, and the communication, as well as for the game itself. \\
 	This way, all the code is well compartmented and we can easily change how something is done in the backend as long as we don't change the API (meaning, the arguments and return statements of the functions) calls. \\
 
 	The most challenging part in writing the interface was managing to integrate the communication, AI, and gestures recognition in the code in a way that makes it easy to modify things. Using classes was a way to solve those problems before they were big.
