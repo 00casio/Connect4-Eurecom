@@ -350,6 +350,8 @@ class Game:
         complete(bits, 2)  # \
         complete(bits, 3)  # /
 
+        pg.event.get()
+
         pg.display.update()
         End.click()
         self.start(skip_start_screen=True)
