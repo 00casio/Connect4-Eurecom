@@ -53,6 +53,25 @@ class Variables:
                 "quit_box": "Quitter",
                 "message_quit": "Vous avez choisis d'abandonner le jeu.\nVous me décevez.",
             },
+            "cat": {
+                "boxAI_text_levels": [
+                    "Nya",
+                    "Nyaaaa",
+                    "Nyah !",
+                    "Nyaaaaaaa?",
+                    "Nya.",
+                ],
+                "options_play": "NYA",
+                "options_options": "Nya Nya",
+                "options_play_HvH": "Nyaaa Nya",
+                "options_play_HvAI": "NYAAAA !",
+                "options_play_AIvAI": "Nya. Nya nyah nya. Nya nyah !",
+                "options_difficulty_HvAI": "Nyah nyah",
+                "options_difficulty_AIvAI": "Nya nya, nyanyanya nya",
+                "cancel_box": "Nyah",
+                "quit_box": "Nya Nya",
+                "message_quit": "Nya nya.\n Nya nya (－‸ლ) nya",
+            },
         }
 
         # Symbols
@@ -152,10 +171,11 @@ class Variables:
         self.sound_winner_victory = "assets/victory.mp3"
         self.image_volume_on = "assets/volume.svg"
         self.image_volume_muted = "assets/muted.svg"
-        self.image_english = "assets/english.svg"
-        self.image_french = "assets/french.svg"
         self.image_camera = "assets/camera.svg"
         self.image_nocamera = "assets/no-camera.svg"
+        self.image_english = "assets/english.svg"
+        self.image_french = "assets/french.svg"
+        self.image_cat = "assets/cat_head.jpg"
 
         # Fonts
         self.main_font = pg.font.SysFont(self.text_font, self.text_size)

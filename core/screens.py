@@ -518,7 +518,7 @@ class OptionsScreen(Screen):
         cs = self.var.center_screen
         sp = self.var.options_spacing
         y_now = cs[1] + 3 * sp // 2
-        l = [self.var.image_english, self.var.image_french]
+        l = [self.var.image_english, self.var.image_french, self.var.image_cat]
         x_now = cs[0] - len(l) * self.size[0] // 2 - (len(l) - 1) * sp
         for lan in l:
             yield self.draw_icon(lan, self.size, (x_now, y_now))
