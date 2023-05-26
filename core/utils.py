@@ -41,7 +41,8 @@ class Config:
         self.var.sound = not self.arg.novolume
         self.var.camera = not self.arg.nocamera
         self.var.libai = not self.arg.no_libai
-        self.load_language(self.arg.language)
+        self.language = self.arg.language
+        self.load_language(self.language)
 
     def load_language(self, language: str) -> None:
         """Load the correct language in the variables"""
@@ -67,9 +68,11 @@ class Config:
             self.var.text_options_difficulty_HvAI,
             self.var.text_options_difficulty_AIvAI,
         ]
+        self.var.text_confirmation = self.var.texts[language]["confirmation_button"]
         self.var.text_cancel_box = self.var.texts[language]["cancel_box"]
         self.var.text_quit_box = self.var.texts[language]["quit_box"]
         self.var.message_quit = self.var.texts[language]["message_quit"]
+        self.language = language
 
 
 class Box:

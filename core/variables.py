@@ -30,6 +30,7 @@ class Variables:
                 "options_play_AIvAI": "Watch the world burn",
                 "options_difficulty_HvAI": "Choose your poison",
                 "options_difficulty_AIvAI": "How badly do you want this game to go ?",
+                "confirmation_button": "Sarah Connor ?",
                 "cancel_box": "Return",
                 "quit_box": "Quit",
                 "message_quit": "You chose to quit the game\nYou are disapointing me",
@@ -49,6 +50,7 @@ class Variables:
                 "options_play_AIvAI": "[Insérer citation connue de 'The Dark Knight']",
                 "options_difficulty_HvAI": "Choisis ton poison",
                 "options_difficulty_AIvAI": "À quoi voulez-vous condamner la Terre ?",
+                "confirmation_button": "Sarah Connor ?",
                 "cancel_box": "Retour",
                 "quit_box": "Quitter",
                 "message_quit": "Vous avez choisis d'abandonner le jeu.\nVous me décevez.",
@@ -68,6 +70,7 @@ class Variables:
                 "options_play_AIvAI": "Nya. Nya nyah nya. Nya nyah !",
                 "options_difficulty_HvAI": "Nyah nyah",
                 "options_difficulty_AIvAI": "Nya nya, nyanyanya nya",
+                "confirmation_button": "Nyyyaaaaa ?",
                 "cancel_box": "Nyah",
                 "quit_box": "Nya Nya",
                 "message_quit": "Nya nya.\n Nya nya (－‸ლ) nya",
@@ -159,6 +162,8 @@ class Variables:
             self.text_options_difficulty_HvAI,
             self.text_options_difficulty_AIvAI,
         ]
+        self.text_confirmation = self.texts["en"]["confirmation_button"]
+        self.text_draw = {"en": "No one won", "fr": "C'est une égalité", "cat": "Nya nya..."}
 
         # Assets
         self.libai = True
@@ -175,7 +180,7 @@ class Variables:
         self.image_nocamera = "assets/no-camera.svg"
         self.image_english = "assets/english.svg"
         self.image_french = "assets/french.svg"
-        self.image_cat = "assets/cat_head.jpg"
+        self.image_cat = "assets/cat.png"
 
         # Fonts
         self.main_font = pg.font.SysFont(self.text_font, self.text_size)

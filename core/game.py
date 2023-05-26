@@ -296,18 +296,19 @@ class Game:
     def draw_winner(self, board_surface: Surface, lastclick: tuple[int, int]) -> None:
         """Draw the winner on the screen, with the line that made it win"""
         winner = self.who_is_winner()
+        text = f"Player {winner.symbol.v} won !"
+        if self.conf.language == "fr":
+            text = f"Le joueur {winner.symbol.v} a gagné !"
+        elif self.conf.language == "cat":
+            text = f"Nyah ! {winner.symbol.v} nyah !"
         sound = self.var.sound_winner_victory
         End = Screen(
             self.var, self.screen, self.gestures, volume=self.volume, camera=self.camera, cancel_box=False
         )
         End.screen.fill(self.var.color_screen)
         End.draw_quit_box()
-        if winner == self.player_1:
-            text = f"Player {winner.symbol.v} won !"
-        elif winner == self.player_2:
-            text = f"Player {winner.symbol.v} won !"
-        else:
-            text = "No one won"
+        if winner != self.player_1 and winner != self.player_2:
+            text = self.var.text_draw[self.conf.language]
             sound = self.var.sound_winner_draw
         print(text)
 

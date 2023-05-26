@@ -4,6 +4,8 @@
 import sys
 from time import time
 from typing import Any, Callable, Iterator, Optional, Union
+from random import choice as random_choice
+from os import listdir
 
 import cv2
 import numpy as np
@@ -352,7 +354,7 @@ class Screen_AI(Screen):
         else:
             self.options_levels = [*boxes_ai_1]
 
-        self.play_box = self.draw_agreement_box("Sarah Connor ?")
+        self.play_box = self.draw_agreement_box(self.var.text_confirmation)
         self.diff_AI_1, self.diff_AI_2 = -1, -1
         self.nbr_levels_AI_1 = len(self.boxes_options[1])
         self.center_all(self.boxes_options)
@@ -565,7 +567,7 @@ class GamingScreen(Screen):
         self.blit_board()
         pg.display.update()
 
-    def animate_fall(self, col: int, row: int, player: Symbol) -> None:
+    def animate_fall(self, col: int, row: int, player: Symbol, mode: str = "") -> None:
         """Animate the fall of a disk"""
         x = self.var.padding + col * self.var.size_cell + self.var.size_cell // 2
         for y in range(
@@ -583,4 +585,8 @@ class GamingScreen(Screen):
             pg.display.update()
         self.draw_token(col, row, player, self.var.radius_hole)
         if self.volume:
-            playsound(self.var.sound_disk_touch, block=True)
+            if mode == "":
+                sound = self.var.sound_disk_touch
+            elif mode == "cat":
+                sound = random_choice(listdir("./assets/cat/"))
+            playsound(sound, block=True)

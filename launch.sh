@@ -25,8 +25,8 @@ if [ "${com}" == "" ]; then exit; fi
 
 # Install packages
 echo "Testing python packages..."
-${com} -m pip install wheel 1>/dev/null # Needed for playsound
-${com} -m pip install -r requirements.txt 1>/dev/null
+${com} -m pip install -U wheel 1>/dev/null # Needed for playsound
+${com} -m pip install -U -r requirements.txt 1>/dev/null
 echo "Python packages tested"
 
 # Change python headers location based on OS
