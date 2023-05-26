@@ -48,9 +48,9 @@ class Screen(Tools):
         if quit_box:
             self.draw_quit_box()
 
-    def draw_cancel_box(self) -> None:
+    def draw_cancel_box(self, force_reload: bool=False) -> None:
         """Draw the box that allow the user to take a step back"""
-        if self.cancel_box is None:
+        if self.cancel_box is None or force_reload:
             self.cancel_box = Box(
                 self.var.text_cancel_box,
                 self.var.black,
@@ -62,9 +62,9 @@ class Screen(Tools):
         if self.cancel_box not in self.all_boxes:
             self.all_boxes.append(self.cancel_box)
 
-    def draw_quit_box(self) -> None:
+    def draw_quit_box(self, force_reload: bool=False) -> None:
         """Draw the box that allow the user to take a step back"""
-        if self.quit_box is None:
+        if self.quit_box is None or force_reload:
             self.quit_box = Box(
                 self.var.text_quit_box,
                 self.var.black,
@@ -472,11 +472,12 @@ class OptionsScreen(Screen):
 
     def reset_options_screen(self) -> None:
         """Reset the appearance of the option screen to the default"""
+        self.all_boxes = []
         self.screen.fill(self.var.color_options_screen)
         if self.draw_cancel:
-            self.draw_cancel_box()
+            self.draw_cancel_box(force_reload=True)
         if self.draw_quit:
-            self.draw_quit_box()
+            self.draw_quit_box(force_reload=True)
         self.vol, self.cam = self.draw_vol_cam()
         self.flags = list(self.draw_language())
         pg.display.update()

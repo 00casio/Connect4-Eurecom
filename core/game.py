@@ -191,6 +191,8 @@ class Game:
                 self.conf.load_language("en")
             elif options.x_in_rect(click, options.flags[1]):
                 self.conf.load_language("fr")
+            elif options.x_in_rect(click, options.flags[2]):
+                self.conf.load_language("cat")
             options.reset_options_screen()
             click = options.click()
         self.status = self.var.options_clicked_cancel
