@@ -27,14 +27,12 @@ pieces are handled, and it may slow down a lot the algorithm.
 
 // Adapted from PascalPons' connect 4 AI
 class Table {
-private:
+public:
     struct Entry {
         uint64_t id: 56;
         int8_t value;
     };
     std::vector<Entry> t;
-
-public:
     Table(): t(SIZE_VECT) {
     };
 

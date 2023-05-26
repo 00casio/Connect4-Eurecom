@@ -53,7 +53,7 @@ class Player:
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
-            click = screen.click(box_allowed, print_disk=True, color_disk=self.color)
+            click = screen.click(box_allowed, print_disk=True, symbol_player=self.symbol)
             col = (click[0] - self.var.padding) // self.var.size_cell
         if ai_cpp is None:
             for candidate in root.children:
@@ -259,18 +259,13 @@ class Game:
 
     def start_game(self) -> None:
         """Start the game"""
+        self.player_playing = self.player_1
         gaming = GamingScreen(
             self.var, self.screen, self.gestures, self.volume, self.camera
         )
         gaming.draw_board()
-        pg.draw.circle(
-            gaming.screen,
-            self.player_1.color,
-            (self.screen.get_width() // 2, self.var.padding // 2),
-            self.var.radius_disk,
-        )
+        gaming.draw_token(self.var.width_screen // 2, self.var.padding // 2, self.player_playing.symbol, self.var.radius_disk, col_row=False, screen=gaming.screen)
         pg.display.update()
-        self.player_playing = self.player_1
         if not self.libai:
             self.root = Node(-1, None, self.player_playing.symbol.v, 0)
             self.root.board = self.board.copy()
@@ -290,7 +285,7 @@ class Game:
                 )
                 if self.libai:
                     self.ai_cpp_1.humanMove(col)
-            gaming.animate_fall(col, row, self.player_playing.color)
+            gaming.animate_fall(col, row, self.player_playing.symbol)
             self.board[row, col] = self.player_playing.symbol.v
             self.inverse_player()
             self.num_turn += 1

@@ -360,6 +360,10 @@ void Game::resetBoard() {
     for (int i = 0; i < NBR_COL; i++) {
         this->col_heights[i] = NBR_COL - i;
     }
+    for (int i = 0; i < SIZE_VECT; i++) {
+        this->transTable.t[i].id = 0;
+        this->transTable.t[i].value = 0;
+    }
 }
 
 void Game::printBoard() {

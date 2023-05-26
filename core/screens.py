@@ -10,7 +10,7 @@ import numpy as np
 import pygame as pg
 from playsound import playsound
 
-from core.utils import Box, Tools
+from core.utils import Box, Tools, Symbol
 from core.variables import Color, Rect, Surface, Variables
 from extern.communication import Communication
 from extern.gesture import *
@@ -33,7 +33,8 @@ class Screen(Tools):
         """Initialize the values"""
         Tools.__init__(self, var, screen, volume, camera)
         self.gestures = gesture
-        self.cancel_box: Optional[Rect] = None
+        self.cancel_box: Optional[Box] = None
+        self.quit_box: Optional[Box] = None
         self.box_clicked = self.var.box_out
         self.screen.fill(color_fill)
         self.last_x = 0
@@ -49,41 +50,64 @@ class Screen(Tools):
 
     def draw_cancel_box(self) -> None:
         """Draw the box that allow the user to take a step back"""
-        self.cancel_box = Box(
-            self.var.text_cancel_box,
-            self.var.black,
-            self.var.white,
-            coordinate=self.var.coor_cancel_box,
-            align=(-1, 1),
-        )
+        if self.cancel_box is None:
+            self.cancel_box = Box(
+                self.var.text_cancel_box,
+                self.var.black,
+                self.var.white,
+                coordinate=self.var.coor_cancel_box,
+                align=(-1, 1),
+            )
         self.cancel_box.render(self.screen)
-        self.all_boxes.append(self.cancel_box)
+        if self.cancel_box not in self.all_boxes:
+            self.all_boxes.append(self.cancel_box)
 
     def draw_quit_box(self) -> None:
         """Draw the box that allow the user to take a step back"""
-        self.quit_box = Box(
-            self.var.text_quit_box,
-            self.var.black,
-            self.var.white,
-            coordinate=self.var.coor_quit_box,
-            align=(1, 1),
-        )
+        if self.quit_box is None:
+            self.quit_box = Box(
+                self.var.text_quit_box,
+                self.var.black,
+                self.var.white,
+                coordinate=self.var.coor_quit_box,
+                align=(1, 1),
+            )
         self.quit_box.render(self.screen)
-        self.all_boxes.append(self.quit_box)
+        if self.quit_box not in self.all_boxes:
+            self.all_boxes.append(self.quit_box)
 
     def reset_screen(self, color_screen: Color, boxes: list[Box]) -> None:
         """Reset the screen to a "blank" state"""
         self.screen.fill(color_screen)
         for b in self.all_boxes:
             b.render(self.screen)
-        # for line in boxes:
-        #     for b in line:
-        #         b.render(self.screen)
-        # if self.draw_cancel:
-        #     self.draw_cancel_box()
-        # if self.draw_quit:
-        #     self.draw_quit_box()
         pg.display.update()
+
+    def draw_circle(self, x: int, y: int, color: Color, r: int, screen: Surface) -> None:
+        """ Draw a circle of the color at the coordinate """
+        pg.draw.circle(screen, color, (x, y), r)
+
+    def draw_token(self, n: int, m: int, symbol: Optional[Symbol], r: int, col_row: bool=True, screen: Surface=None) -> None:
+        """Draw a circle in the corresponding column, and row
+        If col_row is true, then n and m are column and row number, if they are not, then n and m are a position"""
+        if screen is None:
+            screen = self.board_surface
+        if col_row:
+            x = n * self.var.size_cell + self.var.size_cell // 2
+            y = m * self.var.size_cell + self.var.size_cell // 2
+        else:
+            x = n
+            y = m
+        if symbol is None:
+            self.draw_circle(x, y, self.var.color_trans, r, screen)
+        else:
+            if symbol == self.var.symbol_player_1:
+                color = self.var.color_player_1
+            elif symbol == self.var.symbol_player_2:
+                color = self.var.color_player_2
+            else:
+                raise ValueError("How did that happen ?")
+            self.draw_circle(x, y, color, r, screen)
 
     def hovering_box(self, box: Box, hover=True):
         if box is None:
@@ -113,7 +137,7 @@ class Screen(Tools):
         else:
             return 0  # stationary
 
-    def human_move(self, color: Color) -> None:
+    def human_move(self, player: Symbol) -> None:
         """Function to use when it's the human's turn to move"""
         # self.screen.fill(self.var.color_screen)
         p = self.var.padding
@@ -141,13 +165,7 @@ class Screen(Tools):
         self.draw_quit_box()
         pg.draw.rect(self.screen, self.var.color_screen, old_rect)
         pg.draw.rect(self.screen, self.var.color_highlight_column, new_rect)
-        pg.draw.circle(
-            self.screen,
-            color,
-            (p + new_col * sc + sc // 2, p // 2),
-            self.var.radius_disk,
-        )
-
+        self.draw_token(p + new_col * sc + sc //2, p // 2, player, self.var.radius_disk, col_row=False, screen=self.screen)
         pg.display.update(old_rect)
         pg.display.update(new_rect)
 
@@ -194,7 +212,7 @@ class Screen(Tools):
         rect_play: Optional[Rect] = None,
         sound: str = Variables().sound_click_box,
         print_disk: bool = False,
-        color_disk: Color = Variables().white,
+        symbol_player: Symbol = Symbol(None),
         func: Callable = None,
         **args,
     ) -> tuple[int, int]:
@@ -224,7 +242,7 @@ class Screen(Tools):
 
             # Actions independant of the usage of the camera
             if print_disk:
-                self.human_move(color_disk)
+                self.human_move(symbol_player)
             # We force the usage of the mouse if there was an error
             mouse = self.get_mouse_pos(force_mouse=not success)
 
@@ -255,7 +273,7 @@ class Screen(Tools):
         self.handle_quit(click)
         if rect_play is not None:
             while not self.x_in_rect(click, rect_play, ""):
-                click = self.click(rect_play, sound, print_disk, color_disk)
+                click = self.click(rect_play, sound, print_disk, symbol_player)
         return click
 
     def is_canceled(self, click: tuple[int, int]) -> bool:
@@ -527,12 +545,6 @@ class GamingScreen(Screen):
             (self.width_board, self.height_board)
         ).convert_alpha()
 
-    def draw_circle(self, n: int, m: int, color: Color, r: int) -> None:
-        """Draw a circle in the corresponding column, and row"""
-        x = n * self.var.size_cell + self.var.size_cell // 2
-        y = m * self.var.size_cell + self.var.size_cell // 2
-        pg.draw.circle(self.board_surface, color, (x, y), r)
-
     def blit_board(self) -> None:
         """Paste the state of the board onto the screen"""
         self.screen.blit(self.board_surface, (self.var.padding, self.var.padding))
@@ -548,11 +560,11 @@ class GamingScreen(Screen):
         )
         for i in range(7):
             for j in range(6):
-                self.draw_circle(i, j, self.var.color_trans, self.var.radius_hole)
+                self.draw_token(i, j, None, self.var.radius_hole)
         self.blit_board()
         pg.display.update()
 
-    def animate_fall(self, col: int, row: int, color_player: Color) -> None:
+    def animate_fall(self, col: int, row: int, player: Symbol) -> None:
         """Animate the fall of a disk"""
         x = self.var.padding + col * self.var.size_cell + self.var.size_cell // 2
         for y in range(
@@ -561,9 +573,13 @@ class GamingScreen(Screen):
             5,
         ):
             self.screen.fill(self.var.white)
-            pg.draw.circle(self.screen, color_player, (x, y), self.var.radius_disk)
+            if player == self.var.symbol_player_1:
+                color = self.var.color_player_1
+            elif player == self.var.symbol_player_2:
+                color = self.var.color_player_2
+            self.draw_token(x, y, player, self.var.radius_disk, col_row=False, screen=self.screen)
             self.blit_board()
             pg.display.update()
-        self.draw_circle(col, row, color_player, self.var.radius_hole)
+        self.draw_token(col, row, player, self.var.radius_hole)
         if self.volume:
             playsound(self.var.sound_disk_touch, block=True)
