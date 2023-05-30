@@ -3,14 +3,16 @@
 
 import sys
 from time import time
-from typing import Any, Callable, Iterator, Optional
+from typing import Any, Callable, Iterator, Optional, Union
+from random import choice as random_choice
+from os import listdir
 
 import cv2
 import numpy as np
 import pygame as pg
 from playsound import playsound
 
-from core.utils import Tools
+from core.utils import Box, Tools, Symbol
 from core.variables import Color, Rect, Surface, Variables
 from extern.communication import Communication
 from extern.gesture import *
@@ -30,81 +32,147 @@ class Screen(Tools):
         quit_box: bool = True,
         color_fill: Color = Variables().color_options_screen,
     ) -> None:
-        """ Initialize the values """
+        """Initialize the values"""
         Tools.__init__(self, var, screen, volume, camera)
         self.gestures = gesture
-        self.cancel_box: Optional[Rect] = None
+        self.cancel_box: Optional[Box] = None
+        self.quit_box: Optional[Box] = None
         self.box_clicked = self.var.box_out
         self.screen.fill(color_fill)
+        self.last_x = 0
+        self.last_y = 0
         self.draw_cancel = cancel_box
         self.draw_quit = quit_box
+        self.last_column_selected = 3
+        self.last_box_hovered = None
         if cancel_box:
             self.draw_cancel_box()
         if quit_box:
             self.draw_quit_box()
 
-    def draw_cancel_box(self) -> None:
+    def draw_cancel_box(self, force_reload: bool=False) -> None:
         """Draw the box that allow the user to take a step back"""
-        cancel = self.create_text_rendered(self.var.text_cancel_box, self.var.black)
-        self.cancel_box = self.write_on_line(
-            [cancel],
-            self.var.white,
-            self.var.coor_cancel_box[0],
-            self.var.coor_cancel_box[1],
-            align=-1,
-        )[0]
+        if self.cancel_box is None or force_reload:
+            self.cancel_box = Box(
+                self.var.text_cancel_box,
+                self.var.black,
+                self.var.white,
+                coordinate=self.var.coor_cancel_box,
+                align=(-1, 1),
+            )
+        self.cancel_box.render(self.screen)
+        if self.cancel_box not in self.all_boxes:
+            self.all_boxes.append(self.cancel_box)
 
-    def draw_quit_box(self) -> None:
+    def draw_quit_box(self, force_reload: bool=False) -> None:
         """Draw the box that allow the user to take a step back"""
-        quit_t = self.create_text_rendered(self.var.text_quit_box, self.var.black)
-        self.quit_box = self.write_on_line(
-            [quit_t],
-            self.var.white,
-            self.var.coor_quit_box[0],
-            self.var.coor_quit_box[1],
-            align=1,
-        )[0]
+        if self.quit_box is None or force_reload:
+            self.quit_box = Box(
+                self.var.text_quit_box,
+                self.var.black,
+                self.var.white,
+                coordinate=self.var.coor_quit_box,
+                align=(1, 1),
+            )
+        self.quit_box.render(self.screen)
+        if self.quit_box not in self.all_boxes:
+            self.all_boxes.append(self.quit_box)
 
-    def reset_screen(
-        self,
-        color_screen: Color,
-        text: list[list[Surface]],
-        colors_boxes: list[Color],
-    ) -> None:
-        """ Reset the screen to a "blank" state """
+    def reset_screen(self, color_screen: Color, boxes: list[Box]) -> None:
+        """Reset the screen to a "blank" state"""
         self.screen.fill(color_screen)
-        self.center_all(text, colors_boxes)
-        if self.draw_cancel:
-            self.draw_cancel_box()
-        if self.draw_quit:
-            self.draw_quit_box()
+        for b in self.all_boxes:
+            b.render(self.screen)
         pg.display.update()
 
-    def get_mouse_pos(self) -> tuple[int, int]:
+    def draw_circle(self, x: int, y: int, color: Color, r: int, screen: Surface) -> None:
+        """ Draw a circle of the color at the coordinate """
+        pg.draw.circle(screen, color, (x, y), r)
+
+    def draw_token(self, n: int, m: int, symbol: Optional[Symbol], r: int, col_row: bool=True, screen: Surface=None) -> None:
+        """Draw a circle in the corresponding column, and row
+        If col_row is true, then n and m are column and row number, if they are not, then n and m are a position"""
+        if screen is None:
+            screen = self.board_surface
+        if col_row:
+            x = n * self.var.size_cell + self.var.size_cell // 2
+            y = m * self.var.size_cell + self.var.size_cell // 2
+        else:
+            x = n
+            y = m
+        if symbol is None:
+            self.draw_circle(x, y, self.var.color_trans, r, screen)
+        else:
+            if symbol == self.var.symbol_player_1:
+                color = self.var.color_player_1
+            elif symbol == self.var.symbol_player_2:
+                color = self.var.color_player_2
+            else:
+                raise ValueError("How did that happen ?")
+            self.draw_circle(x, y, color, r, screen)
+
+    def hovering_box(self, box: Box, hover=True):
+        if box is None:
+            return
+        color = box.color_rect
+        if hover == True:
+            color = box.color_hover
+        pg.draw.rect(self.screen, color, box.box, 5)
+        pg.display.update(box.box)
+
+    def get_mouse_pos(self, force_mouse: bool = False) -> tuple[int, int]:
         """Return the mouse position"""
         # print("Change this to have the position from the camera")
-        return pg.mouse.get_pos()
+        if not self.camera or force_mouse:
+            return pg.mouse.get_pos()
+        return self.gestures.mouse_pos
 
-    def human_move(self, color: Color) -> None:
-        """ Function to use when it's the human's turn to move """
-        self.screen.fill(self.var.color_screen)
-        mouse_x, mouse_y = self.get_mouse_pos()
-        if mouse_x < self.var.pos_min_x:
-            mouse_x = self.var.pos_min_x
-        elif mouse_x > self.var.pos_max_x:
-            mouse_x = self.var.pos_max_x
+    def jump_mouse(self):
+        x, y = self.gestures.x, self.gestures.y
+        delta_x, delta_y = x - self.last_x, y - self.last_y
+        if delta_x >= 100:
+            self.last_x = x
+            return 1  # move right
+        elif delta_x <= -100:
+            self.last_x = x
+            return -1  # move left
+        else:
+            return 0  # stationary
 
+    def human_move(self, player: Symbol) -> None:
+        """Function to use when it's the human's turn to move"""
+        # self.screen.fill(self.var.color_screen)
         p = self.var.padding
-        if p < mouse_x < p + self.var.width_board:
-            col = (mouse_x - p) // self.var.size_cell
-            rect_col = Rect(p + col * self.var.size_cell, 0, self.var.size_cell, p)
-            pg.draw.rect(self.screen, self.var.color_highlight_column, rect_col)
+        sc = self.var.size_cell
+        last = self.last_column_selected
+
+        if self.camera:
+            direc = self.jump_mouse()
+            new_col = self.last_column_selected + direc
+            mouse_x = self.last_x
+        else:
+            mouse_x, mouse_y = self.get_mouse_pos()
+            if mouse_x < self.var.pos_min_x:
+                mouse_x = self.var.pos_min_x
+            elif mouse_x > self.var.pos_max_x:
+                mouse_x = self.var.pos_max_x
+
+        if p > mouse_x or mouse_x > p + self.var.width_board:
+            return
+
+        new_col = (mouse_x - p) // sc
+        self.last_column_selected = new_col
+        old_rect = (p + last * sc, 0, sc, p)
+        new_rect = (p + new_col * sc, 0, sc, p)
         self.draw_quit_box()
-        pg.draw.circle(self.screen, color, (mouse_x, p // 2), self.var.radius_disk)
-        pg.display.update((mouse_x - p // 2, 0, p, p))
+        pg.draw.rect(self.screen, self.var.color_screen, old_rect)
+        pg.draw.rect(self.screen, self.var.color_highlight_column, new_rect)
+        self.draw_token(p + new_col * sc + sc //2, p // 2, player, self.var.radius_disk, col_row=False, screen=self.screen)
+        pg.display.update(old_rect)
+        pg.display.update(new_rect)
 
     def update_gesture(self, image: np.ndarray[Any, np.dtype[Any]]) -> None:
-        """ Update the gesture class """
+        """Update the gesture class"""
         image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
         image.flags.writeable = False
         results = self.gestures.hands.process(image)
@@ -113,7 +181,7 @@ class Screen(Tools):
         image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
         if results.multi_hand_landmarks:
-            GestureController.classify_hands(results)
+            self.gestures.classify_hands(results)
             self.gestures.handmajor.update_hand_result(self.gestures.hr_major)
             self.gestures.handminor.update_hand_result(self.gestures.hr_minor)
 
@@ -122,12 +190,12 @@ class Screen(Tools):
             gest_name = self.gestures.handminor.get_gesture()
 
             if gest_name == Gest.PINCH_MINOR:
-                Controller.handle_controls(
+                self.gestures.handle_controls(
                     gest_name, self.gestures.handminor.hand_result
                 )
             else:
                 gest_name = self.gestures.handmajor.get_gesture()
-                Controller.handle_controls(
+                self.gestures.handle_controls(
                     gest_name, self.gestures.handmajor.hand_result
                 )
 
@@ -136,7 +204,7 @@ class Screen(Tools):
                     image, hand_landmarks, mp_hands.HAND_CONNECTIONS
                 )
         else:
-            Controller.prev_hand = None
+            self.prev_hand = None
         cv2.imshow("Gesture Controller", image)
         if cv2.waitKey(5) & 0xFF == 13:
             self.handle_quit(self.quit_box.center)
@@ -146,7 +214,7 @@ class Screen(Tools):
         rect_play: Optional[Rect] = None,
         sound: str = Variables().sound_click_box,
         print_disk: bool = False,
-        color_disk: Color = Variables().white,
+        symbol_player: Symbol = Symbol(None),
         func: Callable = None,
         **args,
     ) -> tuple[int, int]:
@@ -154,29 +222,64 @@ class Screen(Tools):
         If f is not None, then the function is called whith the argument 'event' at every iteration"""
         allow_quit = False
         while not allow_quit:
+            # (suppose and) Use the camera if usable
+            success = True
             if self.camera:
-                success, image = GestureController.cap.read()
+                success, image = self.gestures.cap.read()
                 if success:
                     self.update_gesture(image)
+                    if self.gestures.action == self.gestures.Click:
+                        allow_quit = True
+                else:
+                    print("Could not use the camera, disregarding this frame")
 
-            for event in pg.event.get():
-                if event.type == pg.MOUSEBUTTONUP:
-                    allow_quit = True
-                if print_disk:
-                    self.human_move(color_disk)
-                if func is not None:
-                    func(**args)
+            # If there was a problem or we don't use the camera
+            camera_did_not_work = not (self.camera and success)
+            if camera_did_not_work:
+                for event in pg.event.get():
+                    if event.type == pg.MOUSEBUTTONUP:
+                        allow_quit = True
+                    if func is not None:
+                        func(**args)
+
+            # Actions independant of the usage of the camera
+            if print_disk:
+                self.human_move(symbol_player)
+            # We force the usage of the mouse if there was an error
+            mouse = self.get_mouse_pos(force_mouse=not success)
+
+            # Draw a rectangle in the selected box
+            nearest_box = None
+            dist = np.Infinity
+            for box in self.all_boxes:
+                if box.hide:
+                    continue
+                d = np.sqrt(
+                    (box.box.center[0] - mouse[0]) ** 2 + (box.box.center[1] - mouse[1]) ** 2
+                )
+                if camera_did_not_work:
+                    if self.x_in_rect(mouse, box):
+                        nearest_box = box
+                elif d < dist:
+                    dist = d
+                    nearest_box = box
+            if self.last_box_hovered is not nearest_box:
+                self.hovering_box(self.last_box_hovered, hover=False)
+                self.hovering_box(nearest_box, hover=True)
+                self.last_box_hovered = nearest_box
+
+        # When a click is made we are here
         click = self.get_mouse_pos()
         if self.is_canceled(click):
             self.box_clicked = self.var.boxAI_cancel
         self.handle_quit(click)
         if rect_play is not None:
             while not self.x_in_rect(click, rect_play, ""):
-                click = self.click(rect_play, sound, print_disk, color_disk)
+                click = self.click(rect_play, sound, print_disk, symbol_player)
         return click
 
     def is_canceled(self, click: tuple[int, int]) -> bool:
-        """ Return if the cancel button was pressed """
+        """Return if the cancel button was pressed"""
         if self.cancel_box is None:
             return False
         return self.x_in_rect(click, self.cancel_box)
@@ -191,12 +294,14 @@ class Screen(Tools):
     def x_in_rect(
         self,
         coor: tuple[int, int],
-        rect: Optional[Rect],
+        rect: Optional[Union[Rect, Box]],
         sound: str = Variables().sound_click_box,
     ) -> bool:
         """Return whether coor is in the rectangle 'rect'"""
         if rect is None:
             return False
+        if isinstance(rect, Box):
+            rect = rect.box
         status = (
             rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
         )
@@ -204,7 +309,9 @@ class Screen(Tools):
             playsound(sound, block=False)
         return status
 
-    def handle_click(self, click_coor: tuple[int, int], list_rect: list[Rect]) -> int:
+    def handle_click(
+        self, click_coor: tuple[int, int], list_rect: list[Union[Rect, Box]]
+    ) -> int:
         """Return the index of the box the click was in"""
         for i in range(len(list_rect)):
             if self.x_in_rect(click_coor, list_rect[i], ""):
@@ -226,84 +333,75 @@ class Screen_AI(Screen):
         self.number_AI = number_AI
         self.begin = 1
 
-        texts_level = [
-            self.create_text_rendered(f"Level {i}")
-            for i in range(len(self.var.boxAI_text_levels))
-        ]
+        # Creation of all boxes with message in them
+        self.boxes_options = [[Box(self.var.text_difficulty_options[number_AI], color_hovering=self.var.color_options_box)]]
+        boxes_ai_1 = []
+        for i in range(len(self.var.boxAI_text_levels)):
+            boxes_ai_1.append(
+                Box(f"Level {i}", self.var.black, self.var.color_player_1, self.var.color_hover_player_1)
+            )
+        boxes_ai_2 = []
+        for i in range(len(self.var.boxAI_text_levels)):
+            boxes_ai_2.append(
+                Box(f"Level {i}", self.var.black, self.var.color_player_2, self.var.color_hover_player_2)
+            )
+        self.boxes_options.append(boxes_ai_1)
 
-        self.text_options = [
-            [self.create_text_rendered(self.var.text_difficulty_options[number_AI])],
-            texts_level,
-        ]
-        self.options_colors = [self.var.color_options_box, self.var.color_player_1]
+        # self.options_levels is used to know in which the user clicked
         if self.number_AI == 2:
-            self.options_colors.append(self.var.color_player_2)
-        self.boxes_levels = self.center_all(self.text_options, self.options_colors)
-        self.play_box: Optional[Rect] = None
-        self.diff_AI_1, self.diff_AI_2 = -1, -1
-        self.nbr_levels_AI_1 = len(self.boxes_levels[1])
-        if self.number_AI == 2:
-            self.text_options.append(texts_level)
-            self.boxes_levels = self.center_all(self.text_options, self.options_colors)
-            self.options_levels = [*self.boxes_levels[1], *self.boxes_levels[2]]
+            self.boxes_options.append(boxes_ai_2)
+            self.options_levels = [*boxes_ai_1, *boxes_ai_2]
         else:
-            self.options_levels = [*self.boxes_levels[1]]
-        self.reset_screen(
-            self.var.color_options_screen, self.text_options, self.options_colors
-        )
+            self.options_levels = [*boxes_ai_1]
+
+        self.play_box = self.draw_agreement_box(self.var.text_confirmation)
+        self.diff_AI_1, self.diff_AI_2 = -1, -1
+        self.nbr_levels_AI_1 = len(self.boxes_options[1])
+        self.center_all(self.boxes_options)
         self.screen_loop()
 
     def screen_loop(self) -> None:
-        """ Select the possibble value for the AI (if AI, AI(s) level) """
+        """Select the possibble value for the AI (if AI, AI(s) level)"""
         while self.box_clicked not in [self.var.boxAI_play, self.var.boxAI_cancel]:
             mouse_click = self.click()
             index_box = self.handle_click(mouse_click, self.options_levels)
             if index_box != -1:
                 if 0 <= index_box < self.nbr_levels_AI_1:
-                    self.write_on_line(
-                        self.text_options[1],
-                        self.var.color_player_1,
-                        self.var.width_screen,
-                        self.boxes_levels[1][0].top,
-                    )
+                    # We redraw all boxes on the line (remove highlight)
+                    for b in self.options_levels[: self.nbr_levels_AI_1]:
+                        b.render(self.screen)
                     self.diff_AI_1 = index_box
                 elif self.nbr_levels_AI_1 <= index_box < len(self.options_levels):
-                    self.write_on_line(
-                        self.text_options[2],
-                        self.var.color_player_2,
-                        self.var.width_screen,
-                        self.boxes_levels[2][0].top,
-                    )
+                    # Same here
+                    for b in self.options_levels[self.nbr_levels_AI_1 :]:
+                        b.render(self.screen)
                     self.diff_AI_2 = index_box % self.nbr_levels_AI_1
+
                 if self.diff_AI_1 != -1 and (
                     self.diff_AI_2 != -1 or self.number_AI == 1
                 ):
-                    self.play_box = self.draw_agreement_box("Sarah Connor ?")
+                    self.play_box.hide = False
+                    self.play_box.render(self.screen)
                 self.highlight_box(
                     self.options_levels[index_box],
                     self.var.color_options_highlight_box,
                     self.screen,
-                    f"Level {index_box % self.nbr_levels_AI_1}",
                     self.var.color_options_highlight_text,
                 )
-            elif self.play_box is not None and self.x_in_rect(
+            elif not self.play_box.hide and self.x_in_rect(
                 mouse_click, self.play_box
             ):
                 self.box_clicked = self.var.boxAI_play
             else:
-                self.play_box = None
+                self.play_box.hide = True
                 self.diff_AI_1 = -1
                 self.diff_AI_2 = -1
-                self.reset_screen(
-                    self.var.color_options_screen,
-                    self.text_options,
-                    self.options_colors,
-                )
-                pg.display.update()
+                self.reset_screen(self.var.color_options_screen, self.boxes_options)
 
 
 class OpponentSelectionScreen(Screen):
-    """ Not completed, will allow the user to chose it's oppponent """
+    """Not completed, will allow the user to chose it's oppponent"""
+
     def __init__(
         self,
         var: Variables,
@@ -322,7 +420,7 @@ class OpponentSelectionScreen(Screen):
         self.last_update = 0
 
     def update(self) -> None:
-        """ Update the screen with the raspberry pi we can connect to """
+        """Update the screen with the raspberry pi we can connect to"""
         if (time() - self.last_update) < self.time_update:
             return
         self.poss = self.comm.receive()
@@ -336,7 +434,7 @@ class OpponentSelectionScreen(Screen):
         self.rect_boxes = self.center_all(list_poss_player)
 
     def select(self):
-        """ Select a raspberry pi as the opponent """
+        """Select a raspberry pi as the opponent"""
         while self.opp is None and self.box_clicked != self.var.boxAI_cancel:
             mouse = self.click(func=self.update)
             for i in range(len(self.rect_boxes)):
@@ -375,12 +473,13 @@ class OptionsScreen(Screen):
         pg.display.update()
 
     def reset_options_screen(self) -> None:
-        """ Reset the appearance of the option screen to the default """
+        """Reset the appearance of the option screen to the default"""
+        self.all_boxes = []
         self.screen.fill(self.var.color_options_screen)
         if self.draw_cancel:
-            self.draw_cancel_box()
+            self.draw_cancel_box(force_reload=True)
         if self.draw_quit:
-            self.draw_quit_box()
+            self.draw_quit_box(force_reload=True)
         self.vol, self.cam = self.draw_vol_cam()
         self.flags = list(self.draw_language())
         pg.display.update()
@@ -392,7 +491,7 @@ class OptionsScreen(Screen):
         first_image: str,
         second_image: str,
     ) -> Rect:
-        """ Draw First Image (if) True Else Second (image) """
+        """Draw First Image (if) True Else Second (image)"""
         if testing:
             box = self.draw_icon(first_image, self.size, position)
         else:
@@ -400,7 +499,7 @@ class OptionsScreen(Screen):
         return box
 
     def draw_vol_cam(self) -> tuple[Rect, Rect]:
-        """ Draw the icon for the volume and the camera """
+        """Draw the icon for the volume and the camera"""
         cs = self.var.center_screen
         sp = self.var.options_spacing
         x_now = cs[0] - self.size[0] - sp
@@ -418,11 +517,11 @@ class OptionsScreen(Screen):
         return vol, cam
 
     def draw_language(self) -> Iterator[Rect]:
-        """ Draw the languages """
+        """Draw the languages"""
         cs = self.var.center_screen
         sp = self.var.options_spacing
         y_now = cs[1] + 3 * sp // 2
-        l = [self.var.image_english, self.var.image_french]
+        l = [self.var.image_english, self.var.image_french, self.var.image_cat]
         x_now = cs[0] - len(l) * self.size[0] // 2 - (len(l) - 1) * sp
         for lan in l:
             yield self.draw_icon(lan, self.size, (x_now, y_now))
@@ -449,19 +548,13 @@ class GamingScreen(Screen):
             (self.width_board, self.height_board)
         ).convert_alpha()
 
-    def draw_circle(self, n: int, m: int, color: Color, r: int) -> None:
-        """Draw a circle in the corresponding column, and row"""
-        x = n * self.var.size_cell + self.var.size_cell // 2
-        y = m * self.var.size_cell + self.var.size_cell // 2
-        pg.draw.circle(self.board_surface, color, (x, y), r)
-
     def blit_board(self) -> None:
-        """ Paste the state of the board onto the screen """
+        """Paste the state of the board onto the screen"""
         self.screen.blit(self.board_surface, (self.var.padding, self.var.padding))
-        self.draw_quit_box()
+        self.quit_box.render(self.screen)
 
     def draw_board(self) -> None:
-        """ Draw the board on the screen (needed to be sure to see the board) """
+        """Draw the board on the screen (needed to be sure to see the board)"""
         self.screen.fill(self.color_screen)
         pg.draw.rect(
             self.board_surface,
@@ -470,12 +563,12 @@ class GamingScreen(Screen):
         )
         for i in range(7):
             for j in range(6):
-                self.draw_circle(i, j, self.var.color_trans, self.var.radius_hole)
+                self.draw_token(i, j, None, self.var.radius_hole)
         self.blit_board()
         pg.display.update()
 
-    def animate_fall(self, col: int, row: int, color_player: Color) -> None:
-        """ Animate the fall of a disk """
+    def animate_fall(self, col: int, row: int, player: Symbol, mode: str = "") -> None:
+        """Animate the fall of a disk"""
         x = self.var.padding + col * self.var.size_cell + self.var.size_cell // 2
         for y in range(
             self.var.padding // 2,
@@ -483,9 +576,17 @@ class GamingScreen(Screen):
             5,
         ):
             self.screen.fill(self.var.white)
-            pg.draw.circle(self.screen, color_player, (x, y), self.var.radius_disk)
+            if player == self.var.symbol_player_1:
+                color = self.var.color_player_1
+            elif player == self.var.symbol_player_2:
+                color = self.var.color_player_2
+            self.draw_token(x, y, player, self.var.radius_disk, col_row=False, screen=self.screen)
             self.blit_board()
             pg.display.update()
-        self.draw_circle(col, row, color_player, self.var.radius_hole)
+        self.draw_token(col, row, player, self.var.radius_hole)
         if self.volume:
-            playsound(self.var.sound_disk_touch, block=True)
+            if mode == "":
+                sound = self.var.sound_disk_touch
+            elif mode == "cat":
+                sound = random_choice(listdir("./assets/cat/"))
+            playsound(sound, block=True)

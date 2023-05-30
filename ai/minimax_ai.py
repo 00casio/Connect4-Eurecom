@@ -34,9 +34,10 @@ def count(buffer: list[Any], symbol: Any, number: int) -> bool:
 
 
 def count_point(
-    line: Union[np.ndarray[Any, np.dtype[Any]], list[Any]], symbol_player: Any) ->int:
-#     line: np.ndarray[Any, np.dtype[Any]] | list[Any], symbol_player: Any
-# ) -> int:
+    line: Union[np.ndarray[Any, np.dtype[Any]], list[Any]], symbol_player: Any
+) -> int:
+    #     line: np.ndarray[Any, np.dtype[Any]] | list[Any], symbol_player: Any
+    # ) -> int:
     buffer = list(line)
     score = 0
     opp_player = opponent(symbol_player)

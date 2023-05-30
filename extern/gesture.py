@@ -232,7 +232,7 @@ class HandRecog:
         return self.ori_gesture
 
 
-class Controller:
+class GestureController:
     """
     Executes commands according to detected gestures.
 
@@ -246,114 +246,7 @@ class Controller:
         true if V gesture is detected
     grabflag : bool
         true if FIST gesture is detected
-    pinchmajorflag : bool
-        true if PINCH gesture is detected through MAJOR hand,
-        on x-axis 'Controller.changesystembrightness',
-        on y-axis 'Controller.changesystemvolume'.
-    pinchminorflag : bool
-        true if PINCH gesture is detected through MINOR hand,
-        on x-axis 'Controller.scrollHorizontal',
-        on y-axis 'Controller.scrollVertical'.
-    pinchstartxcoord : int
-        x coordinate of hand landmark when pinch gesture is started.
-    pinchstartycoord : int
-        y coordinate of hand landmark when pinch gesture is started.
-    pinchdirectionflag : bool
-        true if pinch gesture movment is along x-axis,
-        otherwise false
-    prevpinchlv : int
-        stores quantized magnitued of prev pinch gesture displacment, from
-        starting position
-    pinchlv : int
-        stores quantized magnitued of pinch gesture displacment, from
-        starting position
-    framecount : int
-        stores no. of frames since 'pinchlv' is updated.
-    prev_hand : tuple
-        stores (x, y) coordinates of hand in previous frame.
-    pinch_threshold : float
-        step size for quantization of 'pinchlv'.
-    """
 
-    tx_old = 0
-    ty_old = 0
-    trial = True
-    flag = False
-    grabflag = False
-    pinchmajorflag = False
-    pinchminorflag = False
-    pinchstartxcoord = None
-    pinchstartycoord = None
-    pinchdirectionflag = None
-    prevpinchlv = 0
-    pinchlv = 0
-    framecount = 0
-    prev_hand = None
-    pinch_threshold = 0.3
-
-    def get_position(hand_result):
-        """
-        returns coordinates of current hand position.
-
-        Locates hand to get cursor position also stabilize cursor by
-        dampening jerky motion of hand.
-
-        Returns
-        -------
-        tuple(float, float)
-        """
-        point = 9
-        position = [hand_result.landmark[point].x, hand_result.landmark[point].y]
-        sx, sy = pyautogui.size()
-        x_old, y_old = pyautogui.position()
-        x = int(position[0] * sx)
-        y = int(position[1] * sy)
-        if Controller.prev_hand is None:
-            Controller.prev_hand = x, y
-        delta_x = x - Controller.prev_hand[0]
-        delta_y = y - Controller.prev_hand[1]
-
-        distsq = delta_x**2 + delta_y**2
-        ratio = 1
-        Controller.prev_hand = [x, y]
-
-        if distsq <= 25:
-            ratio = 0
-        elif distsq <= 900:
-            ratio = 0.07 * (distsq ** (1 / 2))
-        else:
-            ratio = 2.1
-        x, y = x_old + delta_x * ratio, y_old + delta_y * ratio
-        return (x, y)
-
-    def handle_controls(gesture, hand_result):
-        """Impliments all gesture functionality."""
-        x, y = None, None
-        if gesture != Gest.PALM:
-            x, y = Controller.get_position(hand_result)
-
-        # flag reset
-        if gesture != Gest.FIST and Controller.grabflag:
-            Controller.grabflag = False
-            pyautogui.mouseUp(button="left")
-
-        # implementation
-        if gesture == Gest.V_GEST:
-            Controller.flag = True
-            pyautogui.moveTo(x, y, duration=0.1)
-
-        elif gesture == Gest.FIST:
-            if not Controller.grabflag:
-                Controller.grabflag = True
-                pyautogui.click(button="left")
-            # pyautogui.moveTo(x, y, duration = 0.1)
-
-        # Merge this class with GestureController
-        # either return or have the mouse position as variables
-
-
-class GestureController:
-    """
     Handles camera, obtain landmarks from mediapipe, entry point
     for whole program.
 
@@ -377,6 +270,21 @@ class GestureController:
         default True.
     """
 
+    tx_old = 0
+    ty_old = 0
+    trial = True
+    flag = False
+    grabflag = False
+    pinchmajorflag = False
+    pinchminorflag = False
+    pinchstartxcoord = None
+    pinchstartycoord = None
+    pinchdirectionflag = None
+    prevpinchlv = 0
+    pinchlv = 0
+    framecount = 0
+    prev_hand = None
+    pinch_threshold = 0.3
     gc_mode = 0
     cap = None
     CAM_HEIGHT = None
@@ -385,23 +293,129 @@ class GestureController:
     hr_minor = None  # Left hand by default
     dom_hand = True
 
-    def __init__(self):
+    Nothing = 0
+    Moving = 1
+    Click = 2
+    possible_gesture = Gest
+
+    def __init__(self, screen_size: tuple[int, int]):
         """Initilaizes attributes."""
-        GestureController.gc_mode = 1
-        GestureController.cap = cv2.VideoCapture(0)
-        GestureController.CAM_HEIGHT = GestureController.cap.get(
-            cv2.CAP_PROP_FRAME_HEIGHT
-        )
-        GestureController.CAM_WIDTH = GestureController.cap.get(
-            cv2.CAP_PROP_FRAME_WIDTH
-        )
+        self.screen_size = screen_size
+        self.mouse_pos = (screen_size[0] // 2, screen_size[1] // 2)
+        self.action = self.Nothing
+        self.gc_mode = 1
+        self.cap = cv2.VideoCapture(0)
+        self.CAM_HEIGHT = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.CAM_WIDTH = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.handmajor = HandRecog(HLabel.MAJOR)
         self.handminor = HandRecog(HLabel.MINOR)
-        self.hands = mp_hands.Hands(
-            max_num_hands=2, min_detection_confidence=0.5, min_tracking_confidence=0.5
+        self.hands = mp_hands.Hands(static_image_mode=True,
+            max_num_hands=2, min_detection_confidence=0.2, model_complexity=0, min_tracking_confidence=0.2
         )
+        self.action = "state"
 
-    def classify_hands(results):
+    def get_position(self, hand_result):
+        """
+        returns coordinates of current hand position.
+
+        Locates hand to get cursor position also stabilize cursor by
+        dampening jerky motion of hand.
+
+        Returns
+        -------
+        tuple(float, float)
+        """
+        point = 9
+        position = [hand_result.landmark[point].x, hand_result.landmark[point].y]
+        sx, sy = self.screen_size  # size of the screen x and y
+        x_mid, ymid = sx // 2, sy // 2
+        x_old, y_old = self.mouse_pos  # mouse cursor position
+        x = int(position[0] * sx)
+        y = int(position[1] * sy)
+        if self.prev_hand is None:
+            self.prev_hand = x, y
+        delta_x = x - self.prev_hand[0]
+        delta_y = y - self.prev_hand[1]
+
+        distsq = delta_x**2 + delta_y**2
+        ratio = 1
+        self.prev_hand = [x, y]
+
+        if distsq <= 25:
+            ratio = 0
+        elif distsq <= 900:
+            ratio = 0.07 * (distsq ** (1 / 2))
+        else:
+            ratio = 2.1
+        x, y = x_old + delta_x * ratio, y_old + delta_y * ratio
+        self.mouse_pos = (x, y)
+
+    def get_hand_movement(self, hand_result):
+        point = 9
+        position = hand_result.landmark[point].x
+        prev_position = self.prev_position
+
+        if prev_position is None:
+            self.prev_position = position
+            return "none"
+
+        delta = position - prev_position
+
+        if delta < -0.5:
+            self.prev_position = position
+            print("left")
+            return "left"
+        elif delta > 0.5:
+            self.prev_position = position
+            print("right")
+            return "right"
+        else:
+            print("none")
+            return "none"
+
+    def handle_controls(self, gesture, hand_result):
+        """Impliments all gesture functionality."""
+
+        # Reset grabflag
+        if gesture != self.possible_gesture.FIST and self.grabflag:
+            self.grabflag = False
+
+        # # Action associated with click
+        # if gesture == self.possible_gesture.FIST:
+        #     if not self.grabflag:
+        #         self.action = self.Click
+        #         self.grabflag = True
+
+        # # Action associated with moving the hand
+        # elif gesture == self.possible_gesture.V_GEST:
+        #     self.action = self.Moving
+
+        # # Default action
+        # else:
+        #     self.action = self.Nothing
+
+        # # flag reset
+        if gesture != Gest.FIST and self.grabflag:
+            self.grabflag = False
+            self.action = "click left"
+            pyautogui.mouseUp(button="left")
+
+        # implementation
+        if gesture == Gest.V_GEST:
+            self.flag = True
+            self.action = "move"
+            self.get_hand_movement(hand_result)
+
+        elif gesture == Gest.FIST:
+            if not self.grabflag:
+                self.grabflag = True
+                pyautogui.click(button="left")
+            # pyautogui.moveTo(x, y, duration = 0.1)
+
+        # Merge this class with GestureController
+        # either return or have the mouse position as variables
+
+    def classify_hands(self, results):
         """
         sets 'hr_major', 'hr_minor' based on classification(left, right) of
         hand obtained from mediapipe, uses 'dom_hand' to decide major and
@@ -426,63 +440,9 @@ class GestureController:
         except:
             pass
 
-        if GestureController.dom_hand == True:
-            GestureController.hr_major = right
-            GestureController.hr_minor = left
+        if self.dom_hand == True:
+            self.hr_major = right
+            self.hr_minor = left
         else:
-            GestureController.hr_major = left
-            GestureController.hr_minor = right
-
-    def start_gestures(self):
-        """
-        Entry point of whole programm, caputres video frame and passes, obtains
-        landmark from mediapipe and passes it to 'handmajor' and 'handminor' for
-        controlling.
-        """
-
-        handmajor = HandRecog(HLabel.MAJOR)
-        handminor = HandRecog(HLabel.MINOR)
-
-        hands = mp_hands.Hands(
-            max_num_hands=2, min_detection_confidence=0.5, min_tracking_confidence=0.5
-        )
-        while GestureController.cap.isOpened() and GestureController.gc_mode:
-            success, image = GestureController.cap.read()
-
-            if not success:
-                print("Ignoring empty camera frame.")
-                continue
-
-            image = cv2.cvtColor(cv2.flip(image, 1), cv2.COLOR_BGR2RGB)
-            image.flags.writeable = False
-            results = hands.process(image)
-
-            image.flags.writeable = True
-            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-
-            if results.multi_hand_landmarks:
-                GestureController.classify_hands(results)
-                handmajor.update_hand_result(GestureController.hr_major)
-                handminor.update_hand_result(GestureController.hr_minor)
-
-                handmajor.set_finger_state()
-                handminor.set_finger_state()
-                gest_name = handminor.get_gesture()
-
-                if gest_name == Gest.PINCH_MINOR:
-                    Controller.handle_controls(gest_name, handminor.hand_result)
-                else:
-                    gest_name = handmajor.get_gesture()
-                    Controller.handle_controls(gest_name, handmajor.hand_result)
-
-                for hand_landmarks in results.multi_hand_landmarks:
-                    mp_drawing.draw_landmarks(
-                        image, hand_landmarks, mp_hands.HAND_CONNECTIONS
-                    )
-            else:
-                Controller.prev_hand = None
-            cv2.imshow("Gesture Controller", image)
-            if cv2.waitKey(5) & 0xFF == 13:
-                break
-        GestureController.cap.release()
-        cv2.destroyAllWindows()
+            self.hr_major = left
+            self.hr_minor = right

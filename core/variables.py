@@ -10,7 +10,8 @@ Surface = pg.Surface
 
 
 class Variables:
-    """ Contains all variables in the game """
+    """Contains all variables in the game"""
+
     def __init__(self) -> None:
         # Texts
         self.texts = {
@@ -29,6 +30,7 @@ class Variables:
                 "options_play_AIvAI": "Watch the world burn",
                 "options_difficulty_HvAI": "Choose your poison",
                 "options_difficulty_AIvAI": "How badly do you want this game to go ?",
+                "confirmation_button": "Sarah Connor ?",
                 "cancel_box": "Return",
                 "quit_box": "Quit",
                 "message_quit": "You chose to quit the game\nYou are disapointing me",
@@ -48,9 +50,30 @@ class Variables:
                 "options_play_AIvAI": "[Insérer citation connue de 'The Dark Knight']",
                 "options_difficulty_HvAI": "Choisis ton poison",
                 "options_difficulty_AIvAI": "À quoi voulez-vous condamner la Terre ?",
+                "confirmation_button": "Sarah Connor ?",
                 "cancel_box": "Retour",
                 "quit_box": "Quitter",
                 "message_quit": "Vous avez choisis d'abandonner le jeu.\nVous me décevez.",
+            },
+            "cat": {
+                "boxAI_text_levels": [
+                    "Nya",
+                    "Nyaaaa",
+                    "Nyah !",
+                    "Nyaaaaaaa?",
+                    "Nya.",
+                ],
+                "options_play": "NYA",
+                "options_options": "Nya Nya",
+                "options_play_HvH": "Nyaaa Nya",
+                "options_play_HvAI": "NYAAAA !",
+                "options_play_AIvAI": "Nya. Nya nyah nya. Nya nyah !",
+                "options_difficulty_HvAI": "Nyah nyah",
+                "options_difficulty_AIvAI": "Nya nya, nyanyanya nya",
+                "confirmation_button": "Nyyyaaaaa ?",
+                "cancel_box": "Nyah",
+                "quit_box": "Nya Nya",
+                "message_quit": "Nya nya.\n Nya nya (－‸ლ) nya",
             },
         }
 
@@ -73,6 +96,7 @@ class Variables:
         self.green = Color(0, 255, 0)
         self.purple = Color(240, 50, 255)
         self.blue = Color(38, 60, 255)
+        self.yellow = Color(239, 248, 62)
         self.dark_blue = Color(0, 0, 229)
         self.light_blue = Color(30, 160, 255)
         self.very_light_blue = Color(20, 235, 255)
@@ -80,7 +104,9 @@ class Variables:
         self.grey = Color(200, 200, 200)
         self.color_trans = Color(0, 0, 0, 0)
         self.color_player_1 = self.red
-        self.color_player_2 = self.purple
+        self.color_player_2 = self.yellow
+        self.color_hover_player_1 = self.color_player_2
+        self.color_hover_player_2 = self.color_player_1
         self.color_board = self.blue
         self.color_screen = self.white
         self.color_highlight_column = self.grey
@@ -89,6 +115,7 @@ class Variables:
         self.color_options_highlight_text = self.black
         self.color_options_box = self.blue
         self.color_options_text = self.white
+        self.color_hovering_box = self.red
 
         # Size
         self.size_cell = 100
@@ -131,10 +158,12 @@ class Variables:
             "options_difficulty_AIvAI"
         ]
         self.text_difficulty_options = [
-            "",
+            "Waouh, an easter egg !",
             self.text_options_difficulty_HvAI,
             self.text_options_difficulty_AIvAI,
         ]
+        self.text_confirmation = self.texts["en"]["confirmation_button"]
+        self.text_draw = {"en": "No one won", "fr": "C'est une égalité", "cat": "Nya nya..."}
 
         # Assets
         self.libai = True
@@ -147,10 +176,11 @@ class Variables:
         self.sound_winner_victory = "assets/victory.mp3"
         self.image_volume_on = "assets/volume.svg"
         self.image_volume_muted = "assets/muted.svg"
-        self.image_english = "assets/english.svg"
-        self.image_french = "assets/french.svg"
         self.image_camera = "assets/camera.svg"
         self.image_nocamera = "assets/no-camera.svg"
+        self.image_english = "assets/english.svg"
+        self.image_french = "assets/french.svg"
+        self.image_cat = "assets/cat.png"
 
         # Fonts
         self.main_font = pg.font.SysFont(self.text_font, self.text_size)

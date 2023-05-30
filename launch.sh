@@ -24,8 +24,10 @@ com=$(test_python "python" "python3.11" "python3.10" "python3.9")
 if [ "${com}" == "" ]; then exit; fi
 
 # Install packages
-${com} -m pip install wheel # Needed for playsound
-${com} -m pip install -r requirements.txt
+echo "Testing python packages..."
+${com} -m pip install -U wheel 1>/dev/null # Needed for playsound
+${com} -m pip install -U -r requirements.txt 1>/dev/null
+echo "Python packages tested"
 
 # Change python headers location based on OS
 python_ver=$(${com} -c "from sys import version_info as v; print(f'{v[0]}.{v[1]}')")
@@ -44,10 +46,11 @@ swig -version 2>/dev/null 1>&2
 if [ $? -eq 0 ]; then
   echo "Compiling the library..."
   swig -Wall -python -c++ -o ai/ai_wrap.cxx ai/ai.i
-  g++ -shared -O3 -fPIC ai/ai.cpp ai/ai_wrap.cxx -o ai/_libai.so -I ${PYTHON_HEADERS}
+  g++ -shared -O3 -fPIC ai/ai.cpp ai/ai_wrap.cxx -o ai/_libai.so -I ${PYTHON_HEADERS} -Wall
   echo "Compiled the library, launching the game now"
   ${com} main.py --no-camera --no-sound
 else
   echo "Could not find swig, deactivating it for now. Please install it" | tee >&2
+  cp "ai/libai.pyi" "ai/libai.py"
   ${com} main.py --no-camera --no-sound --no-libai
 fi

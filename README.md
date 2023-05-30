@@ -27,6 +27,8 @@ We may be able to use the time between out move and the opponent's move to squee
 
 If we can use the [boost.Python](https://github.com/boostorg/python) library on the raspberry, it would bring many speed improvements over SWIG.
 
+For the first installation, you need to make sure that `libcairomm-dev` (or equivalent) and `libgirepository-dev` (or equivalent) are installed. They are needed by `pygobject` which is needed by `playsound`.
+
 #### Interface
 
 - [x] Choose mode
@@ -41,6 +43,9 @@ Optional:
 - [x] Options
 - [ ] Change theme
 - [ ] Background music
+- [ ] Tidy the codebase
+  - [x] rewrite reset_screen
+  - [x] create class for box (will have coordinate of rect, color of box, text, color of text, if the box is "clickable")
 
 #### AI
 
@@ -51,6 +56,7 @@ Optional:
 - [x] Change difficulty
 - [ ] Different gameplay
 - [ ] Add other algorithms
+- [ ] Test if negamax is faster when using only int64/uint64
 
 #### Hands gesture
 

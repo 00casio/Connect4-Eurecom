@@ -138,6 +138,7 @@ def main():
                     print("It's a draw!")
                     break
 
+
         elif response.lower() == "ai":
             send_request_response("102")  # Accept the game with AI mode
             print("Game request accepted. Waiting for the game board...")

@@ -1,4 +1,3 @@
-import bluetooth
 import os
 
 # Define the game board and other necessary variables
@@ -124,8 +123,11 @@ def main():
     server_sock.close()
     print("All done.")
 
+
 if __name__ == "__main__":
     main()
 
-
+client_sock.close()
+server_sock.close()
+print("All done.")
 
