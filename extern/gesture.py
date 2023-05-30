@@ -309,8 +309,8 @@ class GestureController:
         self.CAM_WIDTH = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.handmajor = HandRecog(HLabel.MAJOR)
         self.handminor = HandRecog(HLabel.MINOR)
-        self.hands = mp_hands.Hands(
-            max_num_hands=2, min_detection_confidence=0.5, min_tracking_confidence=0.5
+        self.hands = mp_hands.Hands(static_image_mode=True,
+            max_num_hands=2, min_detection_confidence=0.2, model_complexity=0, min_tracking_confidence=0.2
         )
         self.action = "state"
 
@@ -380,37 +380,37 @@ class GestureController:
         if gesture != self.possible_gesture.FIST and self.grabflag:
             self.grabflag = False
 
-        # Action associated with click
-        if gesture == self.possible_gesture.FIST:
-            if not self.grabflag:
-                self.action = self.Click
-                self.grabflag = True
+        # # Action associated with click
+        # if gesture == self.possible_gesture.FIST:
+        #     if not self.grabflag:
+        #         self.action = self.Click
+        #         self.grabflag = True
 
-        # Action associated with moving the hand
-        elif gesture == self.possible_gesture.V_GEST:
-            self.action = self.Moving
+        # # Action associated with moving the hand
+        # elif gesture == self.possible_gesture.V_GEST:
+        #     self.action = self.Moving
 
-        # Default action
-        else:
-            self.action = self.Nothing
+        # # Default action
+        # else:
+        #     self.action = self.Nothing
 
         # # flag reset
-        # if gesture != Gest.FIST and self.grabflag:
-        #     self.grabflag = False
-        #     self.action = "click left"
-        #     pyautogui.mouseUp(button="left")
+        if gesture != Gest.FIST and self.grabflag:
+            self.grabflag = False
+            self.action = "click left"
+            pyautogui.mouseUp(button="left")
 
-        # # implementation
-        # if gesture == Gest.V_GEST:
-        #     self.flag = True
-        #     self.action = "move"
-        #     self.get_hand_movement(hand_result)
+        # implementation
+        if gesture == Gest.V_GEST:
+            self.flag = True
+            self.action = "move"
+            self.get_hand_movement(hand_result)
 
-        # elif gesture == Gest.FIST:
-        #     if not self.grabflag:
-        #         self.grabflag = True
-        #         pyautogui.click(button="left")
-        #     # pyautogui.moveTo(x, y, duration = 0.1)
+        elif gesture == Gest.FIST:
+            if not self.grabflag:
+                self.grabflag = True
+                pyautogui.click(button="left")
+            # pyautogui.moveTo(x, y, duration = 0.1)
 
         # Merge this class with GestureController
         # either return or have the mouse position as variables
