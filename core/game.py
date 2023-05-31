@@ -298,6 +298,8 @@ class Game:
                 player_me = "ai"
             if player_me is not None and type_me is not None:
                 final_box.hide = False
+                final_box.render(self.screen)
+                pg.display.update()
             if online.x_in_rect(mouse, final_box):
                 self.box_clicked = self.var.boxAI_play
         if self.box_clicked == self.var.boxAI_cancel:
