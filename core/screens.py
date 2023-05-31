@@ -132,9 +132,7 @@ class Screen(Tools):
     def get_mouse_pos(self, force_mouse: bool = False) -> tuple[int, int]:
         """Return the mouse position"""
         # print("Change this to have the position from the camera")
-        if not self.camera or force_mouse:
-            return pg.mouse.get_pos()
-        return self.gestures.mouse_pos
+        return pg.mouse.get_pos()
 
     def jump_mouse(self):
         x, y = self.gestures.x, self.gestures.y
@@ -237,25 +235,20 @@ class Screen(Tools):
                 success, image = self.gestures.cap.read()
                 if success:
                     self.update_gesture(image)
-                    if self.gestures.action == self.gestures.Click:
-                        allow_quit = True
                 else:
                     print("Could not use the camera, disregarding this frame")
 
-            # If there was a problem or we don't use the camera
-            camera_did_not_work = not (self.camera and success)
-            if camera_did_not_work:
-                for event in pg.event.get():
-                    if event.type == pg.MOUSEBUTTONUP:
-                        allow_quit = True
-                    if func is not None:
-                        func(**args)
+            for event in pg.event.get():
+                if event.type == pg.MOUSEBUTTONUP:
+                    allow_quit = True
+                if func is not None:
+                    func(**args)
 
             # Actions independant of the usage of the camera
             if print_disk:
                 self.human_move(symbol_player)
             # We force the usage of the mouse if there was an error
-            mouse = self.get_mouse_pos(force_mouse=not success)
+            mouse = self.get_mouse_pos()
 
             # Draw a rectangle in the selected box
             nearest_box = None
