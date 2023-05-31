@@ -276,7 +276,7 @@ class Game:
                 if online.x_in_rect(mouse, b):
                     out = False
             if out:
-                final_box = Box("").hide = True
+                final_box.hide = True
                 online.reset_screen(self.var.color_options_screen)
                 type_me = None
                 player_me = None
