@@ -409,9 +409,9 @@ class OpponentSelectionScreen(Screen):
             return []
         size = int(np.sqrt(len(list_to_split)-1)) + 1
         list_splitted = []
-        for i in range(0, len(list_to_split), m):
+        for i in range(0, len(list_to_split), size):
             temp = []
-            for j in range(i, i+m):
+            for j in range(i, i+size):
                 if j >= len(list_to_split):
                     continue
                 temp.append(list_to_split[j])
