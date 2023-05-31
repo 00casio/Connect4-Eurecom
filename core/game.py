@@ -3,7 +3,7 @@
 
 from argparse import Namespace
 from typing import Any, Iterator, Optional
-from time import time
+from time import time, sleep
 
 import numpy as np
 import pygame as pg
@@ -314,12 +314,23 @@ class Game:
             self.player_2 = Player(self.var, 2, is_ai, 14)
 
         self.select_opponent()
+    
+    def write_message(self, screen: Screen, msg: str):
+        screen.screen.fill(self.var.color_options_screen)
+        box_temp = Box(msg)
+        screen.center_all([[box_temp]])
 
     def select_opponent(self):
         """ Select the opponent between all opponents available """
         screen_opp = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
+        self.write_message(screen_opp, "Please wait a few seconds\nWe are getting a list of all potential opponents")
         t = time()
-        boxes = screen_opp.update()
+        boxes = []
+        while len(boxes) == 0:
+            self.write_message(screen_opp, "Please wait a few seconds\nWe are getting a list of all potential opponents")
+            boxes = screen_opp.update()
+            self.write_message(screen_opp, "Looks like we did not find any.\nPlease wait we will look\nagain in a few seconds")
+            sleep(3)
         opp = None
         while opp is None:
             mouse = screen_opp.click()
