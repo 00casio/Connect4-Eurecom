@@ -96,9 +96,10 @@ class Screen(Tools):
         If col_row is true, then n and m are column and row number, if they are not, then n and m are a position"""
         if screen is None:
             screen = self.board_surface
+        sc = self.var.size_cell
         if col_row:
-            x = n * self.var.size_cell + self.var.size_cell // 2
-            y = m * self.var.size_cell + self.var.size_cell // 2
+            x = n * sc + sc // 2
+            y = m * sc + sc // 2
         else:
             x = n
             y = m
@@ -110,7 +111,7 @@ class Screen(Tools):
                 if self.language == "cat":
                     disk = pg.image.load("assets/cat/tails.png")
                     disk = pg.transform.scale(disk, (r*2, r*2))
-                    self.screen.blit(disk, (x-r, y-r))
+                    screen.blit(disk, (x - r, y - r))
                 else:
                     color = self.var.color_player_1
                     self.draw_circle(x, y, color, r, screen)
@@ -561,10 +562,15 @@ class GamingScreen(Screen):
             self.draw_token(x, y, player, self.var.radius_disk, col_row=False, screen=self.screen)
             self.blit_board()
             pg.display.update()
+        self.screen.fill(self.var.color_screen)
         self.draw_token(col, row, player, self.var.radius_hole)
+        self.blit_board()
+        pg.display.update()
         if self.volume:
             if self.language != "cat":
                 sound = self.var.sound_disk_touch
             else:
-                sound = random_choice(listdir("./assets/cat/"))
+                sound = ".png"
+                while sound.split(".")[-1] != "mp3":
+                    sound = "assets/cat/" + random_choice(listdir("assets/cat/"))
             playsound(sound, block=True)
