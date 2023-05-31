@@ -265,7 +265,8 @@ class Game:
         box_machi = Box("As AI")
         type_me = None
         player_me = None
-        final_box = Box("").hide = True
+        final_box = Box("")
+        final_box.hide = True
         online.center_all([[box_client, box_server], [box_human, box_machi]])
         self.box_clicked = self.var.box_out
         while self.box_clicked == self.var.box_out:
