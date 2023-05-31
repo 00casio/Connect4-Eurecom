@@ -399,12 +399,14 @@ class OpponentSelectionScreen(Screen):
         box_temp = []
         if type(msg) == list:
             for i in msg:
-                box_temp.append(Box(i))
+                box_temp.append([Box(i)])
         else:
-            box_temp.append(Box(msg))
-        self.center_all([box_temp])
+            box_temp.append([Box(msg)])
+        self.center_all(box_temp)
 
     def split_list(self, list_to_split):
+        if list_to_split == []:
+            return []
         size = int(np.sqrt(len(list_to_split)-1)) + 1
         list_splitted = []
         for i in range(0, len(list_to_split), m):
