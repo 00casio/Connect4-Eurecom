@@ -265,8 +265,7 @@ class Game:
         box_machi = Box("As AI")
         type_me = None
         player_me = None
-        final_box = Box("")
-        final_box.hide = True
+        final_box = online.draw_agreement_box("J'accepte")
         online.center_all([[box_client, box_server], [box_human, box_machi]])
         self.box_clicked = self.var.box_out
         while self.box_clicked == self.var.box_out:
@@ -298,7 +297,7 @@ class Game:
                 online.highlight_box(box_machi, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
                 player_me = "ai"
             if player_me is not None and type_me is not None:
-                final_box = online.draw_agreement_box("J'accepte")
+                final_box.hide = False
             if online.x_in_rect(mouse, final_box):
                 self.box_clicked = self.var.boxAI_play
         if self.box_clicked == self.var.boxAI_cancel:
