@@ -545,7 +545,7 @@ class GamingScreen(Screen):
         self.blit_board()
         pg.display.update()
 
-    def animate_fall(self, col: int, row: int, player: Symbol, mode: str = "") -> None:
+    def animate_fall(self, col: int, row: int, player: Symbol) -> None:
         """Animate the fall of a disk"""
         x = self.var.padding + col * self.var.size_cell + self.var.size_cell // 2
         for y in range(
@@ -563,8 +563,8 @@ class GamingScreen(Screen):
             pg.display.update()
         self.draw_token(col, row, player, self.var.radius_hole)
         if self.volume:
-            if mode == "":
+            if self.language != "cat":
                 sound = self.var.sound_disk_touch
-            elif mode == "cat":
+            else:
                 sound = random_choice(listdir("./assets/cat/"))
             playsound(sound, block=True)
