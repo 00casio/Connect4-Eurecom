@@ -99,7 +99,7 @@ class Game:
         size_screen = (self.var.width_screen, self.var.height_screen)
 
         # Gestures
-        self.gestures = GestureController(size_screen)
+        self.gestures = GestureController()
 
         # TODO: communication
 

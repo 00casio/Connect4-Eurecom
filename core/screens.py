@@ -252,18 +252,10 @@ class Screen(Tools):
 
             # Draw a rectangle in the selected box
             nearest_box = None
-            dist = np.Infinity
             for box in self.all_boxes:
                 if box.hide:
                     continue
-                d = np.sqrt(
-                    (box.box.center[0] - mouse[0]) ** 2 + (box.box.center[1] - mouse[1]) ** 2
-                )
-                if camera_did_not_work:
-                    if self.x_in_rect(mouse, box):
-                        nearest_box = box
-                elif d < dist:
-                    dist = d
+                if self.x_in_rect(mouse, box):
                     nearest_box = box
             if self.last_box_hovered is not nearest_box:
                 self.hovering_box(self.last_box_hovered, hover=False)
