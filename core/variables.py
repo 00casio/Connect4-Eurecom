@@ -23,7 +23,8 @@ class Variables:
                     "Get my a** kicked",
                     "Welcome to Hell",
                 ],
-                "options_play": "Play",
+                "options_play_local": "Play locally",
+                "options_play_online": "Play online",
                 "options_options": "Options",
                 "options_play_HvH": "Human vs. Human",
                 "options_play_HvAI": "Human vs. AI",
@@ -43,7 +44,8 @@ class Variables:
                     "Je veux souffrir",
                     "LEROYYYYYYYY",
                 ],
-                "options_play": "Jouer",
+                "options_play_local": "Jouer localement",
+                "options_play_online": "Jouer en ligne",
                 "options_options": "Options",
                 "options_play_HvH": "Humain vs. Humain",
                 "options_play_HvAI": "Humain vs. IA",
@@ -63,7 +65,8 @@ class Variables:
                     "Nyaaaaaaa?",
                     "Nya.",
                 ],
-                "options_play": "NYA",
+                "options_play_local": "NYA",
+                "options_play_online": "NYA NYA. nya.",
                 "options_options": "Nya Nya",
                 "options_play_HvH": "Nyaaa Nya",
                 "options_play_HvAI": "NYAAAA !",
@@ -83,7 +86,8 @@ class Variables:
                     "O'r diwedd rhywfaint o boen",
                     "Rydych yn deffro'r ddraig goch",
                 ],
-                "options_play": "Chwarae",
+                "options_play_local": "Chwarae",
+                "options_play_online": "Chwarae 2 [to change]",
                 "options_options": "Dewisiadau",
                 "options_play_HvH": "Dynol vs. Dynol",
                 "options_play_HvAI": "Dynol vs. Ddraig",
@@ -168,7 +172,8 @@ class Variables:
         self.pos_max_x = self.padding + self.width_board - self.size_cell // 2
         self.text_size = 30
         self.text_font = "monospace"
-        self.text_options_play = self.texts["en"]["options_play"]
+        self.text_options_play_local = self.texts["en"]["options_play_local"]
+        self.text_options_play_online = self.texts["en"]["options_play_online"]
         self.text_options_options = self.texts["en"]["options_options"]
         self.text_options_play_HvH = self.texts["en"]["options_play_HvH"]
         self.text_options_play_HvAI = self.texts["en"]["options_play_HvAI"]

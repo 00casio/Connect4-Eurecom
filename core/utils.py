@@ -50,7 +50,8 @@ class Config:
             print("This language is not available.\nI will use English")
             language = "en"
         self.var.boxAI_text_levels = self.var.texts[language]["boxAI_text_levels"]
-        self.var.text_options_play = self.var.texts[language]["options_play"]
+        self.var.text_options_play_local = self.var.texts[language]["options_play_local"]
+        self.var.text_options_play_online = self.var.texts[language]["options_play_online"]
         self.var.text_options_options = self.var.texts[language]["options_options"]
         self.var.text_options_play_HvH = self.var.texts[language]["options_play_HvH"]
         self.var.text_options_play_HvAI = self.var.texts[language]["options_play_HvAI"]

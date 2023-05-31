@@ -14,7 +14,8 @@ from core.screens import GamingScreen, OptionsScreen, Screen, Screen_AI
 from core.structure import Board, Node
 from core.utils import Box, Config, Symbol
 from core.variables import Rect, Variables, Surface
-from extern.gesture import *
+from extern.gesture import GestureController
+from extern.communication import Communication
 
 pg.init()
 
@@ -101,7 +102,8 @@ class Game:
         # Gestures
         self.gestures = GestureController()
 
-        # TODO: communication
+        # Communication
+        self.communication = Communication()
 
         # AI
         self.root: Optional[Node] = None
@@ -143,7 +145,8 @@ class Game:
         if not skip_start_screen:
             self.draw_start_screen()
         else:
-            self.draw_play_options()
+            # communication
+            self.draw_play_local_options()
         self.board = Board()
         self.CLOCK = pg.time.Clock()
         self.num_turn = 0
@@ -160,16 +163,19 @@ class Game:
             volume=self.volume,
             camera=self.camera,
         )
-        box_play = Box(self.var.text_options_play)
+        box_play_local = Box(self.var.text_options_play_local)
+        box_play_online = Box(self.var.text_options_play_online)
         box_options = Box(self.var.text_options_options)
-        start_screen.center_all([[box_play], [box_options]])
+        start_screen.center_all([[box_play_local], [box_play_online], [box_options]])
 
         self.status = self.var.options_menu_start
         while self.status == self.var.options_menu_start:
             mouse = start_screen.click()
-            if start_screen.x_in_rect(mouse, box_play.box):
-                self.draw_play_options()
-            elif start_screen.x_in_rect(mouse, box_options.box):
+            if start_screen.x_in_rect(mouse, box_play_local):
+                self.draw_play_local_options()
+            if start_screen.x_in_rect(mouse, box_play_online):
+                self.draw_play_online_options()
+            elif start_screen.x_in_rect(mouse, box_options):
                 self.draw_options_screen()
         if self.status == self.var.options_clicked_cancel:
             self.draw_start_screen()
@@ -197,8 +203,8 @@ class Game:
             click = options.click()
         self.status = self.var.options_clicked_cancel
 
-    def draw_play_options(self) -> None:
-        """Show the different options when choosing to play"""
+    def draw_play_local_options(self) -> None:
+        """Show the different options when choosing to play locally"""
         self.ai_cpp_1.resetBoard()
         self.ai_cpp_2.resetBoard()
         screen = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
@@ -248,15 +254,52 @@ class Game:
                 self.var.options_play_HvH,
                 self.var.options_clicked_cancel,
             ]:
-                self.draw_play_options()
+                self.draw_play_local_options()
+
+    def draw_play_online_options(self):
+        online = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
+        box_client = Box("Client")
+        box_server = Box("Server")
+        box_human = Box("Human")
+        box_machi = Box("As AI")
+        type_me = None
+        player_me = None
+        final_box = None
+        online.center_all([[box_client, box_server], [box_human, box_machi]])
+        self.box_clicked = self.var.box_out
+        while self.box_clicked == self.var.box_out:
+            mouse = online.click()
+            if online.x_in_rect(mouse, box_client):
+                online.highlight_box(box_client, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
+                type_me = "client"
+            elif online.x_in_rect(mouse, box_server):
+                online.highlight_box(box_server, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
+                type_me = "server"
+            if online.x_in_rect(mouse, box_human):
+                online.highlight_box(box_human, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
+                player_me = "human"
+            elif online.x_in_rect(mouse, box_machi):
+                online.highlight_box(box_machi, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
+                player_me = "ai"
+            if player_me is not None and type_me is not None:
+                final_box = online.draw_agreement_box("J'accepte")
+            if online.x_in_rect(mouse, final_box):
+                self.box_clicked = self.var.boxAI_play
+        if self.box_clicked == self.var.boxAI_cancel:
+            self.draw_start_screen()
+
+        is_ai = player_me == "ai"
+        if type_me == "client":
+            self.player_1 = Player(self.var, 1, is_ai, 14)
+            self.player_2 = None
+        else:
+            self.player_1 = None
+            self.player_2 = Player(self.var, 2, is_ai, 14)
+
+        self.select_opponent()
 
     def select_opponent(self):
-        """
-        TODO:
-            Choose if the opponent is local or remote
-            Put the communication part in here
-            Pick who is player 1 and player 2
-        """
+        """ Select the opponent between all opponents available """
         pass
 
     def start_game(self) -> None:
@@ -276,15 +319,23 @@ class Game:
             self.who_is_winner() == self.player_null and self.num_turn < self.board.size
         ):
             if self.player_playing == self.player_1:
-                col, row, self.root = self.player_1.play(
-                    self.board, self.root, gaming, self.volume, self.ai_cpp_1
-                )
+                if self.player_1 is None:
+                    # communication
+                    pass
+                else:
+                    col, row, self.root = self.player_1.play(
+                        self.board, self.root, gaming, self.volume, self.ai_cpp_1
+                    )
                 if self.libai:
                     self.ai_cpp_2.humanMove(col)
             else:
-                col, row, self.root = self.player_2.play(
-                    self.board, self.root, gaming, self.volume, self.ai_cpp_2
-                )
+                if self.player_2 is None:
+                    # communication
+                    pass
+                else:
+                    col, row, self.root = self.player_2.play(
+                        self.board, self.root, gaming, self.volume, self.ai_cpp_2
+                    )
                 if self.libai:
                     self.ai_cpp_1.humanMove(col)
             gaming.animate_fall(col, row, self.player_playing.symbol)

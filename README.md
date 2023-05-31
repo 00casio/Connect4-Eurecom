@@ -73,3 +73,12 @@ Optional:
 
 - [ ] Choose the mean of communication
 - [ ] Choose the protocol
+
+Code | Meaning | Action.s upon reception | Type
+--- | --- | --- | ---
+000 - 006 | Column number | Put token into right column | `byte`
+100 | Asking for a game (asker will play in human mode) | Respond with 102 or 103 | `byte`
+101 | Asking for a game (asker will play in AI mode) | Respond with 102 or 103 | `byte`
+102 | Game accepted | Launch grid, wait for askee to play (or to send who plays first? **TBD together**) | `byte`
+103 | Game refused | - | `byte`
+201 | Game aborted by user (during a game) _For now, we wait our turn to send this? (beware of this)_ | Abandon game (this way we know the game was ended because of user request, not because of disconnection) | `byte`

@@ -6,6 +6,7 @@
 
 # Install prerequisite
 apt --version 2>&1 1>/dev/null
+
 if [ $? -ne 0 ]; then
   echo "Could not try to install libcairomm-dev and libgirepository-dev"
   echo "Look for them and try to install them"

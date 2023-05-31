@@ -15,7 +15,7 @@ from playsound import playsound
 from core.utils import Box, Tools, Symbol
 from core.variables import Color, Rect, Surface, Variables
 from extern.communication import Communication
-from extern.gesture import *
+from extern.gesture import GestureController
 
 
 class Screen(Tools):
@@ -198,7 +198,7 @@ class Screen(Tools):
             self.prev_hand = None
         cv2.imshow("Gesture Controller", image)
         if cv2.waitKey(5) & 0xFF == 13:
-            self.handle_quit(self.quit_box.center)
+            self.handle_quit(self.quit_box.box.center)
 
     def click(
         self,
@@ -391,39 +391,25 @@ class OpponentSelectionScreen(Screen):
     ) -> None:
         Screen.__init__(self, var, screen, gesture, volume, camera)
         self.opp = None
-        self.poss = []
-        self.rect_boxes = []
         self.comm = comm
-        self.time_update = 5
-        self.last_update = 0
 
-    def update(self) -> None:
-        """Update the screen with the raspberry pi we can connect to"""
-        if (time() - self.last_update) < self.time_update:
-            return
-        self.poss = self.comm.receive()
-        i = 0
-        list_poss_player = []
-        while i < len(poss):
-            p_1 = self.create_text_rendered(poss[i])
-            p_2 = self.create_text_rendered(poss[i + 1])
-            list_poss_player.append([p_1, p_2])
-            i += 2
-        self.rect_boxes = self.center_all(list_poss_player)
-
-    def select(self):
-        """Select a raspberry pi as the opponent"""
-        while self.opp is None and self.box_clicked != self.var.boxAI_cancel:
-            mouse = self.click(func=self.update)
-            for i in range(len(self.rect_boxes)):
-                if self.x_in_rect(mouse, self.rect_boxes[i][0]):
-                    self.opp = self.poss[2 * i]
-                    break
-                elif self.x_in_rect(mouse, self.rect_boxes[i][1]):
-                    self.opp = self.poss[2 * i + 1]
-                    break
-        if self.opp is not None:
-            self.comm.send(self.opp)
+    def split_list(self, list_to_split):
+        size = int(np.sqrt(len(l)-1)) + 1
+        list_splitted = []
+        for i in range(0, len(l), m):
+            temp = []
+            for j in range(i, i+m):
+                if j >= len(l):
+                    continue
+                temp.append(l[j])
+            list_splitted.append(temp)
+        return list_splitted
+    
+    def update(self):
+        assert self.comm.type == "client", ValueError("The module is not in server mode")
+        list_connec = self.comm.list_connections
+        self.center_all(self.split_list(list_connec))
+        pg.display.update()
 
 
 """

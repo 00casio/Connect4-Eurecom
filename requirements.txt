@@ -13,3 +13,6 @@ pygobject
 
 # AI
 swig
+
+# Communication
+#pybluez2
