@@ -324,7 +324,7 @@ class Game:
         while len(boxes) == 0:
             screen_opp.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
             boxes = screen_opp.update()
-            screen_opp.write_message(["Looks like we did not find any.", "Please wait we will look\nagain in a few seconds"])
+            screen_opp.write_message(["Looks like we did not find any.", "Please wait we will look", "again in a few seconds"])
             sleep(3)
         opp = None
         while opp is None:

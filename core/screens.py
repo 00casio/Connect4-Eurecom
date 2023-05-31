@@ -422,8 +422,6 @@ class OpponentSelectionScreen(Screen):
         assert self.comm.type == "client", ValueError("The module is not in server mode")
         self.list_connec = self.split_list(self.comm.list_connections())
         boxes = []
-        if self.list_connec != []:
-            print(self.list_connec[0][0])
         for line in self.list_connec:
             tmp = []
             for l in line:
