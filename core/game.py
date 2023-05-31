@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from argparse import Namespace
-from typing import Any, Iterator, Optional
+from typing import Any, Iterator, Optional, Union
 from time import time, sleep
 
 import numpy as np
