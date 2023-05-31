@@ -80,7 +80,7 @@ class Screen(Tools):
         if self.quit_box not in self.all_boxes:
             self.all_boxes.append(self.quit_box)
 
-    def reset_screen(self, color_screen: Color, boxes: list[Box]) -> None:
+    def reset_screen(self, color_screen: Color) -> None:
         """Reset the screen to a "blank" state"""
         self.screen.fill(color_screen)
         for b in self.all_boxes:
@@ -374,7 +374,7 @@ class Screen_AI(Screen):
                 self.play_box.hide = True
                 self.diff_AI_1 = -1
                 self.diff_AI_2 = -1
-                self.reset_screen(self.var.color_options_screen, self.boxes_options)
+                self.reset_screen(self.var.color_options_screen)
 
 
 class OpponentSelectionScreen(Screen):

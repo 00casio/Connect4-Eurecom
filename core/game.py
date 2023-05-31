@@ -276,7 +276,7 @@ class Game:
                     out = False
             if out:
                 final_box = Box("").hide = True
-                online.reset_screen()
+                online.reset_screen(self.var.color_options_screen)
                 type_me = None
                 player_me = None
 
