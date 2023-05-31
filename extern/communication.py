@@ -37,8 +37,8 @@ class Communication:
         nearby_devices = bluetooth.discover_devices(duration=2, lookup_names=True, flush_cache=True, lookup_class=False)
         self.connections = []
         for d in nearby_devices:
-            if "connect4" in d[1]:
-                self.connections.append(d)
+            # if "connect4" in d[1]:
+            self.connections.append(d)
         return self.connections
 
     def connect(self, index):
