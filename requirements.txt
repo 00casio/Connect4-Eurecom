@@ -15,4 +15,4 @@ pygobject
 swig
 
 # Communication
-#pybluez2
+#pybluez
