@@ -31,6 +31,7 @@ class Screen(Tools):
         cancel_box: bool = True,
         quit_box: bool = True,
         color_fill: Color = Variables().color_options_screen,
+        language: str = "en"
     ) -> None:
         """Initialize the values"""
         Tools.__init__(self, var, screen, volume, camera)
@@ -45,6 +46,7 @@ class Screen(Tools):
         self.draw_quit = quit_box
         self.last_column_selected = 3
         self.last_box_hovered = None
+        self.language = language
         if cancel_box:
             self.draw_cancel_box()
         if quit_box:
@@ -104,12 +106,19 @@ class Screen(Tools):
             self.draw_circle(x, y, self.var.color_trans, r, screen)
         else:
             if symbol == self.var.symbol_player_1:
-                color = self.var.color_player_1
+                r = self.var.radius_disk
+                if self.language == "cat":
+                    disk = pg.image.load("assets/cat/tails.png")
+                    disk = pg.transform.scale(disk, (r*2, r*2))
+                    self.screen.blit(disk, (x-r, y-r))
+                else:
+                    color = self.var.color_player_1
+                    self.draw_circle(x, y, color, r, screen)
             elif symbol == self.var.symbol_player_2:
                 color = self.var.color_player_2
+                self.draw_circle(x, y, color, r, screen)
             else:
                 raise ValueError("How did that happen ?")
-            self.draw_circle(x, y, color, r, screen)
 
     def hovering_box(self, box: Box, hover=True):
         if box is None:
@@ -538,8 +547,9 @@ class GamingScreen(Screen):
         gesture: GestureController,
         volume: bool,
         camera: bool,
+        language: str,
     ) -> None:
-        Screen.__init__(self, var, screen, gesture, volume, camera)
+        Screen.__init__(self, var, screen, gesture, volume, camera, language=language)
         self.color_screen = self.var.white
         self.color_board = self.var.blue
         self.width_board = self.var.width_board
