@@ -75,6 +75,26 @@ class Variables:
                 "quit_box": "Nya Nya",
                 "message_quit": "Nya nya.\n Nya nya (－‸ლ) nya",
             },
+            "wls": {
+                "boxAI_text_levels": [
+                    "Cychwyn",
+                    "Dechrau",
+                    "Lefel fy mrawd",
+                    "O'r diwedd rhywfaint o boen",
+                    "Rydych yn deffro'r ddraig goch",
+                ],
+                "options_play": "Chwarae",
+                "options_options": "Dewisiadau",
+                "options_play_HvH": "Dynol vs. Dynol",
+                "options_play_HvAI": "Dynol vs. Ddraig",
+                "options_play_AIvAI": "Welwn ni chi yn uffern",
+                "options_difficulty_HvAI": "Choose your poison",
+                "options_difficulty_AIvAI": "How badly do you want this game to go ?",
+                "confirmation_button": "Sarah Connor ?",
+                "cancel_box": "Return",
+                "quit_box": "Quit",
+                "message_quit": "You chose to quit the game\nYou are disapointing me",
+            },
         }
 
         # Symbols

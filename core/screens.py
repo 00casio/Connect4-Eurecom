@@ -31,6 +31,7 @@ class Screen(Tools):
         cancel_box: bool = True,
         quit_box: bool = True,
         color_fill: Color = Variables().color_options_screen,
+        language: str = "en"
     ) -> None:
         """Initialize the values"""
         Tools.__init__(self, var, screen, volume, camera)
@@ -45,6 +46,7 @@ class Screen(Tools):
         self.draw_quit = quit_box
         self.last_column_selected = 3
         self.last_box_hovered = None
+        self.language = language
         if cancel_box:
             self.draw_cancel_box()
         if quit_box:
@@ -94,9 +96,10 @@ class Screen(Tools):
         If col_row is true, then n and m are column and row number, if they are not, then n and m are a position"""
         if screen is None:
             screen = self.board_surface
+        sc = self.var.size_cell
         if col_row:
-            x = n * self.var.size_cell + self.var.size_cell // 2
-            y = m * self.var.size_cell + self.var.size_cell // 2
+            x = n * sc + sc // 2
+            y = m * sc + sc // 2
         else:
             x = n
             y = m
@@ -104,12 +107,19 @@ class Screen(Tools):
             self.draw_circle(x, y, self.var.color_trans, r, screen)
         else:
             if symbol == self.var.symbol_player_1:
-                color = self.var.color_player_1
+                r = self.var.radius_disk
+                if self.language == "cat":
+                    disk = pg.image.load("assets/cat/tails.png")
+                    disk = pg.transform.scale(disk, (r*2, r*2))
+                    screen.blit(disk, (x - r, y - r))
+                else:
+                    color = self.var.color_player_1
+                    self.draw_circle(x, y, color, r, screen)
             elif symbol == self.var.symbol_player_2:
                 color = self.var.color_player_2
+                self.draw_circle(x, y, color, r, screen)
             else:
                 raise ValueError("How did that happen ?")
-            self.draw_circle(x, y, color, r, screen)
 
     def hovering_box(self, box: Box, hover=True):
         if box is None:
@@ -123,21 +133,7 @@ class Screen(Tools):
     def get_mouse_pos(self, force_mouse: bool = False) -> tuple[int, int]:
         """Return the mouse position"""
         # print("Change this to have the position from the camera")
-        if not self.camera or force_mouse:
-            return pg.mouse.get_pos()
-        return self.gestures.mouse_pos
-
-    def jump_mouse(self):
-        x, y = self.gestures.x, self.gestures.y
-        delta_x, delta_y = x - self.last_x, y - self.last_y
-        if delta_x >= 100:
-            self.last_x = x
-            return 1  # move right
-        elif delta_x <= -100:
-            self.last_x = x
-            return -1  # move left
-        else:
-            return 0  # stationary
+        return pg.mouse.get_pos()
 
     def human_move(self, player: Symbol) -> None:
         """Function to use when it's the human's turn to move"""
@@ -146,16 +142,11 @@ class Screen(Tools):
         sc = self.var.size_cell
         last = self.last_column_selected
 
-        if self.camera:
-            direc = self.jump_mouse()
-            new_col = self.last_column_selected + direc
-            mouse_x = self.last_x
-        else:
-            mouse_x, mouse_y = self.get_mouse_pos()
-            if mouse_x < self.var.pos_min_x:
-                mouse_x = self.var.pos_min_x
-            elif mouse_x > self.var.pos_max_x:
-                mouse_x = self.var.pos_max_x
+        mouse_x, mouse_y = self.get_mouse_pos()
+        if mouse_x < self.var.pos_min_x:
+            mouse_x = self.var.pos_min_x
+        elif mouse_x > self.var.pos_max_x:
+            mouse_x = self.var.pos_max_x
 
         if p > mouse_x or mouse_x > p + self.var.width_board:
             return
@@ -228,40 +219,27 @@ class Screen(Tools):
                 success, image = self.gestures.cap.read()
                 if success:
                     self.update_gesture(image)
-                    if self.gestures.action == self.gestures.Click:
-                        allow_quit = True
                 else:
                     print("Could not use the camera, disregarding this frame")
 
-            # If there was a problem or we don't use the camera
-            camera_did_not_work = not (self.camera and success)
-            if camera_did_not_work:
-                for event in pg.event.get():
-                    if event.type == pg.MOUSEBUTTONUP:
-                        allow_quit = True
-                    if func is not None:
-                        func(**args)
+            for event in pg.event.get():
+                if event.type == pg.MOUSEBUTTONUP:
+                    allow_quit = True
+                if func is not None:
+                    func(**args)
 
             # Actions independant of the usage of the camera
             if print_disk:
                 self.human_move(symbol_player)
             # We force the usage of the mouse if there was an error
-            mouse = self.get_mouse_pos(force_mouse=not success)
+            mouse = self.get_mouse_pos()
 
             # Draw a rectangle in the selected box
             nearest_box = None
-            dist = np.Infinity
             for box in self.all_boxes:
                 if box.hide:
                     continue
-                d = np.sqrt(
-                    (box.box.center[0] - mouse[0]) ** 2 + (box.box.center[1] - mouse[1]) ** 2
-                )
-                if camera_did_not_work:
-                    if self.x_in_rect(mouse, box):
-                        nearest_box = box
-                elif d < dist:
-                    dist = d
+                if self.x_in_rect(mouse, box, sound=""):
                     nearest_box = box
             if self.last_box_hovered is not nearest_box:
                 self.hovering_box(self.last_box_hovered, hover=False)
@@ -538,8 +516,9 @@ class GamingScreen(Screen):
         gesture: GestureController,
         volume: bool,
         camera: bool,
+        language: str,
     ) -> None:
-        Screen.__init__(self, var, screen, gesture, volume, camera)
+        Screen.__init__(self, var, screen, gesture, volume, camera, language=language)
         self.color_screen = self.var.white
         self.color_board = self.var.blue
         self.width_board = self.var.width_board
@@ -567,7 +546,7 @@ class GamingScreen(Screen):
         self.blit_board()
         pg.display.update()
 
-    def animate_fall(self, col: int, row: int, player: Symbol, mode: str = "") -> None:
+    def animate_fall(self, col: int, row: int, player: Symbol) -> None:
         """Animate the fall of a disk"""
         x = self.var.padding + col * self.var.size_cell + self.var.size_cell // 2
         for y in range(
@@ -583,10 +562,15 @@ class GamingScreen(Screen):
             self.draw_token(x, y, player, self.var.radius_disk, col_row=False, screen=self.screen)
             self.blit_board()
             pg.display.update()
+        self.screen.fill(self.var.color_screen)
         self.draw_token(col, row, player, self.var.radius_hole)
+        self.blit_board()
+        pg.display.update()
         if self.volume:
-            if mode == "":
+            if self.language != "cat":
                 sound = self.var.sound_disk_touch
-            elif mode == "cat":
-                sound = random_choice(listdir("./assets/cat/"))
+            else:
+                sound = ".png"
+                while sound.split(".")[-1] != "mp3":
+                    sound = "assets/cat/" + random_choice(listdir("assets/cat/"))
             playsound(sound, block=True)

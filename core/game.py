@@ -99,7 +99,7 @@ class Game:
         size_screen = (self.var.width_screen, self.var.height_screen)
 
         # Gestures
-        self.gestures = GestureController(size_screen)
+        self.gestures = GestureController()
 
         # TODO: communication
 
@@ -263,7 +263,7 @@ class Game:
         """Start the game"""
         self.player_playing = self.player_1
         gaming = GamingScreen(
-            self.var, self.screen, self.gestures, self.volume, self.camera
+            self.var, self.screen, self.gestures, self.volume, self.camera, self.conf.language
         )
         gaming.draw_board()
         gaming.draw_token(self.var.width_screen // 2, self.var.padding // 2, self.player_playing.symbol, self.var.radius_disk, col_row=False, screen=gaming.screen)

@@ -56,7 +56,7 @@ Optional:
 - [x] Change difficulty
 - [ ] Different gameplay
 - [ ] Add other algorithms
-- [ ] Test if negamax is faster when using only int64/uint64
+- [x] Test if negamax is faster when using only int64/uint64 (yes it is)
 
 #### Hands gesture
 
