@@ -394,6 +394,16 @@ class OpponentSelectionScreen(Screen):
         self.comm = comm
         self.list_connec = []
 
+    def write_message(self, msg: Union[str, list[str]]):
+        self.screen.fill(self.var.color_options_screen)
+        box_temp = []
+        if type(msg) == list:
+            for i in msg:
+                box_temp.append(Box(i))
+        else:
+            box_temp.append(Box(msg))
+        self.center_all([box_temp])
+
     def split_list(self, list_to_split):
         size = int(np.sqrt(len(list_to_split)-1)) + 1
         list_splitted = []

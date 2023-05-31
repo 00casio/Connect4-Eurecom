@@ -314,27 +314,17 @@ class Game:
             self.player_2 = Player(self.var, 2, is_ai, 14)
 
         self.select_opponent()
-    
-    def write_message(self, screen: Screen, msg: Union[str, list[str]]):
-        screen.screen.fill(self.var.color_options_screen)
-        box_temp = []
-        if type(msg) == str:
-            for i in msg:
-                box_temp.append(Box(i))
-        else:
-            box_temp.append(Box(msg))
-        screen.center_all([box_temp])
 
     def select_opponent(self):
         """ Select the opponent between all opponents available """
         screen_opp = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
-        self.write_message(screen_opp, ["Please wait a few seconds", "We are getting a list of all potential opponents"])
+        screen_opp.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
         t = time()
         boxes = []
         while len(boxes) == 0:
-            self.write_message(screen_opp, ["Please wait a few seconds", "We are getting a list of all potential opponents"])
+            screen_opp.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
             boxes = screen_opp.update()
-            self.write_message(screen_opp, ["Looks like we did not find any.", "Please wait we will look\nagain in a few seconds"])
+            screen_opp.write_message(["Looks like we did not find any.", "Please wait we will look\nagain in a few seconds"])
             sleep(3)
         opp = None
         while opp is None:
