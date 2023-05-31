@@ -3,6 +3,7 @@
 
 from argparse import Namespace
 from typing import Any, Iterator, Optional
+from time import time
 
 import numpy as np
 import pygame as pg
@@ -10,7 +11,7 @@ from playsound import playsound
 
 import ai.libai as libai
 from ai.minimax_ai import minimax, opponent
-from core.screens import GamingScreen, OptionsScreen, Screen, Screen_AI
+from core.screens import GamingScreen, OptionsScreen, Screen, Screen_AI, OpponentSelectionScreen
 from core.structure import Board, Node
 from core.utils import Box, Config, Symbol
 from core.variables import Rect, Variables, Surface
@@ -300,7 +301,22 @@ class Game:
 
     def select_opponent(self):
         """ Select the opponent between all opponents available """
-        pass
+        screen_opp = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
+        t = time()
+        boxes = screen_opp.update()
+        opp = None
+        while opp is None:
+            mouse = screen_opp.click()
+            for i in range(len(boxes)):
+                line = boxes[i]
+                for j in range(len(line)):
+                    b = line[j]
+                    if screen_opp.x_in_rect(mouse, b):
+                        opp = screen_opp.list_connec[i][j]
+            if opp is None:
+                boxes = screen_opp.update()
+        self.communication.connect(i * len(screen_opp.list_connec[i]) + j)
+
 
     def start_game(self) -> None:
         """Start the game"""
@@ -320,22 +336,27 @@ class Game:
         ):
             if self.player_playing == self.player_1:
                 if self.player_1 is None:
-                    # communication
-                    pass
+                    col = self.communication.receive()
+                    row = self.board.find_free_slot(col)
+                    assert row != -1, ValueError("the row must be valid")
                 else:
                     col, row, self.root = self.player_1.play(
                         self.board, self.root, gaming, self.volume, self.ai_cpp_1
                     )
+                    if self.player_2 is None:
+                        self.communication.send(col)
                 if self.libai:
                     self.ai_cpp_2.humanMove(col)
             else:
                 if self.player_2 is None:
-                    # communication
-                    pass
+                    col = self.communication.receive()
+                    row = self.board.find_free_slot(col)
                 else:
                     col, row, self.root = self.player_2.play(
                         self.board, self.root, gaming, self.volume, self.ai_cpp_2
                     )
+                    if self.player_1 is None:
+                        self.communication.send(col)
                 if self.libai:
                     self.ai_cpp_1.humanMove(col)
             gaming.animate_fall(col, row, self.player_playing.symbol)

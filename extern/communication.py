@@ -23,7 +23,6 @@ class Communication:
                                     profiles=[bluetooth.SERIAL_PORT_PROFILE])
 
         print("Waiting for connection on RFCOMM channel", port)
-
         self.sock, self.client_info = server_sock.accept()
         print("Accepted connection from", self.client_info)
 
@@ -35,7 +34,7 @@ class Communication:
         # Server have to send 102 or 103
 
     def list_connections(self):
-        nearby_devices = bluetooth.discover_devices(duration=5, lookup_names=True, flush_cache=True, lookup_class=False)
+        nearby_devices = bluetooth.discover_devices(duration=2, lookup_names=True, flush_cache=True, lookup_class=False)
         self.connections = []
         for d in nearby_devices:
             if "connect4" in d[1]:
@@ -54,3 +53,10 @@ class Communication:
         if code not in ["102", "103"]:
             print(f"Code not correct {code}")
             exit()
+        return code
+
+    def send(self, column: int):
+        self.sock.send(f"{column}".encode())
+
+    def receive(self):
+        return self.sock.recv(1024).decode()

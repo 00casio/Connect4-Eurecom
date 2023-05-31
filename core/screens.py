@@ -392,6 +392,7 @@ class OpponentSelectionScreen(Screen):
         Screen.__init__(self, var, screen, gesture, volume, camera)
         self.opp = None
         self.comm = comm
+        self.list_connec = []
 
     def split_list(self, list_to_split):
         size = int(np.sqrt(len(l)-1)) + 1
@@ -404,12 +405,19 @@ class OpponentSelectionScreen(Screen):
                 temp.append(l[j])
             list_splitted.append(temp)
         return list_splitted
-    
+
     def update(self):
         assert self.comm.type == "client", ValueError("The module is not in server mode")
-        list_connec = self.comm.list_connections
-        self.center_all(self.split_list(list_connec))
+        self.list_connec = self.split_list(self.comm.list_connections())
+        boxes = []
+        for line in self.list_connec:
+            tmp = []
+            for l in line:
+                tmp.append(Box(l["host"]))
+            boxes.append(tmp)
+        boxes = self.center_all(self.split_list(line))
         pg.display.update()
+        return boxes
 
 
 """
