@@ -8,12 +8,12 @@
 apt --version 2>&1 1>/dev/null
 
 if [ $? -ne 0 ]; then
-  echo "Could not try to install libcairomm-dev and libgirepository-dev"
+  echo "Could not try to install libcairomm-1.0-dev and libgirepository1.0-dev"
   echo "Look for them and try to install them"
 else
   echo "We need your password to install prerequisite"
-  echo "sudo apt install libcairomm-dev and libgirepository-dev"
-  sudo apt install libcairomm-dev and libgirepository-dev
+  echo "sudo apt install libcairomm-1.0-dev and libgirepository1.0-dev"
+  sudo apt install libcairomm-1.0-dev and libgirepository1.0-dev
 fi
 
 # Find correct Python version
