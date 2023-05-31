@@ -134,18 +134,6 @@ class Screen(Tools):
         # print("Change this to have the position from the camera")
         return pg.mouse.get_pos()
 
-    def jump_mouse(self):
-        x, y = self.gestures.x, self.gestures.y
-        delta_x, delta_y = x - self.last_x, y - self.last_y
-        if delta_x >= 100:
-            self.last_x = x
-            return 1  # move right
-        elif delta_x <= -100:
-            self.last_x = x
-            return -1  # move left
-        else:
-            return 0  # stationary
-
     def human_move(self, player: Symbol) -> None:
         """Function to use when it's the human's turn to move"""
         # self.screen.fill(self.var.color_screen)
@@ -153,16 +141,11 @@ class Screen(Tools):
         sc = self.var.size_cell
         last = self.last_column_selected
 
-        if self.camera:
-            direc = self.jump_mouse()
-            new_col = self.last_column_selected + direc
-            mouse_x = self.last_x
-        else:
-            mouse_x, mouse_y = self.get_mouse_pos()
-            if mouse_x < self.var.pos_min_x:
-                mouse_x = self.var.pos_min_x
-            elif mouse_x > self.var.pos_max_x:
-                mouse_x = self.var.pos_max_x
+        mouse_x, mouse_y = self.get_mouse_pos()
+        if mouse_x < self.var.pos_min_x:
+            mouse_x = self.var.pos_min_x
+        elif mouse_x > self.var.pos_max_x:
+            mouse_x = self.var.pos_max_x
 
         if p > mouse_x or mouse_x > p + self.var.width_board:
             return
@@ -255,7 +238,7 @@ class Screen(Tools):
             for box in self.all_boxes:
                 if box.hide:
                     continue
-                if self.x_in_rect(mouse, box):
+                if self.x_in_rect(mouse, box, sound=""):
                     nearest_box = box
             if self.last_box_hovered is not nearest_box:
                 self.hovering_box(self.last_box_hovered, hover=False)
