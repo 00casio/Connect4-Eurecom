@@ -395,14 +395,14 @@ class OpponentSelectionScreen(Screen):
         self.list_connec = []
 
     def split_list(self, list_to_split):
-        size = int(np.sqrt(len(l)-1)) + 1
+        size = int(np.sqrt(len(list_to_split)-1)) + 1
         list_splitted = []
-        for i in range(0, len(l), m):
+        for i in range(0, len(list_to_split), m):
             temp = []
             for j in range(i, i+m):
-                if j >= len(l):
+                if j >= len(list_to_split):
                     continue
-                temp.append(l[j])
+                temp.append(list_to_split[j])
             list_splitted.append(temp)
         return list_splitted
 
@@ -410,6 +410,7 @@ class OpponentSelectionScreen(Screen):
         assert self.comm.type == "client", ValueError("The module is not in server mode")
         self.list_connec = self.split_list(self.comm.list_connections())
         boxes = []
+        print(self.list_connec[0][0])
         for line in self.list_connec:
             tmp = []
             for l in line:
