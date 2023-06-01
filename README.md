@@ -24,7 +24,6 @@ The project S6 of:
   - Show name of raspberry for server
   - Place filter on possible communications
   - Put texts in variables (with languages)
-  - Finish cat mode
   - Fuse a "perfect" (look for all poss) AI in our program
 - Report:
   - Make benchmarks, comparisons

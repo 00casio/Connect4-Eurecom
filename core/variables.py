@@ -206,6 +206,8 @@ class Variables:
         self.image_english = "assets/english.svg"
         self.image_french = "assets/french.svg"
         self.image_cat = "assets/cat.png"
+        self.image_cat_tails = "assets/cat/tails.png"
+        self.image_cat_heads = "assets/cat/heads_1.png"
 
         # Fonts
         self.main_font = pg.font.SysFont(self.text_font, self.text_size)

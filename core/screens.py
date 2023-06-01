@@ -108,14 +108,18 @@ class Screen(Tools):
         else:
             if symbol == self.var.symbol_player_1:
                 if self.language == "cat":
-                    disk = pg.image.load("assets/cat/tails.png")
+                    disk = pg.image.load(self.var.image_cat_tails)
                     screen.blit(disk, (x - self.var.radius_disk, y - self.var.radius_disk))
                 else:
                     color = self.var.color_player_1
                     self.draw_circle(x, y, color, r, screen)
             elif symbol == self.var.symbol_player_2:
-                color = self.var.color_player_2
-                self.draw_circle(x, y, color, r, screen)
+                if self.language == "cat":
+                    disk = pg.image.load(self.var.image_cat_heads)
+                    screen.blit(disk, (x - self.var.radius_disk, y - self.var.radius_disk))
+                else:
+                    color = self.var.color_player_2
+                    self.draw_circle(x, y, color, r, screen)
             else:
                 raise ValueError("How did that happen ?")
 
