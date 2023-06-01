@@ -3,7 +3,6 @@
 
 from argparse import Namespace
 from typing import Any, Iterator, Optional, Union
-from time import time, sleep
 
 import numpy as np
 import pygame as pg
@@ -321,7 +320,6 @@ class Game:
         """ Select the opponent between all opponents available """
         screen_opp = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
         screen_opp.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
-        t = time()
         boxes = screen_opp.update_all_boxes()
         opp = None
         while opp is None:

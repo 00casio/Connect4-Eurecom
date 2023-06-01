@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from time import time
+from time import time, sleep
 from typing import Any, Callable, Iterator, Optional, Union
 from random import choice as random_choice
 from os import listdir
