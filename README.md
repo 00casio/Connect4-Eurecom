@@ -10,9 +10,26 @@ The project S6 of:
 
 ### This week objectives
 
-- [x] Speed up the minimax algorithm
-- [ ] Solve lag problem on gestures
-- [x] Reorganize repo
+- Correct bugs:
+  - Red disk bigger than yellow when on board
+  - Clicking after game send to local menu
+  - Clicking return after end online game start a new online game
+  - Seems like when root, hovering line is not correct
+- Finish communication protocol implementation:
+  - When online and click on quit, send message to opponent
+  - When connecting, send correct message (100 or 101)
+  - Do not close the program when receiving 103
+  - For server: ask confirmation when someone asks for a game
+  - For client: make sure we receive 102 before proceeding
+- Polish the game:
+  - Show name of raspberry for server
+  - Place filter on possible communications
+  - Put texts in variables (with languages)
+  - Finish cat mode
+  - Fuse a "perfect" (look for all poss) AI in our program
+- Report:
+  - Make benchmarks, comparisons
+  - Do almost everything
 
 ### Objectives
 
@@ -35,7 +52,7 @@ For the first installation, you need to make sure that `libcairomm-dev` (or equi
 - [x] Grid
 - [x] Play sound
 - [x] Highlight selected column
-- [ ] Menu to choose the opponent
+- [x] Menu to choose the opponent
 
 Optional:
 
@@ -85,4 +102,3 @@ Code | Meaning | Action.s upon reception | Type
 
 Example of result from find_services:  
 [{'service-classes': ['94F39D29-7D6D-437D-973B-FBA39E49D4EE', '1101'], 'profiles': [('1101', 256)], 'name': 'connect4_1', 'description': None, 'provider': None, 'service-id': '94F39D29-7D6D-437D-973B-FBA39E49D4EE', 'protocol': 'RFCOMM', 'port': 1, 'host': 'E4:5F:01:D2:D2:94'}]
-
