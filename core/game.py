@@ -314,7 +314,12 @@ class Game:
             self.player_2 = Player(self.var, 2, is_ai, 14)
         self.communication.type = type_me
 
-        self.select_opponent()
+        if type_me == "client":
+            self.select_opponent()
+        else:
+            screen = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
+            screen.write_message(["Please wait, we are waiting for someone", "to connect to us."])
+            self.communication.wait_for_connection()
 
     def select_opponent(self):
         """ Select the opponent between all opponents available """
