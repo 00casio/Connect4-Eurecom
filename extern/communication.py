@@ -50,7 +50,9 @@ class Communication:
     def connect(self, index):
         """ Connect to a server. Usable only on client mode """
         assert self.type == "client", ValueError("Must be client")
-        matches = bluetooth.find_service(uuid=self.uuid, address=self.connections[index][0])
+        matches = []
+        while matches == []:
+            matches = bluetooth.find_service(uuid=self.uuid, address=self.connections[index][0])
         print(matches)
         choosed = matches[0]
 
