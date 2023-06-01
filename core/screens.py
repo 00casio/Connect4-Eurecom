@@ -107,11 +107,9 @@ class Screen(Tools):
             self.draw_circle(x, y, self.var.color_trans, r, screen)
         else:
             if symbol == self.var.symbol_player_1:
-                r = self.var.radius_disk
                 if self.language == "cat":
                     disk = pg.image.load("assets/cat/tails.png")
-                    disk = pg.transform.scale(disk, (r*2, r*2))
-                    screen.blit(disk, (x - r, y - r))
+                    screen.blit(disk, (x - self.var.radius_disk, y - self.var.radius_disk))
                 else:
                     color = self.var.color_player_1
                     self.draw_circle(x, y, color, r, screen)
@@ -574,11 +572,7 @@ class GamingScreen(Screen):
             self.var.padding + row * self.var.size_cell + self.var.size_cell // 2,
             5,
         ):
-            self.screen.fill(self.var.white)
-            if player == self.var.symbol_player_1:
-                color = self.var.color_player_1
-            elif player == self.var.symbol_player_2:
-                color = self.var.color_player_2
+            self.screen.fill(self.var.color_screen)
             self.draw_token(x, y, player, self.var.radius_disk, col_row=False, screen=self.screen)
             self.blit_board()
             pg.display.update()

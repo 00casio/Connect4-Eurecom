@@ -105,7 +105,7 @@ class Game:
         self.gestures = GestureController()
 
         # Communication
-        self.communication = Communication()
+        self.communication = None#Communication()
 
         # AI
         self.root: Optional[Node] = None
