@@ -439,8 +439,9 @@ class OpponentSelectionScreen(Screen):
         while len(boxes) == 0:
             self.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
             boxes = self.update()
-            self.write_message(["Looks like we did not find any.", "Please wait we will look", "again in a few seconds"])
-            sleep(3)
+            if len(boxes) == 0:
+                self.write_message(["Looks like we did not find any.", "Please wait we will look", "again in a few seconds"])
+                sleep(3)
         return boxes
 
 
