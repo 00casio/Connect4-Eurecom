@@ -49,7 +49,9 @@ class Communication:
     def connect(self, index):
         """ Connect to a server. Usable only on client mode """
         assert self.type == "client", ValueError("Must be client")
+        print(self.connections, index)
         matches = bluetooth.find_service(uuid=self.uuid, address=self.connections[index][0])
+        print(matches)
         choosed = matches[0]
 
         self.sock.connect((choosed["host"], choosed["port"]))

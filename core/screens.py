@@ -435,7 +435,6 @@ class OpponentSelectionScreen(Screen):
         pg.display.update()
         return boxes
 
-    
     def update_all_boxes(self):
         boxes = []
         while len(boxes) == 0:
