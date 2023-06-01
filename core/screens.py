@@ -427,7 +427,7 @@ class OpponentSelectionScreen(Screen):
             for l in line:
                 tmp.append(Box(l[1]))
             boxes.append(tmp)
-        self.center_all(self.split_list(boxes))
+        self.center_all(boxes)
         pg.display.update()
         return boxes
 
