@@ -38,7 +38,7 @@ class Communication:
     def list_connections(self):
         """ List the connections. Usable only in cient mode """
         assert self.type == "client", ValueError("Must be client")
-        nearby_devices = bluetooth.discover_devices(duration=2, lookup_names=True, flush_cache=True, lookup_class=False)
+        nearby_devices = bluetooth.discover_devices(duration=5, lookup_names=True, flush_cache=True, lookup_class=False)
         self.connections = []
         for d in nearby_devices:
             # if "connect4" in d[1]:
