@@ -11,7 +11,7 @@ The project S6 of:
 ### This week objectives
 
 - Correct bugs:
-  - Clicking after game send to local menu
+  - Clicking after online game send to local menu
   - Clicking return after end online game start a new online game
   - Seems like when root, hovering line is not correct
 - Finish communication protocol implementation:

@@ -323,6 +323,7 @@ class Game:
             screen = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
             screen.write_message(["Please wait, we are waiting for someone", "to connect to us."])
             self.communication.wait_for_connection()
+            # TODO: print confirmation message
 
     def select_opponent(self):
         """ Select the opponent between all opponents available """
