@@ -262,6 +262,7 @@ class Game:
         box_server = Box("Server")
         box_human = Box("Human")
         box_machi = Box("As AI")
+        self.status = self.var.options_menu_play
         type_me = None
         player_me = None
         final_box = online.draw_agreement_box("J'accepte")
