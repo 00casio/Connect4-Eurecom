@@ -69,7 +69,7 @@ class Communication:
         return code
 
     def send(self, column: int):
-        self.sock.send(f"{column}".encode())
+        self.sock.send(f"00{column}".encode())
 
     def receive(self):
-        return self.sock.recv(1024).decode()
+        return int(self.sock.recv(1024).decode())

@@ -364,6 +364,7 @@ class Game:
             if self.player_playing == self.player_1:
                 if self.player_1.online:
                     col = self.communication.receive()
+                    assert col > 10, ValueError(f"The code is not correct {code}")
                     row = self.board.find_free_slot(col)
                     assert row != -1, ValueError("the row must be valid")
                 else:
@@ -377,6 +378,7 @@ class Game:
             else:
                 if self.player_2.online:
                     col = self.communication.receive()
+                    assert col > 10, ValueError(f"The code is not correct {code}")
                     row = self.board.find_free_slot(col)
                 else:
                     col, row, self.root = self.player_2.play(
