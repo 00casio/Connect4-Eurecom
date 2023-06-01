@@ -388,10 +388,13 @@ class Game:
                         self.communication.send(col)
                 if self.libai:
                     self.ai_cpp_1.humanMove(col)
+
+            pg.event.get()
             gaming.animate_fall(col, row, self.player_playing.symbol)
             self.board[row, col] = self.player_playing.symbol.v
             self.inverse_player()
             self.num_turn += 1
+
         self.draw_winner(gaming.board_surface, (col, row))
 
     def draw_winner(self, board_surface: Surface, lastclick: tuple[int, int]) -> None:

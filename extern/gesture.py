@@ -306,7 +306,7 @@ class GestureController:
         self.handmajor = HandRecog(HLabel.MAJOR)
         self.handminor = HandRecog(HLabel.MINOR)
         self.hands = mp_hands.Hands(
-            max_num_hands=2, min_detection_confidence=0.5, min_tracking_confidence=0.5
+            max_num_hands=1, min_detection_confidence=0.2, model_complexity=0, min_tracking_confidence=0.2
         )
 
     def get_position(self, hand_result):
@@ -358,7 +358,7 @@ class GestureController:
         # implementation
         if gesture == Gest.V_GEST:
             self.flag = True
-            pyautogui.moveTo(x, y, duration=0.1)
+            pyautogui.moveTo(x, y, duration=0.01)
 
         elif gesture == Gest.FIST:
             if not self.grabflag:
