@@ -304,6 +304,7 @@ class Game:
                 self.box_clicked = self.var.boxAI_play
         if self.box_clicked == self.var.boxAI_cancel:
             self.draw_start_screen()
+            return
 
         is_ai = player_me == "ai"
         if type_me == "client":
@@ -312,6 +313,7 @@ class Game:
         else:
             self.player_1 = None
             self.player_2 = Player(self.var, 2, is_ai, 14)
+        self.communication.type = type_me
 
         self.select_opponent()
 

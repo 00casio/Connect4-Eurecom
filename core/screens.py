@@ -425,7 +425,7 @@ class OpponentSelectionScreen(Screen):
         for line in self.list_connec:
             tmp = []
             for l in line:
-                tmp.append(Box(l["host"]))
+                tmp.append(Box(l[1]))
             boxes.append(tmp)
         boxes = self.center_all(self.split_list(boxes))
         pg.display.update()

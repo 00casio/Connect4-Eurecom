@@ -13,7 +13,9 @@ class Communication:
         self.sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
         self.type = "client"
 
-    def wait_connection(self):
+    def wait_for_connection(self):
+        """ Used in server mode """
+        assert self.type == "server", ValueError("Must be server")
         self.sock.bind(("", bluetooth.PORT_ANY))
         self.sock.listen(1)
 
@@ -34,6 +36,8 @@ class Communication:
         # Server have to send 102 or 103
 
     def list_connections(self):
+        """ List the connections. Usable only in cient mode """
+        assert self.type == "client", ValueError("Must be client")
         nearby_devices = bluetooth.discover_devices(duration=2, lookup_names=True, flush_cache=True, lookup_class=False)
         self.connections = []
         for d in nearby_devices:
@@ -43,12 +47,12 @@ class Communication:
         return self.connections
 
     def connect(self, index):
-        choosed = self.connections[index]
-        port = choosed["port"]
-        name = choosed["name"]
-        host = choosed["host"]
+        """ Connect to a server. Usable only on client mode """
+        assert self.type == "client", ValueError("Must be client")
+        matches = bluetooth.find_service(uuid=self.uuid, address=self.connections[index][0])
+        choosed = matches[0]
 
-        self.sock.connect((host, port))
+        self.sock.connect((choosed["host"], choosed["port"]))
         self.sock.send("100".encode())
         code = self.sock.recv(1024).decode()
         if code not in ["102", "103"]:
