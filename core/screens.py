@@ -395,7 +395,9 @@ class OpponentSelectionScreen(Screen):
         self.list_connec = []
 
     def write_message(self, msg: Union[str, list[str]]):
+        self.all_boxes = []
         self.screen.fill(self.var.color_options_screen)
+        self.draw_quit_box()
         box_temp = []
         if type(msg) == list:
             for i in msg:
@@ -429,6 +431,16 @@ class OpponentSelectionScreen(Screen):
             boxes.append(tmp)
         self.center_all(boxes)
         pg.display.update()
+        return boxes
+
+    
+    def update_all_boxes(self):
+        boxes = []
+        while len(boxes) == 0:
+            self.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
+            boxes = self.update()
+            self.write_message(["Looks like we did not find any.", "Please wait we will look", "again in a few seconds"])
+            sleep(3)
         return boxes
 
 

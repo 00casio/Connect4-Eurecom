@@ -303,7 +303,7 @@ class Game:
             if online.x_in_rect(mouse, final_box):
                 self.box_clicked = self.var.boxAI_play
         if self.box_clicked == self.var.boxAI_cancel:
-            self.draw_start_screen()
+            self.start()
             return
 
         is_ai = player_me == "ai"
@@ -322,12 +322,7 @@ class Game:
         screen_opp = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
         screen_opp.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
         t = time()
-        boxes = []
-        while len(boxes) == 0:
-            screen_opp.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
-            boxes = screen_opp.update()
-            screen_opp.write_message(["Looks like we did not find any.", "Please wait we will look", "again in a few seconds"])
-            sleep(3)
+        boxes = screen_opp.update_all_boxes()
         opp = None
         while opp is None:
             mouse = screen_opp.click()
@@ -338,7 +333,7 @@ class Game:
                     if screen_opp.x_in_rect(mouse, b):
                         opp = screen_opp.list_connec[i][j]
             if opp is None:
-                boxes = screen_opp.update()
+                boxes = screen_opp.update_all_boxes()
         self.communication.connect(i * len(screen_opp.list_connec[i]) + j)
 
 
