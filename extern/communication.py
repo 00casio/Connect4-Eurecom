@@ -55,9 +55,11 @@ class Communication:
         while matches == []:
             print("Searching")
             matches = bluetooth.find_service(uuid=self.uuid, address=self.connections[index][0])
-            print("Sleeping...")
-            sleep(2)
-            print(matches)
+            if matches == []:
+                print("Nothing found, sleeping...")
+                sleep(1)
+            else:
+                print(matches)
         choosed = matches[0]
 
         self.sock.connect((choosed["host"], choosed["port"]))
