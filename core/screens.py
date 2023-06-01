@@ -106,22 +106,18 @@ class Screen(Tools):
         if symbol is None:
             self.draw_circle(x, y, self.var.color_trans, r, screen)
         else:
-            if symbol == self.var.symbol_player_1:
-                if self.language == "cat":
+            if self.language == "cat":
+                if symbol == self.var.symbol_player_1:
                     disk = pg.image.load(self.var.image_cat_tails)
-                    screen.blit(disk, (x - self.var.radius_disk, y - self.var.radius_disk))
-                else:
-                    color = self.var.color_player_1
-                    self.draw_circle(x, y, color, r, screen)
-            elif symbol == self.var.symbol_player_2:
-                if self.language == "cat":
+                elif symbol == self.var.symbol_player_2:
                     disk = pg.image.load(self.var.image_cat_heads)
-                    screen.blit(disk, (x - self.var.radius_disk, y - self.var.radius_disk))
-                else:
-                    color = self.var.color_player_2
-                    self.draw_circle(x, y, color, r, screen)
+                screen.blit(disk, (x - self.var.radius_disk, y - self.var.radius_disk))
             else:
-                raise ValueError("How did that happen ?")
+                if symbol == self.var.symbol_player_1:
+                    color = self.var.color_player_1
+                elif symbol == self.var.symbol_player_2:
+                    color = self.var.color_player_2
+                self.draw_circle(x, y, color, r, screen)
 
     def hovering_box(self, box: Box, hover=True):
         if box is None:
