@@ -3,6 +3,7 @@
 
 import bluetooth
 import os
+from time import sleep
 
 class Communication:
     def __init__(self):
