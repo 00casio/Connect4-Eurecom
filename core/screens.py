@@ -15,7 +15,7 @@ from playsound import playsound
 from core.utils import Box, Tools, Symbol
 from core.variables import Color, Rect, Surface, Variables
 from extern.communication import Communication
-from extern.gesture import GestureController
+from extern.gesture import GestureController, Gest
 
 
 class Screen(Tools):
