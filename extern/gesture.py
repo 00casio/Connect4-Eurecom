@@ -306,7 +306,7 @@ class GestureController:
         self.handmajor = HandRecog(HLabel.MAJOR)
         self.handminor = HandRecog(HLabel.MINOR)
         self.hands = mp_hands.Hands(
-            max_num_hands=1, min_detection_confidence=0.2, model_complexity=0, min_tracking_confidence=0.2
+            max_num_hands=1, min_detection_confidence=0.2, model_complexity=1, min_tracking_confidence=0.2
         )
 
     def get_position(self, hand_result):
