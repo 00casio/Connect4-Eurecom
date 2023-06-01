@@ -310,11 +310,11 @@ class Game:
 
         is_ai = player_me == "ai"
         if type_me == "client":
-            self.player_1 = Player(self.var, 1, is_ai, 14)
-            self.player_2 = Player(self.var, 2, False, online=True)
-        else:
             self.player_1 = Player(self.var, 1, False, online=True)
-            self.player_2 = Player(self.var, 2, is_ai, 14)
+            self.player_2 = Player(self.var, 2, is_ai, 5)
+        else:
+            self.player_1 = Player(self.var, 1, is_ai, 5)
+            self.player_2 = Player(self.var, 2, False, online=True)
         self.communication.type = type_me
 
         if type_me == "client":
