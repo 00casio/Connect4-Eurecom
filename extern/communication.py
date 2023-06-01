@@ -50,14 +50,15 @@ class Communication:
     def connect(self, index):
         """ Connect to a server. Usable only on client mode """
         assert self.type == "client", ValueError("Must be client")
-        print(self.connections, index)
         matches = bluetooth.find_service(uuid=self.uuid, address=self.connections[index][0])
         print(matches)
         choosed = matches[0]
 
         self.sock.connect((choosed["host"], choosed["port"]))
+        sleep(3)
         self.sock.send("100".encode())
-        code = self.sock.recv(1024).decode()
+
+        code = self.sock.recv(16).decode()
         if code not in ["102", "103"]:
             print(f"Code not correct {code}")
             exit()
