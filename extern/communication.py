@@ -53,7 +53,7 @@ class Communication:
         matches = []
         while matches == []:
             matches = bluetooth.find_service(uuid=self.uuid, address=self.connections[index][0])
-        print(matches)
+            print(matches)
         choosed = matches[0]
 
         self.sock.connect((choosed["host"], choosed["port"]))
