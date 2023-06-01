@@ -82,3 +82,7 @@ Code | Meaning | Action.s upon reception | Type
 102 | Game accepted | Launch grid, wait for askee to play (or to send who plays first? **TBD together**) | `byte`
 103 | Game refused | - | `byte`
 201 | Game aborted by user (during a game) _For now, we wait our turn to send this? (beware of this)_ | Abandon game (this way we know the game was ended because of user request, not because of disconnection) | `byte`
+
+Example of result from find_services:  
+[{'service-classes': ['94F39D29-7D6D-437D-973B-FBA39E49D4EE', '1101'], 'profiles': [('1101', 256)], 'name': 'connect4_1', 'description': None, 'provider': None, 'service-id': '94F39D29-7D6D-437D-973B-FBA39E49D4EE', 'protocol': 'RFCOMM', 'port': 1, 'host': 'E4:5F:01:D2:D2:94'}]
+
