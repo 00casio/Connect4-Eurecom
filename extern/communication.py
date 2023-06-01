@@ -16,20 +16,21 @@ class Communication:
     def wait_for_connection(self):
         """ Used in server mode """
         assert self.type == "server", ValueError("Must be server")
+
         self.sock.bind(("", bluetooth.PORT_ANY))
         self.sock.listen(1)
-
         port = self.sock.getsockname()[1]
         bluetooth.advertise_service(self.sock, "connect4-4", service_id=self.uuid,
                                     service_classes=[self.uuid, bluetooth.SERIAL_PORT_CLASS],
                                     profiles=[bluetooth.SERIAL_PORT_PROFILE])
 
         print("Waiting for connection on RFCOMM channel", port)
-        self.sock, self.client_info = server_sock.accept()
+        self.sock, self.client_info = self.sock.accept()
         print("Accepted connection from", self.client_info)
 
         # May need to wait for code 100
-        # code = self.sock.recv(3).decode()
+        code = self.sock.recv(3).decode()
+        assert code == "100", ValueError(f"Wrong code {code}")
 
         # Accept connection
         self.sock.send("102".encode())
