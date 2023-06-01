@@ -53,8 +53,10 @@ class Communication:
         assert self.type == "client", ValueError("Must be client")
         matches = []
         while matches == []:
+            print("Searching")
             matches = bluetooth.find_service(uuid=self.uuid, address=self.connections[index][0])
-            sleep(1)
+            print("Sleeping...")
+            sleep(2)
             print(matches)
         choosed = matches[0]
 
