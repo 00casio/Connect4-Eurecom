@@ -47,10 +47,10 @@ class Screen(Tools):
         self.last_column_selected = 3
         self.last_box_hovered = None
         self.language = language
-        if cancel_box:
-            self.draw_cancel_box()
-        if quit_box:
-            self.draw_quit_box()
+        self.draw_cancel_box()
+        self.draw_quit_box()
+        self.cancel_box.hide = not cancel_box
+        self.quit_box.hide = not quit_box
 
     def draw_cancel_box(self, force_reload: bool=False) -> None:
         """Draw the box that allow the user to take a step back"""
@@ -87,9 +87,9 @@ class Screen(Tools):
             b.render(self.screen)
         pg.display.update()
 
-    def draw_circle(self, x: int, y: int, color: Color, r: int, screen: Surface) -> None:
+    def draw_circle(self, x: int, y: int, color: Color, r: int, screen: Surface, width:int=0) -> None:
         """ Draw a circle of the color at the coordinate """
-        pg.draw.circle(screen, color, (x, y), r)
+        pg.draw.circle(screen, color, (x, y), r, width)
 
     def draw_token(self, n: int, m: int, symbol: Optional[Symbol], r: int, col_row: bool=True, screen: Surface=None) -> None:
         """Draw a circle in the corresponding column, and row
@@ -106,18 +106,18 @@ class Screen(Tools):
         if symbol is None:
             self.draw_circle(x, y, self.var.color_trans, r, screen)
         else:
+            if symbol == self.var.symbol_player_1:
+                color = self.var.color_player_1
+            elif symbol == self.var.symbol_player_2:
+                color = self.var.color_player_2
+            self.draw_circle(x, y, color, r, screen)
+
             if self.language == "cat":
                 if symbol == self.var.symbol_player_1:
                     disk = pg.image.load(self.var.image_cat_tails)
                 elif symbol == self.var.symbol_player_2:
                     disk = pg.image.load(self.var.image_cat_heads)
                 screen.blit(disk, (x - self.var.radius_disk, y - self.var.radius_disk))
-            else:
-                if symbol == self.var.symbol_player_1:
-                    color = self.var.color_player_1
-                elif symbol == self.var.symbol_player_2:
-                    color = self.var.color_player_2
-                self.draw_circle(x, y, color, r, screen)
 
     def hovering_box(self, box: Box, hover=True):
         if box is None:
@@ -536,7 +536,7 @@ class GamingScreen(Screen):
         camera: bool,
         language: str,
     ) -> None:
-        Screen.__init__(self, var, screen, gesture, volume, camera, language=language)
+        Screen.__init__(self, var, screen, gesture, volume, camera, language=language, cancel_box=False)
         self.color_screen = self.var.white
         self.color_board = self.var.blue
         self.width_board = self.var.width_board
@@ -566,10 +566,11 @@ class GamingScreen(Screen):
 
     def animate_fall(self, col: int, row: int, player: Symbol) -> None:
         """Animate the fall of a disk"""
-        x = self.var.padding + col * self.var.size_cell + self.var.size_cell // 2
+        p = self.var.padding
+        x = p + col * self.var.size_cell + self.var.size_cell // 2
         for y in range(
-            self.var.padding // 2,
-            self.var.padding + row * self.var.size_cell + self.var.size_cell // 2,
+            p // 2,
+            p + row * self.var.size_cell + self.var.size_cell // 2,
             5,
         ):
             self.screen.fill(self.var.color_screen)
@@ -578,6 +579,7 @@ class GamingScreen(Screen):
             pg.display.update()
         self.screen.fill(self.var.color_screen)
         self.draw_token(col, row, player, self.var.radius_hole)
+        self.draw_circle(x-p, y-p+5, self.var.color_board, self.var.radius_disk, self.board_surface, width=self.var.radius_disk - self.var.radius_hole)
         self.blit_board()
         pg.display.update()
         if self.volume:
@@ -586,5 +588,5 @@ class GamingScreen(Screen):
             else:
                 sound = ".png"
                 while sound.split(".")[-1] != "mp3":
-                    sound = "assets/cat/" + random_choice(listdir("assets/cat/"))
+                    sound = "assets/cat/" + random_choice(listdir("assets/cat"))
             playsound(sound, block=True)
