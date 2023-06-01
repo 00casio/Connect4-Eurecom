@@ -53,7 +53,7 @@ class Communication:
         assert self.type == "client", ValueError("Must be client")
         matches = []
         while matches == []:
-            print("Searching")
+            print("Searching", end = "\r")
             matches = bluetooth.find_service(uuid=self.uuid, address=self.connections[index][0])
             if matches == []:
                 print("Nothing found, sleeping...")
@@ -63,7 +63,6 @@ class Communication:
         choosed = matches[0]
 
         self.sock.connect((choosed["host"], choosed["port"]))
-        sleep(3)
         self.sock.send("100".encode())
 
         code = self.sock.recv(16).decode()
