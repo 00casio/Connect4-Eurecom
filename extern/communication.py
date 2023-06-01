@@ -54,6 +54,7 @@ class Communication:
         matches = []
         while matches == []:
             matches = bluetooth.find_service(uuid=self.uuid, address=self.connections[index][0])
+            sleep(1)
             print(matches)
         choosed = matches[0]
 

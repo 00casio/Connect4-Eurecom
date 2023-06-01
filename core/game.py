@@ -24,7 +24,7 @@ class Player:
     """The class that keep all the options for a player"""
 
     def __init__(
-        self, var: Variables, number: int, AI: bool, difficulty: int = -1
+        self, var: Variables, number: int, AI: bool, difficulty: int = -1, online: bool = False
     ) -> None:
         """Initialize the values for the Players"""
         self.var = var
@@ -41,11 +41,13 @@ class Player:
             raise ValueError("There can not be more than 2 players")
         self.is_ai = AI
         self.ai_difficulty = difficulty
+        self.online = online
 
     def play(
         self, board: Board, root: Node, screen: Screen, volume: bool, ai_cpp
     ) -> tuple[int, int]:
         """The function used when it's the player's turn"""
+        assert self.online == False, "Can not play when the player is not local"
         if self.is_ai:
             if ai_cpp is None:
                 score, col = minimax(root, 0, 0, True)
@@ -309,9 +311,9 @@ class Game:
         is_ai = player_me == "ai"
         if type_me == "client":
             self.player_1 = Player(self.var, 1, is_ai, 14)
-            self.player_2 = None
+            self.player_2 = Player(self.var, 2, False, online=True)
         else:
-            self.player_1 = None
+            self.player_1 = Player(self.var, 1, False, online=True)
             self.player_2 = Player(self.var, 2, is_ai, 14)
         self.communication.type = type_me
 
@@ -360,7 +362,7 @@ class Game:
             self.who_is_winner() == self.player_null and self.num_turn < self.board.size
         ):
             if self.player_playing == self.player_1:
-                if self.player_1 is None:
+                if self.player_1.online:
                     col = self.communication.receive()
                     row = self.board.find_free_slot(col)
                     assert row != -1, ValueError("the row must be valid")
@@ -368,19 +370,19 @@ class Game:
                     col, row, self.root = self.player_1.play(
                         self.board, self.root, gaming, self.volume, self.ai_cpp_1
                     )
-                    if self.player_2 is None:
+                    if self.player_2.online:
                         self.communication.send(col)
                 if self.libai:
                     self.ai_cpp_2.humanMove(col)
             else:
-                if self.player_2 is None:
+                if self.player_2.online:
                     col = self.communication.receive()
                     row = self.board.find_free_slot(col)
                 else:
                     col, row, self.root = self.player_2.play(
                         self.board, self.root, gaming, self.volume, self.ai_cpp_2
                     )
-                    if self.player_1 is None:
+                    if self.player_1.online:
                         self.communication.send(col)
                 if self.libai:
                     self.ai_cpp_1.humanMove(col)
