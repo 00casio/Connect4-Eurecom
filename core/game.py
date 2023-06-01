@@ -2,8 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from argparse import Namespace
-from typing import Any, Iterator, Optional
-from time import time
+from typing import Any, Iterator, Optional, Union
 
 import numpy as np
 import pygame as pg
@@ -25,7 +24,7 @@ class Player:
     """The class that keep all the options for a player"""
 
     def __init__(
-        self, var: Variables, number: int, AI: bool, difficulty: int = -1
+        self, var: Variables, number: int, AI: bool, difficulty: int = -1, online: bool = False
     ) -> None:
         """Initialize the values for the Players"""
         self.var = var
@@ -42,11 +41,13 @@ class Player:
             raise ValueError("There can not be more than 2 players")
         self.is_ai = AI
         self.ai_difficulty = difficulty
+        self.online = online
 
     def play(
         self, board: Board, root: Node, screen: Screen, volume: bool, ai_cpp
     ) -> tuple[int, int]:
         """The function used when it's the player's turn"""
+        assert self.online == False, "Can not play when the player is not local"
         if self.is_ai:
             if ai_cpp is None:
                 score, col = minimax(root, 0, 0, True)
@@ -263,49 +264,76 @@ class Game:
         box_server = Box("Server")
         box_human = Box("Human")
         box_machi = Box("As AI")
+        self.status = self.var.options_menu_play
         type_me = None
         player_me = None
-        final_box = None
+        final_box = online.draw_agreement_box("J'accepte")
         online.center_all([[box_client, box_server], [box_human, box_machi]])
         self.box_clicked = self.var.box_out
         while self.box_clicked == self.var.box_out:
             mouse = online.click()
+            out = True
+            for b in online.all_boxes:
+                if online.x_in_rect(mouse, b):
+                    out = False
+            if out:
+                final_box.hide = True
+                online.reset_screen(self.var.color_options_screen)
+                type_me = None
+                player_me = None
+
             if online.x_in_rect(mouse, box_client):
+                box_server.render(self.screen)
                 online.highlight_box(box_client, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
                 type_me = "client"
             elif online.x_in_rect(mouse, box_server):
+                box_client.render(self.screen)
                 online.highlight_box(box_server, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
                 type_me = "server"
             if online.x_in_rect(mouse, box_human):
+                box_machi.render(self.screen)
                 online.highlight_box(box_human, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
                 player_me = "human"
             elif online.x_in_rect(mouse, box_machi):
+                box_human.render(self.screen)
                 online.highlight_box(box_machi, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
                 player_me = "ai"
             if player_me is not None and type_me is not None:
-                final_box = online.draw_agreement_box("J'accepte")
+                final_box.hide = False
+                final_box.render(self.screen)
+                pg.display.update()
             if online.x_in_rect(mouse, final_box):
                 self.box_clicked = self.var.boxAI_play
         if self.box_clicked == self.var.boxAI_cancel:
-            self.draw_start_screen()
+            self.start()
+            return
 
         is_ai = player_me == "ai"
         if type_me == "client":
-            self.player_1 = Player(self.var, 1, is_ai, 14)
-            self.player_2 = None
+            self.player_1 = Player(self.var, 1, False, online=True)
+            self.player_2 = Player(self.var, 2, is_ai, 5)
         else:
-            self.player_1 = None
-            self.player_2 = Player(self.var, 2, is_ai, 14)
+            self.player_1 = Player(self.var, 1, is_ai, 5)
+            self.player_2 = Player(self.var, 2, False, online=True)
+        self.communication.type = type_me
 
-        self.select_opponent()
+        if type_me == "client":
+            self.select_opponent()
+        else:
+            screen = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
+            screen.write_message(["Please wait, we are waiting for someone", "to connect to us."])
+            self.communication.wait_for_connection()
 
     def select_opponent(self):
         """ Select the opponent between all opponents available """
         screen_opp = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
-        t = time()
-        boxes = screen_opp.update()
+        screen_opp.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
+        boxes = screen_opp.update_all_boxes()
         opp = None
         while opp is None:
+            screen_opp.all_boxes = []
+            screen_opp.screen.fill(self.var.color_options_screen)
+            screen_opp.draw_quit_box()
             mouse = screen_opp.click()
             for i in range(len(boxes)):
                 line = boxes[i]
@@ -314,9 +342,8 @@ class Game:
                     if screen_opp.x_in_rect(mouse, b):
                         opp = screen_opp.list_connec[i][j]
             if opp is None:
-                boxes = screen_opp.update()
+                boxes = screen_opp.update_all_boxes()
         self.communication.connect(i * len(screen_opp.list_connec[i]) + j)
-
 
     def start_game(self) -> None:
         """Start the game"""
@@ -335,34 +362,39 @@ class Game:
             self.who_is_winner() == self.player_null and self.num_turn < self.board.size
         ):
             if self.player_playing == self.player_1:
-                if self.player_1 is None:
+                if self.player_1.online:
                     col = self.communication.receive()
+                    assert col < 10, ValueError(f"The code is not correct {col}")
                     row = self.board.find_free_slot(col)
                     assert row != -1, ValueError("the row must be valid")
                 else:
                     col, row, self.root = self.player_1.play(
                         self.board, self.root, gaming, self.volume, self.ai_cpp_1
                     )
-                    if self.player_2 is None:
+                    if self.player_2.online:
                         self.communication.send(col)
                 if self.libai:
                     self.ai_cpp_2.humanMove(col)
             else:
-                if self.player_2 is None:
+                if self.player_2.online:
                     col = self.communication.receive()
+                    assert col < 10, ValueError(f"The code is not correct {col}")
                     row = self.board.find_free_slot(col)
                 else:
                     col, row, self.root = self.player_2.play(
                         self.board, self.root, gaming, self.volume, self.ai_cpp_2
                     )
-                    if self.player_1 is None:
+                    if self.player_1.online:
                         self.communication.send(col)
                 if self.libai:
                     self.ai_cpp_1.humanMove(col)
+
+            pg.event.get()
             gaming.animate_fall(col, row, self.player_playing.symbol)
             self.board[row, col] = self.player_playing.symbol.v
             self.inverse_player()
             self.num_turn += 1
+
         self.draw_winner(gaming.board_surface, (col, row))
 
     def draw_winner(self, board_surface: Surface, lastclick: tuple[int, int]) -> None:

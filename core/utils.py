@@ -203,7 +203,7 @@ class Tools:
         Box(box.text, color_text, color_box, box.color_hover, box.coor, box.align).render(screen)
         pg.display.update()
 
-    def draw_agreement_box(self, text: str, position: float = 0.75) -> Rect:
+    def draw_agreement_box(self, text: str, position: float = 0.75) -> Box:
         """Draw a agreement box in the center of the screen at position (in %) of the height of the screen"""
         agreement = Box(
             text,

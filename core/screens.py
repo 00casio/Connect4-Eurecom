@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from time import time
+from time import time, sleep
 from typing import Any, Callable, Iterator, Optional, Union
 from random import choice as random_choice
 from os import listdir
@@ -15,7 +15,7 @@ from playsound import playsound
 from core.utils import Box, Tools, Symbol
 from core.variables import Color, Rect, Surface, Variables
 from extern.communication import Communication
-from extern.gesture import GestureController
+from extern.gesture import *
 
 
 class Screen(Tools):
@@ -80,7 +80,7 @@ class Screen(Tools):
         if self.quit_box not in self.all_boxes:
             self.all_boxes.append(self.quit_box)
 
-    def reset_screen(self, color_screen: Color, boxes: list[Box]) -> None:
+    def reset_screen(self, color_screen: Color) -> None:
         """Reset the screen to a "blank" state"""
         self.screen.fill(color_screen)
         for b in self.all_boxes:
@@ -374,7 +374,7 @@ class Screen_AI(Screen):
                 self.play_box.hide = True
                 self.diff_AI_1 = -1
                 self.diff_AI_2 = -1
-                self.reset_screen(self.var.color_options_screen, self.boxes_options)
+                self.reset_screen(self.var.color_options_screen)
 
 
 class OpponentSelectionScreen(Screen):
@@ -394,29 +394,55 @@ class OpponentSelectionScreen(Screen):
         self.comm = comm
         self.list_connec = []
 
+    def write_message(self, msg: Union[str, list[str]]):
+        self.all_boxes = []
+        self.screen.fill(self.var.color_options_screen)
+        self.draw_quit_box()
+        box_temp = []
+        if type(msg) == list:
+            for i in msg:
+                box_temp.append([Box(i)])
+        else:
+            box_temp.append([Box(msg)])
+        self.center_all(box_temp)
+
     def split_list(self, list_to_split):
-        size = int(np.sqrt(len(l)-1)) + 1
+        if list_to_split == []:
+            return []
+        size = int(np.sqrt(len(list_to_split)-1)) + 1
         list_splitted = []
-        for i in range(0, len(l), m):
+        for i in range(0, len(list_to_split), size):
             temp = []
-            for j in range(i, i+m):
-                if j >= len(l):
+            for j in range(i, i+size):
+                if j >= len(list_to_split):
                     continue
-                temp.append(l[j])
+                temp.append(list_to_split[j])
             list_splitted.append(temp)
         return list_splitted
 
     def update(self):
-        assert self.comm.type == "client", ValueError("The module is not in server mode")
+        assert self.comm.type == "client", ValueError("The module is not in client mode")
         self.list_connec = self.split_list(self.comm.list_connections())
         boxes = []
         for line in self.list_connec:
             tmp = []
             for l in line:
-                tmp.append(Box(l["host"]))
+                tmp.append(Box(l[1]))
             boxes.append(tmp)
-        boxes = self.center_all(self.split_list(line))
+        self.all_boxes = []
+        self.screen.fill(self.var.color_options_screen)
+        self.center_all(boxes)
         pg.display.update()
+        return boxes
+
+    def update_all_boxes(self):
+        boxes = []
+        while len(boxes) == 0:
+            self.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
+            boxes = self.update()
+            if len(boxes) == 0:
+                self.write_message(["Looks like we did not find any.", "Please wait we will look", "again in a few seconds"])
+                sleep(3)
         return boxes
 
 
