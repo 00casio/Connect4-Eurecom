@@ -323,6 +323,9 @@ class Game:
         boxes = screen_opp.update_all_boxes()
         opp = None
         while opp is None:
+            screen_opp.all_boxes = []
+            screen_opp.screen.fill(self.var.color_options_screen)
+            screen_opp.draw_quit_box()
             mouse = screen_opp.click()
             for i in range(len(boxes)):
                 line = boxes[i]

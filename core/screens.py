@@ -429,6 +429,8 @@ class OpponentSelectionScreen(Screen):
             for l in line:
                 tmp.append(Box(l[1]))
             boxes.append(tmp)
+        self.all_boxes = []
+        self.screen.fill(self.var.color_options_screen)
         self.center_all(boxes)
         pg.display.update()
         return boxes
