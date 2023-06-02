@@ -331,6 +331,8 @@ class Game:
         screen_opp.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
         boxes = screen_opp.update_all_boxes()
         opp = None
+        index = 0
+        final_index = -1
         while opp is None:
             screen_opp.all_boxes = []
             screen_opp.screen.fill(self.var.color_options_screen)
@@ -339,12 +341,13 @@ class Game:
             for i in range(len(boxes)):
                 line = boxes[i]
                 for j in range(len(line)):
+                    index += 1
                     b = line[j]
                     if screen_opp.x_in_rect(mouse, b):
-                        opp = screen_opp.list_connec[i][j]
-            if opp is None:
+                        final_index = index
+            if final_index == -1:
                 boxes = screen_opp.update_all_boxes()
-        code = self.communication.connect(i * len(screen_opp.list_connec[i]) + j, "100" if mode=="human" else "101")
+        code = self.communication.connect(final_index, "100" if mode=="human" else "101")
         if code == "103":
             self.select_opponent()
             return

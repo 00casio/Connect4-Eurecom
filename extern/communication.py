@@ -59,6 +59,7 @@ class Communication:
         """ Connect to a server. Usable only on client mode """
         assert self.type == "client", ValueError("Must be client")
         addr = self.connections[index][0]
+        print(index, self.connections)
         print(addr)
         matches = []
         i = 0
