@@ -346,6 +346,7 @@ class Game:
                     index += 1
             if final_index == -1:
                 boxes = screen_opp.update_all_boxes()
+                index = 0
         code = self.communication.connect(final_index, "100" if mode=="human" else "101")
         if code == "103":
             self.communication = Communication()
