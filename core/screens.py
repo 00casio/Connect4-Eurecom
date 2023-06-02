@@ -267,6 +267,7 @@ class Screen(Tools):
         if not self.quit_box.hide and self.x_in_rect(click, self.quit_box):
             if self.comm is not None:
                 self.comm.send("201")
+                self.comm.sock.close()
             print(self.var.message_quit)
             pg.quit()
             sys.exit()

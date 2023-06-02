@@ -10,6 +10,8 @@ class Communication:
     def __init__(self):
         self.uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
         self.connections = []
+        os.system("bluetoothctl discoverable on")
+        os.system("bluetoothctl pairable on")
         self.sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
         self.type = "client"
 
@@ -23,8 +25,6 @@ class Communication:
         """ Used in server mode """
         assert self.type == "server", ValueError("Must be server")
 
-        os.system("bluetoothctl discoverable on")
-        os.system("bluetoothctl pairable on")
         self.sock.bind(("", bluetooth.PORT_ANY))
         self.sock.listen(1)
         port = self.sock.getsockname()[1]
@@ -63,7 +63,7 @@ class Communication:
         matches = []
         i = 0
         while matches == []:
-            print("Searching", end = "\r")
+            print("Searching", " "*30, end="\r")
             matches = bluetooth.find_service(uuid=self.uuid, address=addr)
             if matches == []:
                 i += 1
