@@ -42,17 +42,13 @@ class Screen(Tools):
         self.screen.fill(color_fill)
         self.last_x = 0
         self.last_y = 0
-        self.draw_cancel = cancel_box
-        self.draw_quit = quit_box
-        self.last_column_selected = 3
+        self.last_position = 3
         self.last_box_hovered = None
         self.language = language
-        self.draw_cancel_box()
+        self.draw_cancel_box(hide=not cancel_box)
         self.draw_quit_box()
-        self.cancel_box.hide = not cancel_box
-        self.quit_box.hide = not quit_box
 
-    def draw_cancel_box(self, force_reload: bool=False) -> None:
+    def draw_cancel_box(self, force_reload: bool=False, hide: bool=False) -> None:
         """Draw the box that allow the user to take a step back"""
         if self.cancel_box is None or force_reload:
             self.cancel_box = Box(
@@ -62,6 +58,7 @@ class Screen(Tools):
                 coordinate=self.var.coor_cancel_box,
                 align=(-1, 1),
             )
+            self.cancel_box.hide = hide
         self.cancel_box.render(self.screen)
         if self.cancel_box not in self.all_boxes:
             self.all_boxes.append(self.cancel_box)
@@ -135,10 +132,11 @@ class Screen(Tools):
 
     def human_move(self, player: Symbol) -> None:
         """Function to use when it's the human's turn to move"""
-        # self.screen.fill(self.var.color_screen)
         p = self.var.padding
         sc = self.var.size_cell
-        last = self.last_column_selected
+        last = self.last_position
+
+        pg.draw.rect(self.screen, self.var.color_screen, (p, 0, self.var.width_board, p))
 
         mouse_x, mouse_y = self.get_mouse_pos()
         if mouse_x < self.var.pos_min_x:
@@ -146,17 +144,20 @@ class Screen(Tools):
         elif mouse_x > self.var.pos_max_x:
             mouse_x = self.var.pos_max_x
 
+        self.last_position = mouse_x
+
         if p > mouse_x or mouse_x > p + self.var.width_board:
             return
 
         new_col = (mouse_x - p) // sc
-        self.last_column_selected = new_col
-        old_rect = (p + last * sc, 0, sc, p)
+        old_col = (last - p) // sc
         new_rect = (p + new_col * sc, 0, sc, p)
+        old_rect = (p + old_col * sc, 0, sc, p)
+
         self.draw_quit_box()
         pg.draw.rect(self.screen, self.var.color_screen, old_rect)
         pg.draw.rect(self.screen, self.var.color_highlight_column, new_rect)
-        self.draw_token(p + new_col * sc + sc //2, p // 2, player, self.var.radius_disk, col_row=False, screen=self.screen)
+        self.draw_token(mouse_x, p // 2, player, self.var.radius_disk, col_row=False, screen=self.screen)
         pg.display.update(old_rect)
         pg.display.update(new_rect)
 
@@ -472,10 +473,8 @@ class OptionsScreen(Screen):
         """Reset the appearance of the option screen to the default"""
         self.all_boxes = []
         self.screen.fill(self.var.color_options_screen)
-        if self.draw_cancel:
-            self.draw_cancel_box(force_reload=True)
-        if self.draw_quit:
-            self.draw_quit_box(force_reload=True)
+        self.draw_cancel_box(force_reload=True)
+        self.draw_quit_box(force_reload=True)
         self.vol, self.cam = self.draw_vol_cam()
         self.flags = list(self.draw_language())
         pg.display.update()
