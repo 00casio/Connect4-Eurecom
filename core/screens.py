@@ -2,17 +2,17 @@
 # -*- coding: utf-8 -*-
 
 import sys
-from time import time, sleep
-from typing import Any, Callable, Iterator, Optional, Union
-from random import choice as random_choice
 from os import listdir
+from random import choice as random_choice
+from time import sleep, time
+from typing import Any, Callable, Iterator, Optional, Union
 
 import cv2
 import numpy as np
 import pygame as pg
 from playsound import playsound
 
-from core.utils import Box, Tools, Symbol
+from core.utils import Box, Symbol, Tools
 from core.variables import Color, Rect, Surface, Variables
 from extern.communication import Communication
 from extern.gesture import *
@@ -31,7 +31,7 @@ class Screen(Tools):
         cancel_box: bool = True,
         quit_box: bool = True,
         color_fill: Color = Variables().color_options_screen,
-        language: str = "en"
+        language: str = "en",
     ) -> None:
         """Initialize the values"""
         Tools.__init__(self, var, screen, volume, camera)
@@ -49,7 +49,7 @@ class Screen(Tools):
         self.draw_cancel_box(hide=not cancel_box)
         self.draw_quit_box()
 
-    def draw_cancel_box(self, force_reload: bool=False, hide: bool=False) -> None:
+    def draw_cancel_box(self, force_reload: bool = False, hide: bool = False) -> None:
         """Draw the box that allow the user to take a step back"""
         if self.cancel_box is None or force_reload:
             self.cancel_box = Box(
@@ -64,7 +64,7 @@ class Screen(Tools):
         if self.cancel_box not in self.all_boxes:
             self.all_boxes.append(self.cancel_box)
 
-    def draw_quit_box(self, force_reload: bool=False) -> None:
+    def draw_quit_box(self, force_reload: bool = False) -> None:
         """Draw the box that allow the user to take a step back"""
         if self.quit_box is None or force_reload:
             self.quit_box = Box(
@@ -85,11 +85,21 @@ class Screen(Tools):
             b.render(self.screen)
         pg.display.update()
 
-    def draw_circle(self, x: int, y: int, color: Color, r: int, screen: Surface, width:int=0) -> None:
-        """ Draw a circle of the color at the coordinate """
+    def draw_circle(
+        self, x: int, y: int, color: Color, r: int, screen: Surface, width: int = 0
+    ) -> None:
+        """Draw a circle of the color at the coordinate"""
         pg.draw.circle(screen, color, (x, y), r, width)
 
-    def draw_token(self, n: int, m: int, symbol: Optional[Symbol], r: int, col_row: bool=True, screen: Surface=None) -> None:
+    def draw_token(
+        self,
+        n: int,
+        m: int,
+        symbol: Optional[Symbol],
+        r: int,
+        col_row: bool = True,
+        screen: Surface = None,
+    ) -> None:
         """Draw a circle in the corresponding column, and row
         If col_row is true, then n and m are column and row number, if they are not, then n and m are a position"""
         if screen is None:
@@ -159,7 +169,14 @@ class Screen(Tools):
         self.draw_quit_box()
         pg.draw.rect(self.screen, self.var.color_screen, old_rect)
         pg.draw.rect(self.screen, self.var.color_highlight_column, new_rect)
-        self.draw_token(mouse_x, p // 2, player, self.var.radius_disk, col_row=False, screen=self.screen)
+        self.draw_token(
+            mouse_x,
+            p // 2,
+            player,
+            self.var.radius_disk,
+            col_row=False,
+            screen=self.screen,
+        )
         pg.display.update(top_rect)
 
     def update_gesture(self, image: np.ndarray[Any, np.dtype[Any]]) -> None:
@@ -315,16 +332,33 @@ class Screen_AI(Screen):
         self.begin = 1
 
         # Creation of all boxes with message in them
-        self.boxes_options = [[Box(self.var.text_difficulty_options[number_AI], color_hovering=self.var.color_options_box)]]
+        self.boxes_options = [
+            [
+                Box(
+                    self.var.text_difficulty_options[number_AI],
+                    color_hovering=self.var.color_options_box,
+                )
+            ]
+        ]
         boxes_ai_1 = []
         for i in range(len(self.var.boxAI_text_levels)):
             boxes_ai_1.append(
-                Box(f"{self.var.text_box_levels} {i}", self.var.black, self.var.color_player_1, self.var.color_hover_player_1)
+                Box(
+                    f"{self.var.text_box_levels} {i}",
+                    self.var.black,
+                    self.var.color_player_1,
+                    self.var.color_hover_player_1,
+                )
             )
         boxes_ai_2 = []
         for i in range(len(self.var.boxAI_text_levels)):
             boxes_ai_2.append(
-                Box(f"{self.var.text_box_levels} {i}", self.var.black, self.var.color_player_2, self.var.color_hover_player_2)
+                Box(
+                    f"{self.var.text_box_levels} {i}",
+                    self.var.black,
+                    self.var.color_player_2,
+                    self.var.color_hover_player_2,
+                )
             )
         self.boxes_options.append(boxes_ai_1)
 
@@ -369,9 +403,7 @@ class Screen_AI(Screen):
                     self.screen,
                     self.var.color_options_highlight_text,
                 )
-            elif not self.play_box.hide and self.x_in_rect(
-                mouse_click, self.play_box
-            ):
+            elif not self.play_box.hide and self.x_in_rect(mouse_click, self.play_box):
                 self.box_clicked = self.var.boxAI_play
             else:
                 self.play_box.hide = True
@@ -412,11 +444,11 @@ class OpponentSelectionScreen(Screen):
     def split_list(self, list_to_split):
         if list_to_split == []:
             return []
-        size = int(np.sqrt(len(list_to_split)-1)) + 1
+        size = int(np.sqrt(len(list_to_split) - 1)) + 1
         list_splitted = []
         for i in range(0, len(list_to_split), size):
             temp = []
-            for j in range(i, i+size):
+            for j in range(i, i + size):
                 if j >= len(list_to_split):
                     continue
                 temp.append(list_to_split[j])
@@ -424,7 +456,9 @@ class OpponentSelectionScreen(Screen):
         return list_splitted
 
     def update(self):
-        assert self.comm.type == "client", ValueError("The module is not in client mode")
+        assert self.comm.type == "client", ValueError(
+            "The module is not in client mode"
+        )
         self.list_connec = self.split_list(self.comm.list_connections())
         boxes = []
         for line in self.list_connec:
@@ -441,10 +475,21 @@ class OpponentSelectionScreen(Screen):
     def update_all_boxes(self):
         boxes = []
         while len(boxes) == 0:
-            self.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
+            self.write_message(
+                [
+                    "Please wait a few seconds",
+                    "We are getting a list of all potential opponents",
+                ]
+            )
             boxes = self.update()
             if len(boxes) == 0:
-                self.write_message(["Looks like we did not find any.", "Please wait we will look", "again in a few seconds"])
+                self.write_message(
+                    [
+                        "Looks like we did not find any.",
+                        "Please wait we will look",
+                        "again in a few seconds",
+                    ]
+                )
                 sleep(3)
         return boxes
 
@@ -539,7 +584,16 @@ class GamingScreen(Screen):
         camera: bool,
         language: str,
     ) -> None:
-        Screen.__init__(self, var, screen, gesture, volume, camera, language=language, cancel_box=False)
+        Screen.__init__(
+            self,
+            var,
+            screen,
+            gesture,
+            volume,
+            camera,
+            language=language,
+            cancel_box=False,
+        )
         self.color_screen = self.var.white
         self.color_board = self.var.blue
         self.width_board = self.var.width_board
@@ -577,12 +631,21 @@ class GamingScreen(Screen):
             5,
         ):
             self.screen.fill(self.var.color_screen)
-            self.draw_token(x, y, player, self.var.radius_disk, col_row=False, screen=self.screen)
+            self.draw_token(
+                x, y, player, self.var.radius_disk, col_row=False, screen=self.screen
+            )
             self.blit_board()
             pg.display.update()
         self.screen.fill(self.var.color_screen)
         self.draw_token(col, row, player, self.var.radius_hole)
-        self.draw_circle(x-p, y-p+5, self.var.color_board, self.var.radius_disk, self.board_surface, width=self.var.radius_disk - self.var.radius_hole)
+        self.draw_circle(
+            x - p,
+            y - p + 5,
+            self.var.color_board,
+            self.var.radius_disk,
+            self.board_surface,
+            width=self.var.radius_disk - self.var.radius_hole,
+        )
         self.blit_board()
         pg.display.update()
         if self.volume:

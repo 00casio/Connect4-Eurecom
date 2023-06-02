@@ -10,12 +10,18 @@ from playsound import playsound
 
 import ai.libai as libai
 from ai.minimax_ai import minimax, opponent
-from core.screens import GamingScreen, OptionsScreen, Screen, Screen_AI, OpponentSelectionScreen
+from core.screens import (
+    GamingScreen,
+    OpponentSelectionScreen,
+    OptionsScreen,
+    Screen,
+    Screen_AI,
+)
 from core.structure import Board, Node
 from core.utils import Box, Config, Symbol
-from core.variables import Rect, Variables, Surface
-from extern.gesture import GestureController
+from core.variables import Rect, Surface, Variables
 from extern.communication import Communication
+from extern.gesture import GestureController
 
 pg.init()
 
@@ -24,7 +30,12 @@ class Player:
     """The class that keep all the options for a player"""
 
     def __init__(
-        self, var: Variables, number: int, AI: bool, difficulty: int = -1, online: bool = False
+        self,
+        var: Variables,
+        number: int,
+        AI: bool,
+        difficulty: int = -1,
+        online: bool = False,
     ) -> None:
         """Initialize the values for the Players"""
         self.var = var
@@ -56,7 +67,9 @@ class Player:
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
-            click = screen.click(box_allowed, print_disk=True, symbol_player=self.symbol)
+            click = screen.click(
+                box_allowed, print_disk=True, symbol_player=self.symbol
+            )
             col = (click[0] - self.var.padding) // self.var.size_cell
         if ai_cpp is None:
             for candidate in root.children:
@@ -105,7 +118,7 @@ class Game:
         self.gestures = GestureController()
 
         # Communication
-        self.communication = None#Communication()
+        self.communication = None  # Communication()
 
         # AI
         self.root: Optional[Node] = None
@@ -284,19 +297,39 @@ class Game:
 
             if online.x_in_rect(mouse, box_client):
                 box_server.render(self.screen)
-                online.highlight_box(box_client, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
+                online.highlight_box(
+                    box_client,
+                    self.var.color_options_highlight_box,
+                    online.screen,
+                    self.var.color_options_highlight_text,
+                )
                 type_me = "client"
             elif online.x_in_rect(mouse, box_server):
                 box_client.render(self.screen)
-                online.highlight_box(box_server, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
+                online.highlight_box(
+                    box_server,
+                    self.var.color_options_highlight_box,
+                    online.screen,
+                    self.var.color_options_highlight_text,
+                )
                 type_me = "server"
             if online.x_in_rect(mouse, box_human):
                 box_machi.render(self.screen)
-                online.highlight_box(box_human, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
+                online.highlight_box(
+                    box_human,
+                    self.var.color_options_highlight_box,
+                    online.screen,
+                    self.var.color_options_highlight_text,
+                )
                 player_me = "human"
             elif online.x_in_rect(mouse, box_machi):
                 box_human.render(self.screen)
-                online.highlight_box(box_machi, self.var.color_options_highlight_box, online.screen, self.var.color_options_highlight_text)
+                online.highlight_box(
+                    box_machi,
+                    self.var.color_options_highlight_box,
+                    online.screen,
+                    self.var.color_options_highlight_text,
+                )
                 player_me = "ai"
             if player_me is not None and type_me is not None:
                 final_box.hide = False
@@ -320,15 +353,36 @@ class Game:
         if type_me == "client":
             self.select_opponent(player_me)
         else:
-            screen = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
-            screen.write_message(["Please wait, we are waiting for someone", "to connect to us."])
+            screen = OpponentSelectionScreen(
+                self.var,
+                self.screen,
+                self.gestures,
+                self.communication,
+                self.volume,
+                self.camera,
+            )
+            screen.write_message(
+                ["Please wait, we are waiting for someone", "to connect to us."]
+            )
             self.communication.wait_for_connection()
             # TODO: print confirmation message
 
     def select_opponent(self, mode: str) -> None:
-        """ Select the opponent between all opponents available """
-        screen_opp = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
-        screen_opp.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
+        """Select the opponent between all opponents available"""
+        screen_opp = OpponentSelectionScreen(
+            self.var,
+            self.screen,
+            self.gestures,
+            self.communication,
+            self.volume,
+            self.camera,
+        )
+        screen_opp.write_message(
+            [
+                "Please wait a few seconds",
+                "We are getting a list of all potential opponents",
+            ]
+        )
         boxes = screen_opp.update_all_boxes()
         index = 0
         final_index = -1
@@ -347,7 +401,9 @@ class Game:
             if final_index == -1:
                 boxes = screen_opp.update_all_boxes()
                 index = 0
-        code = self.communication.connect(final_index, "100" if mode=="human" else "101")
+        code = self.communication.connect(
+            final_index, "100" if mode == "human" else "101"
+        )
         if code == "103":
             self.communication = Communication()
             self.select_opponent(mode)
@@ -357,12 +413,24 @@ class Game:
         """Start the game"""
         self.player_playing = self.player_1
         gaming = GamingScreen(
-            self.var, self.screen, self.gestures, self.volume, self.camera, self.conf.language
+            self.var,
+            self.screen,
+            self.gestures,
+            self.volume,
+            self.camera,
+            self.conf.language,
         )
         if self.player_1.online or self.player_2.online:
             gaming.comm = self.communication
         gaming.draw_board()
-        gaming.draw_token(self.var.width_screen // 2, self.var.padding // 2, self.player_playing.symbol, self.var.radius_disk, col_row=False, screen=gaming.screen)
+        gaming.draw_token(
+            self.var.width_screen // 2,
+            self.var.padding // 2,
+            self.player_playing.symbol,
+            self.var.radius_disk,
+            col_row=False,
+            screen=gaming.screen,
+        )
         pg.display.update()
         if not self.libai:
             self.root = Node(-1, None, self.player_playing.symbol.v, 0)
@@ -417,7 +485,12 @@ class Game:
             text = f"Nyah ! {winner.symbol.v} nyah !"
         sound = self.var.sound_winner_victory
         End = Screen(
-            self.var, self.screen, self.gestures, volume=self.volume, camera=self.camera, cancel_box=False
+            self.var,
+            self.screen,
+            self.gestures,
+            volume=self.volume,
+            camera=self.camera,
+            cancel_box=False,
         )
         End.screen.fill(self.var.color_screen)
         End.draw_quit_box()
@@ -427,7 +500,13 @@ class Game:
         print(text)
 
         p = self.var.padding
-        box_winner = Box(text, color_text=self.var.black, color_rect=self.var.white, coordinate=(self.var.width_screen//2, p//2), align=(0, 0))
+        box_winner = Box(
+            text,
+            color_text=self.var.black,
+            color_rect=self.var.white,
+            coordinate=(self.var.width_screen // 2, p // 2),
+            align=(0, 0),
+        )
         box_winner.font_size = 64
         box_winner.render(self.screen)
 

@@ -14,8 +14,8 @@ The project S6 of:
   - Clicking after online game send to local menu
   - Clicking return after end online game start a new online game
   - Seems like when root, hovering line is not correct
+  - Correct all part return button
 - Finish communication protocol implementation:
-  - Do not close the program when receiving 103
   - For server: ask confirmation when someone asks for a game
 - Polish the game:
   - Show name of raspberry for server

@@ -50,8 +50,12 @@ class Config:
             print("This language is not available.\nI will use English")
             language = "en"
         self.var.boxAI_text_levels = self.var.texts[language]["boxAI_text_levels"]
-        self.var.text_options_play_local = self.var.texts[language]["options_play_local"]
-        self.var.text_options_play_online = self.var.texts[language]["options_play_online"]
+        self.var.text_options_play_local = self.var.texts[language][
+            "options_play_local"
+        ]
+        self.var.text_options_play_online = self.var.texts[language][
+            "options_play_online"
+        ]
         self.var.text_options_options = self.var.texts[language]["options_options"]
         self.var.text_options_play_HvH = self.var.texts[language]["options_play_HvH"]
         self.var.text_options_play_HvAI = self.var.texts[language]["options_play_HvAI"]
@@ -201,7 +205,9 @@ class Tools:
         self, box: Box, color_box: Color, screen: Surface, color_text: Color
     ) -> None:
         """Highlight the clicked box to be in a color or another"""
-        Box(box.text, color_text, color_box, box.color_hover, box.coor, box.align).render(screen)
+        Box(
+            box.text, color_text, color_box, box.color_hover, box.coor, box.align
+        ).render(screen)
         pg.display.update()
 
     def draw_agreement_box(self, text: str, position: float = 0.75) -> Box:

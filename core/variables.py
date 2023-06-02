@@ -35,7 +35,7 @@ class Variables:
                 "cancel_box": "Return",
                 "quit_box": "Quit",
                 "message_quit": "You chose to quit the game\nYou are disapointing me",
-                "text_levels": "Level"
+                "text_levels": "Level",
             },
             "fr": {
                 "boxAI_text_levels": [
@@ -57,7 +57,7 @@ class Variables:
                 "cancel_box": "Retour",
                 "quit_box": "Quitter",
                 "message_quit": "Vous avez choisis d'abandonner le jeu.\nVous me décevez.",
-                "text_levels": "Niveau"
+                "text_levels": "Niveau",
             },
             "cat": {
                 "boxAI_text_levels": [
@@ -79,7 +79,7 @@ class Variables:
                 "cancel_box": "Nyah",
                 "quit_box": "Nya Nya",
                 "message_quit": "Nya nya.\n Nya nya (－‸ლ) nya",
-                "text_levels": "Nyaaa"
+                "text_levels": "Nyaaa",
             },
             "wls": {
                 "boxAI_text_levels": [
@@ -101,7 +101,7 @@ class Variables:
                 "cancel_box": "Return",
                 "quit_box": "Quit",
                 "message_quit": "You chose to quit the game\nYou are disapointing me",
-                "text_levels": "Level"
+                "text_levels": "Level",
             },
         }
 
@@ -193,7 +193,11 @@ class Variables:
         ]
         self.text_confirmation = self.texts["en"]["confirmation_button"]
         self.text_box_levels = self.texts["en"]["text_levels"]
-        self.text_draw = {"en": "No one won", "fr": "C'est une égalité", "cat": "Nya nya..."}
+        self.text_draw = {
+            "en": "No one won",
+            "fr": "C'est une égalité",
+            "cat": "Nya nya...",
+        }
 
         # Assets
         self.libai = True

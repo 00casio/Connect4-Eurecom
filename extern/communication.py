@@ -1,10 +1,11 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-#import bluetooth
+# import bluetooth
 bluetooth = None
 import os
 from time import sleep
+
 
 class Communication:
     def __init__(self):
@@ -22,15 +23,19 @@ class Communication:
         return self.sock.recv(1024).decode()
 
     def wait_for_connection(self):
-        """ Used in server mode """
+        """Used in server mode"""
         assert self.type == "server", ValueError("Must be server")
 
         self.sock.bind(("", bluetooth.PORT_ANY))
         self.sock.listen(1)
         port = self.sock.getsockname()[1]
-        bluetooth.advertise_service(self.sock, "connect4-4", service_id=self.uuid,
-                                    service_classes=[self.uuid, bluetooth.SERIAL_PORT_CLASS],
-                                    profiles=[bluetooth.SERIAL_PORT_PROFILE])
+        bluetooth.advertise_service(
+            self.sock,
+            "connect4-4",
+            service_id=self.uuid,
+            service_classes=[self.uuid, bluetooth.SERIAL_PORT_CLASS],
+            profiles=[bluetooth.SERIAL_PORT_PROFILE],
+        )
 
         print("Waiting for connection on RFCOMM channel", port)
         self.sock, self.client_info = self.sock.accept()
@@ -45,9 +50,11 @@ class Communication:
         # Server have to send 102 or 103
 
     def list_connections(self):
-        """ List the connections. Usable only in cient mode """
+        """List the connections. Usable only in cient mode"""
         assert self.type == "client", ValueError("Must be client")
-        nearby_devices = bluetooth.discover_devices(duration=5, lookup_names=True, flush_cache=True, lookup_class=False)
+        nearby_devices = bluetooth.discover_devices(
+            duration=5, lookup_names=True, flush_cache=True, lookup_class=False
+        )
         self.connections = []
         for d in nearby_devices:
             # if "connect4" in d[1]:
@@ -55,14 +62,14 @@ class Communication:
         return self.connections
 
     def connect(self, index: int, message: str) -> str:
-        """ Connect to a server. Usable only on client mode """
+        """Connect to a server. Usable only on client mode"""
         assert self.type == "client", ValueError("Must be client")
         print(self.connections, index)
         addr = self.connections[index][0]
         matches = []
         i = 0
         while matches == []:
-            print("Searching", " "*30, end="\r")
+            print("Searching", " " * 30, end="\r")
             matches = bluetooth.find_service(uuid=self.uuid, address=addr)
             if matches == []:
                 i += 1

@@ -297,12 +297,8 @@ class GestureController:
         """Initilaizes attributes."""
         self.gc_mode = 1
         self.cap = cv2.VideoCapture(0)
-        self.CAM_HEIGHT = self.cap.get(
-            cv2.CAP_PROP_FRAME_HEIGHT
-        )
-        self.CAM_WIDTH = self.cap.get(
-            cv2.CAP_PROP_FRAME_WIDTH
-        )
+        self.CAM_HEIGHT = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
+        self.CAM_WIDTH = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.handmajor = HandRecog(HLabel.MAJOR)
         self.handminor = HandRecog(HLabel.MINOR)
         self.hands = mp_hands.Hands(
