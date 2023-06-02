@@ -352,6 +352,8 @@ class Game:
         gaming = GamingScreen(
             self.var, self.screen, self.gestures, self.volume, self.camera, self.conf.language
         )
+        if self.player_1.online or self.player_2.online:
+            gaming.comm = self.communication
         gaming.draw_board()
         gaming.draw_token(self.var.width_screen // 2, self.var.padding // 2, self.player_playing.symbol, self.var.radius_disk, col_row=False, screen=gaming.screen)
         pg.display.update()
@@ -373,7 +375,7 @@ class Game:
                         self.board, self.root, gaming, self.volume, self.ai_cpp_1
                     )
                     if self.player_2.online:
-                        self.communication.send(col)
+                        self.communication.send(f"00{col}")
                 if self.libai:
                     self.ai_cpp_2.humanMove(col)
             else:
@@ -386,7 +388,7 @@ class Game:
                         self.board, self.root, gaming, self.volume, self.ai_cpp_2
                     )
                     if self.player_1.online:
-                        self.communication.send(col)
+                        self.communication.send(f"00{col}")
                 if self.libai:
                     self.ai_cpp_1.humanMove(col)
 

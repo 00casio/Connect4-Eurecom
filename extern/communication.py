@@ -15,6 +15,12 @@ class Communication:
         self.sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
         self.type = "client"
 
+    def send(self, value: str):
+        self.sock.send(value.encode())
+
+    def receive(self):
+        return self.sock.recv(1024).decode()
+
     def wait_for_connection(self):
         """ Used in server mode """
         assert self.type == "server", ValueError("Must be server")
@@ -31,11 +37,11 @@ class Communication:
         print("Accepted connection from", self.client_info)
 
         # May need to wait for code 100
-        code = self.sock.recv(3).decode()
+        code = self.receive()
         assert code == "100", ValueError(f"Wrong code {code}")
 
         # Accept connection
-        self.sock.send("102".encode())
+        self.send("102")
         # Server have to send 102 or 103
 
     def list_connections(self):
@@ -64,16 +70,10 @@ class Communication:
         choosed = matches[0]
 
         self.sock.connect((choosed["host"], choosed["port"]))
-        self.sock.send("100".encode())
+        self.send("100")
 
-        code = self.sock.recv(16).decode()
+        code = self.receive()
         if code not in ["102", "103"]:
             print(f"Code not correct {code}")
             exit()
         return code
-
-    def send(self, column: int):
-        self.sock.send(f"00{column}".encode())
-
-    def receive(self):
-        return int(self.sock.recv(1024).decode())

@@ -36,6 +36,7 @@ class Screen(Tools):
         """Initialize the values"""
         Tools.__init__(self, var, screen, volume, camera)
         self.gestures = gesture
+        self.comm = None
         self.cancel_box: Optional[Box] = None
         self.quit_box: Optional[Box] = None
         self.box_clicked = self.var.box_out
@@ -263,7 +264,9 @@ class Screen(Tools):
 
     def handle_quit(self, click: tuple[int, int]) -> None:
         """Function to call when wanting to see if user clicked in the quitting box"""
-        if self.quit_box is not None and self.x_in_rect(click, self.quit_box):
+        if not self.quit_box.hide and self.x_in_rect(click, self.quit_box):
+            if self.comm is not None:
+                self.comm.send("201")
             print(self.var.message_quit)
             pg.quit()
             sys.exit()
