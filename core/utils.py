@@ -72,6 +72,7 @@ class Config:
         self.var.text_confirmation = self.var.texts[language]["confirmation_button"]
         self.var.text_cancel_box = self.var.texts[language]["cancel_box"]
         self.var.text_quit_box = self.var.texts[language]["quit_box"]
+        self.var.text_box_levels = self.var.texts[language]["text_levels"]
         self.var.message_quit = self.var.texts[language]["message_quit"]
         self.language = language
 

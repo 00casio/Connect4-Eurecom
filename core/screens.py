@@ -315,12 +315,12 @@ class Screen_AI(Screen):
         boxes_ai_1 = []
         for i in range(len(self.var.boxAI_text_levels)):
             boxes_ai_1.append(
-                Box(f"Level {i}", self.var.black, self.var.color_player_1, self.var.color_hover_player_1)
+                Box(f"{self.var.text_box_levels} {i}", self.var.black, self.var.color_player_1, self.var.color_hover_player_1)
             )
         boxes_ai_2 = []
         for i in range(len(self.var.boxAI_text_levels)):
             boxes_ai_2.append(
-                Box(f"Level {i}", self.var.black, self.var.color_player_2, self.var.color_hover_player_2)
+                Box(f"{self.var.text_box_levels} {i}", self.var.black, self.var.color_player_2, self.var.color_hover_player_2)
             )
         self.boxes_options.append(boxes_ai_1)
 
