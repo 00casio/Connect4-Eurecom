@@ -366,7 +366,7 @@ class Game:
         ):
             if self.player_playing == self.player_1:
                 if self.player_1.online:
-                    col = self.communication.receive()
+                    col = int(self.communication.receive())
                     assert col < 10, ValueError(f"The code is not correct {col}")
                     row = self.board.find_free_slot(col)
                     assert row != -1, ValueError("the row must be valid")
@@ -380,7 +380,7 @@ class Game:
                     self.ai_cpp_2.humanMove(col)
             else:
                 if self.player_2.online:
-                    col = self.communication.receive()
+                    col = int(self.communication.receive())
                     assert col < 10, ValueError(f"The code is not correct {col}")
                     row = self.board.find_free_slot(col)
                 else:

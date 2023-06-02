@@ -138,7 +138,7 @@ class Screen(Tools):
         last = self.last_position
 
         top_rect = Rect(p, 0, self.var.width_board, p)
-        pg.draw.rect(self.screen, self.var.color_black, top_rect)
+        pg.draw.rect(self.screen, self.var.color_screen, top_rect)
 
         mouse_x, mouse_y = self.get_mouse_pos()
         if mouse_x < self.var.pos_min_x:
