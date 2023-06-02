@@ -330,10 +330,9 @@ class Game:
         screen_opp = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
         screen_opp.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
         boxes = screen_opp.update_all_boxes()
-        opp = None
         index = 0
         final_index = -1
-        while opp is None:
+        while final_index == -1:
             screen_opp.all_boxes = []
             screen_opp.screen.fill(self.var.color_options_screen)
             screen_opp.draw_quit_box()
@@ -341,11 +340,10 @@ class Game:
             for i in range(len(boxes)):
                 line = boxes[i]
                 for j in range(len(line)):
-                    index += 1
-                    print(index, screen_opp.x_in_rect(mouse, b))
                     b = line[j]
                     if screen_opp.x_in_rect(mouse, b):
                         final_index = index
+                    index += 1
             if final_index == -1:
                 boxes = screen_opp.update_all_boxes()
         code = self.communication.connect(final_index, "100" if mode=="human" else "101")
