@@ -136,7 +136,8 @@ class Screen(Tools):
         sc = self.var.size_cell
         last = self.last_position
 
-        pg.draw.rect(self.screen, self.var.color_screen, (p, 0, self.var.width_board, p))
+        top_rect = Rect(p, 0, self.var.width_board, p)
+        pg.draw.rect(self.screen, self.var.color_black, top_rect)
 
         mouse_x, mouse_y = self.get_mouse_pos()
         if mouse_x < self.var.pos_min_x:
@@ -158,8 +159,7 @@ class Screen(Tools):
         pg.draw.rect(self.screen, self.var.color_screen, old_rect)
         pg.draw.rect(self.screen, self.var.color_highlight_column, new_rect)
         self.draw_token(mouse_x, p // 2, player, self.var.radius_disk, col_row=False, screen=self.screen)
-        pg.display.update(old_rect)
-        pg.display.update(new_rect)
+        pg.display.update(top_rect)
 
     def update_gesture(self, image: np.ndarray[Any, np.dtype[Any]]) -> None:
         """Update the gesture class"""
