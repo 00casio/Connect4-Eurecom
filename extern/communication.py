@@ -38,7 +38,7 @@ class Communication:
 
         # May need to wait for code 100
         code = self.receive()
-        assert code == "100", ValueError(f"Wrong code {code}")
+        assert code == "100" or code == "101", ValueError(f"Wrong code {code}")
 
         # Accept connection
         self.send("102")
@@ -52,20 +52,23 @@ class Communication:
         for d in nearby_devices:
             # if "connect4" in d[1]:
             self.connections.append(d)
+            print(d)
         return self.connections
 
     def connect(self, index: int, message: str) -> str:
         """ Connect to a server. Usable only on client mode """
         assert self.type == "client", ValueError("Must be client")
+        addr = self.connections[index][0]
+        print(addr)
         matches = []
         i = 0
         while matches == []:
             print("Searching", end = "\r")
-            matches = bluetooth.find_service(uuid=self.uuid, address=self.connections[index][0])
+            matches = bluetooth.find_service(uuid=self.uuid, address=addr)
             if matches == []:
                 i += 1
                 print(f"Nothing found, sleeping... x{i}", end="\r")
-                sleep(1)
+                sleep(2.5)
             else:
                 print(matches)
         choosed = matches[0]
