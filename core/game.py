@@ -342,6 +342,7 @@ class Game:
                 line = boxes[i]
                 for j in range(len(line)):
                     index += 1
+                    print(index, screen_opp.x_in_rect(mouse, b))
                     b = line[j]
                     if screen_opp.x_in_rect(mouse, b):
                         final_index = index
