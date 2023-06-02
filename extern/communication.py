@@ -8,8 +8,6 @@ from time import sleep
 
 class Communication:
     def __init__(self):
-        os.system("bluetoothctl discoverable on")
-        os.system("bluetoothctl pairable on")
         self.uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
         self.connections = []
         self.sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
@@ -25,6 +23,8 @@ class Communication:
         """ Used in server mode """
         assert self.type == "server", ValueError("Must be server")
 
+        os.system("bluetoothctl discoverable on")
+        os.system("bluetoothctl pairable on")
         self.sock.bind(("", bluetooth.PORT_ANY))
         self.sock.listen(1)
         port = self.sock.getsockname()[1]
@@ -52,18 +52,19 @@ class Communication:
         for d in nearby_devices:
             # if "connect4" in d[1]:
             self.connections.append(d)
-            print(d)
         return self.connections
 
     def connect(self, index: int, message: str) -> str:
         """ Connect to a server. Usable only on client mode """
         assert self.type == "client", ValueError("Must be client")
         matches = []
+        i = 0
         while matches == []:
             print("Searching", end = "\r")
             matches = bluetooth.find_service(uuid=self.uuid, address=self.connections[index][0])
             if matches == []:
-                print("Nothing found, sleeping...")
+                i += 1
+                print(f"Nothing found, sleeping... x{i}", end="\r")
                 sleep(1)
             else:
                 print(matches)
