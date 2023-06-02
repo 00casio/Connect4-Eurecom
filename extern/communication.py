@@ -57,6 +57,7 @@ class Communication:
     def connect(self, index: int, message: str) -> str:
         """ Connect to a server. Usable only on client mode """
         assert self.type == "client", ValueError("Must be client")
+        print(self.connections, index)
         addr = self.connections[index][0]
         matches = []
         i = 0
