@@ -52,15 +52,12 @@ class Communication:
         for d in nearby_devices:
             # if "connect4" in d[1]:
             self.connections.append(d)
-            print(d)
         return self.connections
 
     def connect(self, index: int, message: str) -> str:
         """ Connect to a server. Usable only on client mode """
         assert self.type == "client", ValueError("Must be client")
         addr = self.connections[index][0]
-        print(index, self.connections)
-        print(addr)
         matches = []
         i = 0
         while matches == []:

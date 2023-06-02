@@ -348,7 +348,7 @@ class Game:
                 boxes = screen_opp.update_all_boxes()
         code = self.communication.connect(final_index, "100" if mode=="human" else "101")
         if code == "103":
-            self.select_opponent()
+            self.select_opponent(mode)
             return
 
     def start_game(self) -> None:
