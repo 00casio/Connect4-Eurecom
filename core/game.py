@@ -258,7 +258,7 @@ class Game:
             ]:
                 self.draw_play_local_options()
 
-    def draw_play_online_options(self):
+    def draw_play_online_options(self) -> None:
         online = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
         box_client = Box("Client")
         box_server = Box("Server")
@@ -318,14 +318,14 @@ class Game:
         self.communication.type = type_me
 
         if type_me == "client":
-            self.select_opponent()
+            self.select_opponent(player_me)
         else:
             screen = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
             screen.write_message(["Please wait, we are waiting for someone", "to connect to us."])
             self.communication.wait_for_connection()
             # TODO: print confirmation message
 
-    def select_opponent(self):
+    def select_opponent(self, mode: str) -> None:
         """ Select the opponent between all opponents available """
         screen_opp = OpponentSelectionScreen(self.var, self.screen, self.gestures, self.communication, self.volume, self.camera)
         screen_opp.write_message(["Please wait a few seconds", "We are getting a list of all potential opponents"])
@@ -344,7 +344,10 @@ class Game:
                         opp = screen_opp.list_connec[i][j]
             if opp is None:
                 boxes = screen_opp.update_all_boxes()
-        self.communication.connect(i * len(screen_opp.list_connec[i]) + j)
+        code = self.communication.connect(i * len(screen_opp.list_connec[i]) + j, "100" if mode=="human" else "101")
+        if code == "103":
+            self.select_opponent()
+            return
 
     def start_game(self) -> None:
         """Start the game"""

@@ -55,7 +55,7 @@ class Communication:
             print(d)
         return self.connections
 
-    def connect(self, index):
+    def connect(self, index: int, message: str) -> str:
         """ Connect to a server. Usable only on client mode """
         assert self.type == "client", ValueError("Must be client")
         matches = []
@@ -70,7 +70,7 @@ class Communication:
         choosed = matches[0]
 
         self.sock.connect((choosed["host"], choosed["port"]))
-        self.send("100")
+        self.send(message)
 
         code = self.receive()
         if code not in ["102", "103"]:
