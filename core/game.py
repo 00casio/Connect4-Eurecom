@@ -176,10 +176,6 @@ class Game:
         while True:
             if self.status == self.allowed_status["start"]:
                 self.draw_start_screen()
-            elif self.status == self.allowed_status["local"]:
-                self.draw_play_local_options()
-            elif self.status == self.allowed_status["online"]:
-                self.draw_play_online_options()
             elif self.status == self.allowed_status["gaming"]:
                 self.board = Board()
                 self.CLOCK = pg.time.Clock()
@@ -208,9 +204,9 @@ class Game:
                 )
                 self.player_1 = Player(self.var, 1, False)
                 self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_1)
-                if self.screen_AI.box_clicked == self.var.boxAI_play:
+                if self.screen_AI.ready_play:
                     self.status = self.allowed_status["gaming"]
-                elif self.screen_AI.box_clicked == self.var.boxAI_cancel:
+                else:
                     self.status = self.allowed_status["local"]
             elif self.status == self.allowed_status["loc_AIvAI"]:
                 self.screen_AI = Screen_AI(
@@ -223,9 +219,9 @@ class Game:
                 )
                 self.player_1 = Player(self.var, 1, True, self.screen_AI.diff_AI_1)
                 self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_2)
-                if self.screen_AI.box_clicked == self.var.boxAI_play:
+                if self.screen_AI.ready_play:
                     self.status = self.allowed_status["gaming"]
-                elif self.screen_AI.box_clicked == self.var.boxAI_cancel:
+                else:
                     self.status = self.allowed_status["local"]
 
 
@@ -309,9 +305,10 @@ class Game:
         player_me = None
         final_box = online.draw_agreement_box("J'accepte")
         online.center_all([[box_client, box_server], [box_human, box_machi]])
-        self.box_clicked = self.var.box_out
-        while self.box_clicked == self.var.box_out:
+
+        while self.status == self.allowed_status["online"]:
             mouse = online.click()
+            box = None
             out = True
             for b in online.all_boxes:
                 if online.x_in_rect(mouse, b):
@@ -321,51 +318,44 @@ class Game:
                 online.reset_screen(self.var.color_options_screen)
                 type_me = None
                 player_me = None
+            
+            if online.is_canceled(mouse):
+                self.status = self.allowed_status["start"]
 
             if online.x_in_rect(mouse, box_client):
                 box_server.render(self.screen)
-                online.highlight_box(
-                    box_client,
-                    self.var.color_options_highlight_box,
-                    online.screen,
-                    self.var.color_options_highlight_text,
-                )
+                box = box_client
                 type_me = "client"
             elif online.x_in_rect(mouse, box_server):
                 box_client.render(self.screen)
-                online.highlight_box(
-                    box_server,
-                    self.var.color_options_highlight_box,
-                    online.screen,
-                    self.var.color_options_highlight_text,
-                )
+                box = box_server
                 type_me = "server"
             if online.x_in_rect(mouse, box_human):
                 box_machi.render(self.screen)
-                online.highlight_box(
-                    box_human,
-                    self.var.color_options_highlight_box,
-                    online.screen,
-                    self.var.color_options_highlight_text,
-                )
+                box = box_human
                 player_me = "human"
             elif online.x_in_rect(mouse, box_machi):
                 box_human.render(self.screen)
+                box = box_machi
+                player_me = "ai"
+
+            if box is not None:
                 online.highlight_box(
-                    box_machi,
+                    box,
                     self.var.color_options_highlight_box,
                     online.screen,
                     self.var.color_options_highlight_text,
                 )
-                player_me = "ai"
+
             if player_me is not None and type_me is not None:
                 final_box.hide = False
                 final_box.render(self.screen)
                 pg.display.update()
             if online.x_in_rect(mouse, final_box):
-                self.box_clicked = self.var.boxAI_play
-        if self.box_clicked == self.var.boxAI_cancel:
-            self.start()
+                self.status = self.allowed_status["online_client"]
+
+        if online.is_canceled(mouse):
+            self.status = self.allowed_status["start"]
             return
 
         is_ai = player_me == "ai"

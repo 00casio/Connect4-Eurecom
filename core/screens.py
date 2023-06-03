@@ -39,11 +39,8 @@ class Screen(Tools):
         self.comm = None
         self.cancel_box: Optional[Box] = None
         self.quit_box: Optional[Box] = None
-        self.box_clicked = self.var.box_out
         self.screen.fill(color_fill)
-        self.last_x = 0
-        self.last_y = 0
-        self.last_position = 3
+        self.last_position = 0
         self.last_box_hovered = None
         self.language = language
         self.draw_cancel_box(hide=not cancel_box)
@@ -265,8 +262,6 @@ class Screen(Tools):
 
         # When a click is made we are here
         click = self.get_mouse_pos()
-        if self.is_canceled(click):
-            self.box_clicked = self.var.boxAI_cancel
         self.handle_quit(click)
         if rect_play is not None:
             while not self.x_in_rect(click, rect_play, ""):
@@ -377,8 +372,11 @@ class Screen_AI(Screen):
 
     def screen_loop(self) -> None:
         """Select the possibble value for the AI (if AI, AI(s) level)"""
-        while self.box_clicked not in [self.var.boxAI_play, self.var.boxAI_cancel]:
+        self.ready_play = None
+        while self.ready_play is None:
             mouse_click = self.click()
+            if self.is_canceled(mouse_click):
+                self.ready_play = False
             index_box = self.handle_click(mouse_click, self.options_levels)
             if index_box != -1:
                 if 0 <= index_box < self.nbr_levels_AI_1:
@@ -404,7 +402,7 @@ class Screen_AI(Screen):
                     self.var.color_options_highlight_text,
                 )
             elif not self.play_box.hide and self.x_in_rect(mouse_click, self.play_box):
-                self.box_clicked = self.var.boxAI_play
+                self.ready_play = True
             else:
                 self.play_box.hide = True
                 self.diff_AI_1 = -1
