@@ -105,6 +105,22 @@ class Game:
         self, args: Namespace, ai_cpp_1: libai.Game, ai_cpp_2: libai.Game
     ) -> None:
         """Initialize the value needed for the game"""
+        self.allowed_status = {
+            "gaming": -1,
+            "winning": -10,
+            "start": 0,
+            "options": 1,
+            "local": 2,
+            "online": 3,
+            "loc_HvH": 4,
+            "loc_HvAI": 5,
+            "loc_AIvAI": 6,
+            "online_options": 7,
+            "online_client": 8,
+            "online_server": 9,
+        }
+        self.status = self.allowed_status["start"]
+        self.winning_surface = None
 
         # Players
         self.var = Variables()
@@ -157,15 +173,61 @@ class Game:
 
     def start(self, skip_start_screen=False) -> None:
         """The start function to use when wanting to start the program"""
-        if not skip_start_screen:
-            self.draw_start_screen()
-        else:
-            # communication
-            self.draw_play_local_options()
-        self.board = Board()
-        self.CLOCK = pg.time.Clock()
-        self.num_turn = 0
-        self.start_game()
+        while True:
+            if self.status == self.allowed_status["start"]:
+                self.draw_start_screen()
+            elif self.status == self.allowed_status["local"]:
+                self.draw_play_local_options()
+            elif self.status == self.allowed_status["online"]:
+                self.draw_play_online_options()
+            elif self.status == self.allowed_status["gaming"]:
+                self.board = Board()
+                self.CLOCK = pg.time.Clock()
+                self.num_turn = 0
+                self.start_game()
+            elif self.status == self.allowed_status["winning"]:
+                self.draw_winner()
+            elif self.status == self.allowed_status["local"]:
+                self.draw_play_local_options()
+            elif self.status == self.allowed_status["online"]:
+                self.draw_play_online_options()
+            elif self.status == self.allowed_status["options"]:
+                self.draw_options_screen()
+            elif self.status == self.allowed_status["loc_HvH"]:
+                self.player_1 = Player(self.var, 1, False)
+                self.player_2 = Player(self.var, 2, False)
+                self.status = self.allowed_status["gaming"]
+            elif self.status == self.allowed_status["loc_HvAI"]:
+                self.screen_AI = Screen_AI(
+                    self.var,
+                    self.screen,
+                    self.gestures,
+                    volume=self.volume,
+                    camera=self.camera,
+                    number_AI=1,
+                )
+                self.player_1 = Player(self.var, 1, False)
+                self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_1)
+                if self.screen_AI.box_clicked == self.var.boxAI_play:
+                    self.status = self.allowed_status["gaming"]
+                elif self.screen_AI.box_clicked == self.var.boxAI_cancel:
+                    self.status = self.allowed_status["local"]
+            elif self.status == self.allowed_status["loc_AIvAI"]:
+                self.screen_AI = Screen_AI(
+                    self.var,
+                    self.screen,
+                    self.gestures,
+                    volume=self.volume,
+                    camera=self.camera,
+                    number_AI=2,
+                )
+                self.player_1 = Player(self.var, 1, True, self.screen_AI.diff_AI_1)
+                self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_2)
+                if self.screen_AI.box_clicked == self.var.boxAI_play:
+                    self.status = self.allowed_status["gaming"]
+                elif self.screen_AI.box_clicked == self.var.boxAI_cancel:
+                    self.status = self.allowed_status["local"]
+
 
     def draw_start_screen(self) -> None:
         """Show the starting screen, choose between the different possinilities"""
@@ -183,25 +245,24 @@ class Game:
         box_options = Box(self.var.text_options_options)
         start_screen.center_all([[box_play_local], [box_play_online], [box_options]])
 
-        self.status = self.var.options_menu_start
-        while self.status == self.var.options_menu_start:
+        while self.status == self.allowed_status["start"]:
             mouse = start_screen.click()
             if start_screen.x_in_rect(mouse, box_play_local):
-                self.draw_play_local_options()
+                self.status = self.allowed_status["local"]
             if start_screen.x_in_rect(mouse, box_play_online):
-                self.draw_play_online_options()
+                self.status = self.allowed_status["online"]
             elif start_screen.x_in_rect(mouse, box_options):
-                self.draw_options_screen()
-        if self.status == self.var.options_clicked_cancel:
-            self.draw_start_screen()
+                self.status = self.allowed_status["options"]
 
     def draw_options_screen(self) -> None:
         """Draw the options screen (language, if camera, if sound, etc.)"""
         options = OptionsScreen(
             self.var, self, self.screen, self.gestures, self.volume, self.camera
         )
-        click = options.click()
-        while options.box_clicked != self.var.boxAI_cancel:
+        while self.status == self.allowed_status["options"]:
+            click = options.click()
+            if options.is_canceled(click):
+                self.status = self.allowed_status["start"]
             if options.x_in_rect(click, options.vol):
                 self.volume = not self.volume
                 options.volume = self.volume
@@ -215,8 +276,6 @@ class Game:
             elif options.x_in_rect(click, options.flags[2]):
                 self.conf.load_language("cat")
             options.reset_options_screen()
-            click = options.click()
-        self.status = self.var.options_clicked_cancel
 
     def draw_play_local_options(self) -> None:
         """Show the different options when choosing to play locally"""
@@ -228,48 +287,17 @@ class Game:
         box_AIvAI = Box(self.var.text_options_play_AIvAI)
         screen.center_all([[box_HvH], [box_HvAI], [box_AIvAI]])
 
-        self.status = self.var.options_menu_play
         self.screen_AI = None
-        while self.status == self.var.options_menu_play:
+        while self.status == self.allowed_status["local"]:
             mouse = screen.click()
             if screen.x_in_rect(mouse, box_HvH):
-                self.status = self.var.options_play_HvH
-                self.player_1 = Player(self.var, 1, False)
-                self.player_2 = Player(self.var, 2, False)
+                self.status = self.allowed_status["loc_HvH"]
             elif screen.x_in_rect(mouse, box_HvAI):
-                self.status = self.var.options_play_HvAI
-                self.screen_AI = Screen_AI(
-                    self.var,
-                    self.screen,
-                    self.gestures,
-                    volume=self.volume,
-                    camera=self.camera,
-                    number_AI=1,
-                )
-                self.player_1 = Player(self.var, 1, False)
-                self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_1)
+                self.status = self.allowed_status["loc_HvAI"]
             elif screen.x_in_rect(mouse, box_AIvAI):
-                self.status = self.var.options_play_AIvAI
-                self.screen_AI = Screen_AI(
-                    self.var,
-                    self.screen,
-                    self.gestures,
-                    volume=self.volume,
-                    camera=self.camera,
-                    number_AI=2,
-                )
-                self.player_1 = Player(self.var, 1, True, self.screen_AI.diff_AI_1)
-                self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_2)
+                self.status = self.allowed_status["loc_AIvAI"]
             if screen.x_in_rect(mouse, screen.cancel_box):
-                self.status = self.var.options_clicked_cancel
-        if (self.player_1.is_ai and self.player_1.ai_difficulty == -1) or (
-            self.player_2.is_ai and self.player_2.ai_difficulty == -1
-        ):
-            if self.status not in [
-                self.var.options_play_HvH,
-                self.var.options_clicked_cancel,
-            ]:
-                self.draw_play_local_options()
+                self.status = self.allowed_status["start"]
 
     def draw_play_online_options(self) -> None:
         online = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
@@ -277,7 +305,6 @@ class Game:
         box_server = Box("Server")
         box_human = Box("Human")
         box_machi = Box("As AI")
-        self.status = self.var.options_menu_play
         type_me = None
         player_me = None
         final_box = online.draw_agreement_box("J'accepte")
@@ -472,10 +499,10 @@ class Game:
             self.board[row, col] = self.player_playing.symbol.v
             self.inverse_player()
             self.num_turn += 1
+        self.winning_surface = gaming.board_surface
+        self.status = self.allowed_status["winning"]
 
-        self.draw_winner(gaming.board_surface, (col, row))
-
-    def draw_winner(self, board_surface: Surface, lastclick: tuple[int, int]) -> None:
+    def draw_winner(self) -> None:
         """Draw the winner on the screen, with the line that made it win"""
         winner = self.who_is_winner()
         text = f"Player {winner.symbol.v} won !"
@@ -512,7 +539,7 @@ class Game:
 
         if self.volume:
             playsound(sound, block=False)
-        self.screen.blit(board_surface, (p, p))
+        self.screen.blit(self.winning_surface, (p, p))
         bits = int(self.board.state_to_bits(), 2)
 
         def complete(bits: int, direction: int) -> None:
@@ -542,7 +569,6 @@ class Game:
         complete(bits, 3)  # /
 
         pg.event.get()
-
         pg.display.update()
         End.click()
-        self.start(skip_start_screen=True)
+        self.status = self.allowed_status["start"]
