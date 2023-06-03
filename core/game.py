@@ -3,6 +3,7 @@
 
 from argparse import Namespace
 from typing import Any, Iterator, Optional, Union
+from socket import gethostname
 
 import numpy as np
 import pygame as pg
@@ -223,7 +224,16 @@ class Game:
                     self.status = self.allowed_status["gaming"]
                 else:
                     self.status = self.allowed_status["local"]
-
+            elif self.status == self.allowed_status["online_client"]:
+                code = self.select_opponent()
+                if code == "103":
+                    self.communication = Communication()
+                elif code == "102":
+                    self.status = self.allowed_status["gaming"]
+                else:
+                    print(f"Ask the other group why we received {code}")
+            elif self.status == self.allowed_status["online_server"]:
+                self.wait_as_server()
 
     def draw_start_screen(self) -> None:
         """Show the starting screen, choose between the different possinilities"""
@@ -359,32 +369,21 @@ class Game:
             return
 
         is_ai = player_me == "ai"
+        print("We need to allow the change of the difficulty")
         if type_me == "client":
             self.player_1 = Player(self.var, 1, False, online=True)
-            self.player_2 = Player(self.var, 2, is_ai, 5)
+            self.player_2 = Player(self.var, 2, is_ai, 10)
         else:
-            self.player_1 = Player(self.var, 1, is_ai, 5)
+            self.player_1 = Player(self.var, 1, is_ai, 10)
             self.player_2 = Player(self.var, 2, False, online=True)
         self.communication.type = type_me
 
         if type_me == "client":
-            self.select_opponent(player_me)
+            self.status = self.allowed_status["online_client"]
         else:
-            screen = OpponentSelectionScreen(
-                self.var,
-                self.screen,
-                self.gestures,
-                self.communication,
-                self.volume,
-                self.camera,
-            )
-            screen.write_message(
-                ["Please wait, we are waiting for someone", "to connect to us."]
-            )
-            self.communication.wait_for_connection()
-            # TODO: print confirmation message
+            self.status = self.allowed_status["online_server"]
 
-    def select_opponent(self, mode: str) -> None:
+    def select_opponent(self) -> str:
         """Select the opponent between all opponents available"""
         screen_opp = OpponentSelectionScreen(
             self.var,
@@ -418,13 +417,47 @@ class Game:
             if final_index == -1:
                 boxes = screen_opp.update_all_boxes()
                 index = 0
-        code = self.communication.connect(
-            final_index, "100" if mode == "human" else "101"
+        mode = "100"
+        if self.player_1.is_ai or self.player_2.is_ai:
+            mode = "101"
+        code = self.communication.connect(final_index, mode)
+        return code
+
+    def wait_as_server(self) -> None:
+        screen = OpponentSelectionScreen(
+            self.var,
+            self.screen,
+            self.gestures,
+            self.communication,
+            self.volume,
+            self.camera,
+            quit_box=False,
+            cancel_box=False
         )
-        if code == "103":
-            self.communication = Communication()
-            self.select_opponent(mode)
-            return
+        screen.write_message(
+            ["Please wait, we are waiting for someone", "to connect to us."]
+        )
+        screen.draw_agreement_box([f"You are {gethostname()}"], position=0.20)
+        self.communication.wait_for_connection()
+
+        screen.screen.fill(self.var.color_options_screen)
+        screen.cancel_box.hide = False
+        screen.quit_box.hide = False
+        msg = Box(f"Looks like {self.communication.client_info} want to play")
+        yes = Box("Accept")
+        nop = Box("Reject")
+        screen.center_all([[msg], [yes, nop]])
+        force_reload = False
+        while self.status == self.allowed_status["online_server"] or not force_reload:
+            mouse = screen.click()
+            if screen.x_in_rect(mouse, yes):
+                self.communication.send("102")
+                self.status = self.allowed_status["gaming"]
+            elif screen.x_in_rect(mouse, no):
+                self.communication.send("103")
+                force_reload = True
+            elif screen.is_canceled(mouse):
+                self.status = self.allowed_status["online"]
 
     def start_game(self) -> None:
         """Start the game"""

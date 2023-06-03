@@ -41,13 +41,9 @@ class Communication:
         self.sock, self.client_info = self.sock.accept()
         print("Accepted connection from", self.client_info)
 
-        # May need to wait for code 100
+        # Need to wait for code 100 or 101
         code = self.receive()
         assert code == "100" or code == "101", ValueError(f"Wrong code {code}")
-
-        # Accept connection
-        self.send("102")
-        # Server have to send 102 or 103
 
     def list_connections(self):
         """List the connections. Usable only in cient mode"""
@@ -83,7 +79,4 @@ class Communication:
         self.send(message)
 
         code = self.receive()
-        if code not in ["102", "103"]:
-            print(f"Code not correct {code}")
-            exit()
         return code
