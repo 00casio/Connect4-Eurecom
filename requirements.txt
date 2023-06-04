@@ -5,6 +5,7 @@ numpy
 # Hands gestures
 mediapipe
 protobuf==3.20.1
+pyautogui
 
 # Interface (sound)
 playsound
@@ -12,3 +13,6 @@ pygobject
 
 # AI
 swig
+
+# Communication
+#pybluez

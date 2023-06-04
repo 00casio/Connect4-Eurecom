@@ -293,26 +293,17 @@ class GestureController:
     hr_minor = None  # Left hand by default
     dom_hand = True
 
-    Nothing = 0
-    Moving = 1
-    Click = 2
-    possible_gesture = Gest
-
-    def __init__(self, screen_size: tuple[int, int]):
+    def __init__(self):
         """Initilaizes attributes."""
-        self.screen_size = screen_size
-        self.mouse_pos = (screen_size[0] // 2, screen_size[1] // 2)
-        self.action = self.Nothing
         self.gc_mode = 1
         self.cap = cv2.VideoCapture(0)
         self.CAM_HEIGHT = self.cap.get(cv2.CAP_PROP_FRAME_HEIGHT)
         self.CAM_WIDTH = self.cap.get(cv2.CAP_PROP_FRAME_WIDTH)
         self.handmajor = HandRecog(HLabel.MAJOR)
         self.handminor = HandRecog(HLabel.MINOR)
-        self.hands = mp_hands.Hands(static_image_mode=True,
-            max_num_hands=2, min_detection_confidence=0.2, model_complexity=0, min_tracking_confidence=0.2
+        self.hands = mp_hands.Hands(
+            max_num_hands=1, min_detection_confidence=0.2, min_tracking_confidence=0.2
         )
-        self.action = "state"
 
     def get_position(self, hand_result):
         """
@@ -327,9 +318,8 @@ class GestureController:
         """
         point = 9
         position = [hand_result.landmark[point].x, hand_result.landmark[point].y]
-        sx, sy = self.screen_size  # size of the screen x and y
-        x_mid, ymid = sx // 2, sy // 2
-        x_old, y_old = self.mouse_pos  # mouse cursor position
+        sx, sy = pyautogui.size()
+        x_old, y_old = pyautogui.position()
         x = int(position[0] * sx)
         y = int(position[1] * sy)
         if self.prev_hand is None:
@@ -348,72 +338,29 @@ class GestureController:
         else:
             ratio = 2.1
         x, y = x_old + delta_x * ratio, y_old + delta_y * ratio
-        self.mouse_pos = (x, y)
-
-    def get_hand_movement(self, hand_result):
-        point = 9
-        position = hand_result.landmark[point].x
-        prev_position = self.prev_position
-
-        if prev_position is None:
-            self.prev_position = position
-            return "none"
-
-        delta = position - prev_position
-
-        if delta < -0.5:
-            self.prev_position = position
-            print("left")
-            return "left"
-        elif delta > 0.5:
-            self.prev_position = position
-            print("right")
-            return "right"
-        else:
-            print("none")
-            return "none"
+        return (x, y)
 
     def handle_controls(self, gesture, hand_result):
         """Impliments all gesture functionality."""
+        x, y = None, None
+        if gesture != Gest.PALM:
+            x, y = self.get_position(hand_result)
 
-        # Reset grabflag
-        if gesture != self.possible_gesture.FIST and self.grabflag:
-            self.grabflag = False
-
-        # # Action associated with click
-        # if gesture == self.possible_gesture.FIST:
-        #     if not self.grabflag:
-        #         self.action = self.Click
-        #         self.grabflag = True
-
-        # # Action associated with moving the hand
-        # elif gesture == self.possible_gesture.V_GEST:
-        #     self.action = self.Moving
-
-        # # Default action
-        # else:
-        #     self.action = self.Nothing
-
-        # # flag reset
+        # flag reset
         if gesture != Gest.FIST and self.grabflag:
             self.grabflag = False
-            self.action = "click left"
             pyautogui.mouseUp(button="left")
 
         # implementation
         if gesture == Gest.V_GEST:
             self.flag = True
-            self.action = "move"
-            self.get_hand_movement(hand_result)
+            pyautogui.moveTo(x, y, duration=0.01)
 
         elif gesture == Gest.FIST:
             if not self.grabflag:
                 self.grabflag = True
                 pyautogui.click(button="left")
             # pyautogui.moveTo(x, y, duration = 0.1)
-
-        # Merge this class with GestureController
-        # either return or have the mouse position as variables
 
     def classify_hands(self, results):
         """

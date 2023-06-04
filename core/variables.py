@@ -23,7 +23,8 @@ class Variables:
                     "Get my a** kicked",
                     "Welcome to Hell",
                 ],
-                "options_play": "Play",
+                "options_play_local": "Play locally",
+                "options_play_online": "Play online",
                 "options_options": "Options",
                 "options_play_HvH": "Human vs. Human",
                 "options_play_HvAI": "Human vs. AI",
@@ -34,6 +35,7 @@ class Variables:
                 "cancel_box": "Return",
                 "quit_box": "Quit",
                 "message_quit": "You chose to quit the game\nYou are disapointing me",
+                "text_levels": "Level",
             },
             "fr": {
                 "boxAI_text_levels": [
@@ -43,7 +45,8 @@ class Variables:
                     "Je veux souffrir",
                     "LEROYYYYYYYY",
                 ],
-                "options_play": "Jouer",
+                "options_play_local": "Jouer localement",
+                "options_play_online": "Jouer en ligne",
                 "options_options": "Options",
                 "options_play_HvH": "Humain vs. Humain",
                 "options_play_HvAI": "Humain vs. IA",
@@ -54,6 +57,7 @@ class Variables:
                 "cancel_box": "Retour",
                 "quit_box": "Quitter",
                 "message_quit": "Vous avez choisis d'abandonner le jeu.\nVous me décevez.",
+                "text_levels": "Niveau",
             },
             "cat": {
                 "boxAI_text_levels": [
@@ -63,7 +67,8 @@ class Variables:
                     "Nyaaaaaaa?",
                     "Nya.",
                 ],
-                "options_play": "NYA",
+                "options_play_local": "NYA",
+                "options_play_online": "NYA NYA. nya.",
                 "options_options": "Nya Nya",
                 "options_play_HvH": "Nyaaa Nya",
                 "options_play_HvAI": "NYAAAA !",
@@ -74,6 +79,29 @@ class Variables:
                 "cancel_box": "Nyah",
                 "quit_box": "Nya Nya",
                 "message_quit": "Nya nya.\n Nya nya (－‸ლ) nya",
+                "text_levels": "Nyaaa",
+            },
+            "wls": {
+                "boxAI_text_levels": [
+                    "Cychwyn",
+                    "Dechrau",
+                    "Lefel fy mrawd",
+                    "O'r diwedd rhywfaint o boen",
+                    "Rydych yn deffro'r ddraig goch",
+                ],
+                "options_play_local": "Chwarae",
+                "options_play_online": "Chwarae 2 [to change]",
+                "options_options": "Dewisiadau",
+                "options_play_HvH": "Dynol vs. Dynol",
+                "options_play_HvAI": "Dynol vs. Ddraig",
+                "options_play_AIvAI": "Welwn ni chi yn uffern",
+                "options_difficulty_HvAI": "Choose your poison",
+                "options_difficulty_AIvAI": "How badly do you want this game to go ?",
+                "confirmation_button": "Sarah Connor ?",
+                "cancel_box": "Return",
+                "quit_box": "Quit",
+                "message_quit": "You chose to quit the game\nYou are disapointing me",
+                "text_levels": "Level",
             },
         }
 
@@ -148,7 +176,8 @@ class Variables:
         self.pos_max_x = self.padding + self.width_board - self.size_cell // 2
         self.text_size = 30
         self.text_font = "monospace"
-        self.text_options_play = self.texts["en"]["options_play"]
+        self.text_options_play_local = self.texts["en"]["options_play_local"]
+        self.text_options_play_online = self.texts["en"]["options_play_online"]
         self.text_options_options = self.texts["en"]["options_options"]
         self.text_options_play_HvH = self.texts["en"]["options_play_HvH"]
         self.text_options_play_HvAI = self.texts["en"]["options_play_HvAI"]
@@ -163,7 +192,12 @@ class Variables:
             self.text_options_difficulty_AIvAI,
         ]
         self.text_confirmation = self.texts["en"]["confirmation_button"]
-        self.text_draw = {"en": "No one won", "fr": "C'est une égalité", "cat": "Nya nya..."}
+        self.text_box_levels = self.texts["en"]["text_levels"]
+        self.text_draw = {
+            "en": "No one won",
+            "fr": "C'est une égalité",
+            "cat": "Nya nya...",
+        }
 
         # Assets
         self.libai = True
@@ -181,6 +215,8 @@ class Variables:
         self.image_english = "assets/english.svg"
         self.image_french = "assets/french.svg"
         self.image_cat = "assets/cat.png"
+        self.image_cat_tails = "assets/cat/tails.png"
+        self.image_cat_heads = "assets/cat/heads_1.png"
 
         # Fonts
         self.main_font = pg.font.SysFont(self.text_font, self.text_size)

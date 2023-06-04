@@ -50,7 +50,12 @@ class Config:
             print("This language is not available.\nI will use English")
             language = "en"
         self.var.boxAI_text_levels = self.var.texts[language]["boxAI_text_levels"]
-        self.var.text_options_play = self.var.texts[language]["options_play"]
+        self.var.text_options_play_local = self.var.texts[language][
+            "options_play_local"
+        ]
+        self.var.text_options_play_online = self.var.texts[language][
+            "options_play_online"
+        ]
         self.var.text_options_options = self.var.texts[language]["options_options"]
         self.var.text_options_play_HvH = self.var.texts[language]["options_play_HvH"]
         self.var.text_options_play_HvAI = self.var.texts[language]["options_play_HvAI"]
@@ -71,6 +76,7 @@ class Config:
         self.var.text_confirmation = self.var.texts[language]["confirmation_button"]
         self.var.text_cancel_box = self.var.texts[language]["cancel_box"]
         self.var.text_quit_box = self.var.texts[language]["quit_box"]
+        self.var.text_box_levels = self.var.texts[language]["text_levels"]
         self.var.message_quit = self.var.texts[language]["message_quit"]
         self.language = language
 
@@ -199,10 +205,12 @@ class Tools:
         self, box: Box, color_box: Color, screen: Surface, color_text: Color
     ) -> None:
         """Highlight the clicked box to be in a color or another"""
-        Box(box.text, color_text, color_box, box.color_hover, box.coor, box.align).render(screen)
+        Box(
+            box.text, color_text, color_box, box.color_hover, box.coor, box.align
+        ).render(screen)
         pg.display.update()
 
-    def draw_agreement_box(self, text: str, position: float = 0.75) -> Rect:
+    def draw_agreement_box(self, text: str, position: float = 0.75) -> Box:
         """Draw a agreement box in the center of the screen at position (in %) of the height of the screen"""
         agreement = Box(
             text,

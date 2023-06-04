@@ -4,6 +4,18 @@
 # echo "If possible, try to use clang++-16 because the binary produced are the fastest amongst all"
 # echo "You can benchmark this by using the ai/ai_benchmark.py program"
 
+# Install prerequisite
+apt --version 2>&1 1>/dev/null
+
+if [ $? -ne 0 ]; then
+  echo "Could not try to install libcairomm, libgirepository, and libbluetooth-dev"
+  echo "Look for them and try to install them"
+else
+  echo "We need your password to install prerequisite"
+  echo "sudo apt install libcairomm-1.0-dev libgirepository1.0-dev libbluetooth-dev"
+  sudo apt install libcairomm-1.0-dev libgirepository1.0-dev libbluetooth-dev
+fi
+
 # Find correct Python version
 test_python() {
   if [ "$1" == "" ]; then

@@ -10,9 +10,21 @@ The project S6 of:
 
 ### This week objectives
 
-- [x] Speed up the minimax algorithm
-- [ ] Solve lag problem on gestures
-- [x] Reorganize repo
+- Correct bugs:
+  - Clicking after online game send to local menu
+  - Clicking return after end online game start a new online game
+  - Seems like when root, hovering line is not correct
+  - Correct all part return button
+- Finish communication protocol implementation:
+  - For server: ask confirmation when someone asks for a game
+- Polish the game:
+  - Show name of raspberry for server
+  - Place filter on possible communications
+  - Put texts in variables (with languages)
+  - Fuse a "perfect" (look for all poss) AI in our program
+- Report:
+  - Make benchmarks, comparisons
+  - Do almost everything
 
 ### Objectives
 
@@ -35,7 +47,7 @@ For the first installation, you need to make sure that `libcairomm-dev` (or equi
 - [x] Grid
 - [x] Play sound
 - [x] Highlight selected column
-- [ ] Menu to choose the opponent
+- [x] Menu to choose the opponent
 
 Optional:
 
@@ -56,7 +68,7 @@ Optional:
 - [x] Change difficulty
 - [ ] Different gameplay
 - [ ] Add other algorithms
-- [ ] Test if negamax is faster when using only int64/uint64
+- [x] Test if negamax is faster when using only int64/uint64 (yes it is)
 
 #### Hands gesture
 
@@ -73,3 +85,15 @@ Optional:
 
 - [ ] Choose the mean of communication
 - [ ] Choose the protocol
+
+Code | Meaning | Action.s upon reception | Type
+--- | --- | --- | ---
+000 - 006 | Column number | Put token into right column | `byte`
+100 | Asking for a game (asker will play in human mode) | Respond with 102 or 103 | `byte`
+101 | Asking for a game (asker will play in AI mode) | Respond with 102 or 103 | `byte`
+102 | Game accepted | Launch grid, wait for askee to play (or to send who plays first? **TBD together**) | `byte`
+103 | Game refused | - | `byte`
+201 | Game aborted by user (during a game) _For now, we wait our turn to send this? (beware of this)_ | Abandon game (this way we know the game was ended because of user request, not because of disconnection) | `byte`
+
+Example of result from find_services:  
+[{'service-classes': ['94F39D29-7D6D-437D-973B-FBA39E49D4EE', '1101'], 'profiles': [('1101', 256)], 'name': 'connect4_1', 'description': None, 'provider': None, 'service-id': '94F39D29-7D6D-437D-973B-FBA39E49D4EE', 'protocol': 'RFCOMM', 'port': 1, 'host': 'E4:5F:01:D2:D2:94'}]
