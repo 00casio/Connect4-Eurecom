@@ -129,10 +129,24 @@
 	\end{itemize}
 
 	Those criteria were evaluated and reported in the following graph (insert graph and comment results) \\
+ \newpage
 
 	\section{Gestures}
+In the gesture part, we utilized MediaPipe library for hand tracking and landmark detection. MediaPipe provided us with pre-trained models and APIs to accurately track the position of landmarks on the hand.\\
 
+To classify the gestures, we used mathematical functions that analyzed the shape of the hand landmarks. These functions utilized the Euclidean distance between the landmarks to determine whether the hand formed a V shape, a palm shape, or a fist shape. This approach allowed us to recognize and differentiate between the gestures based on the arrangement of the landmarks.\\
+
+For example, to detect the V shape, we measured the distances between the thumb and index finger, middle finger, and ring finger based on the distance between the landmarks. If the distance between the thumb and index finger was larger than the distance between the other fingers, we classified it as a V shape gesture.\\
+
+To enable control of the Connect 4 game board, we mapped the gestures to specific mouse actions using the pyautogui library. For instance, when the V shape gesture was recognized, we moved the mouse cursor in the corresponding direction consequently moving the game disk with the moving hand direction, whereas when a fist shape gesture was recognized, a mouse click was performed allowing the game disk to fall into the game board, a palm-shaped gesture was mapped into a neutral mouse action. \\
+
+Furthermore, we employed OpenCV (cv2) to process and manipulate the image frames. OpenCV allowed us to convert the color space of the captured images, draw landmarks on the frames, and display the output in a graphical user interface.\\
+
+During the development process, we encountered an initial challenge with lag when using continuous control on the Raspberry Pi which has limited RAM resources compared to desktop computers. To address this issue, we temporarily switched to discrete control, where each gesture corresponded to a discrete action, such as moving the game disk left or right by only one displacement and performing a click. However, after optimizing the code, we were able to reintroduce continuous control, ensuring a minimum lag experience.\\ \\
+
+Overall, by combining the capabilities of MediaPipe for hand tracking, mathematical functions for landmark analysis, pyautogui for mouse control, and OpenCV for image processing, we successfully implemented an interactive gesture-based interface for controlling the Connect 4 game.\\
 	\section{Communication}
 
 	\chapter{Conclusion}
 \end{document}
+
