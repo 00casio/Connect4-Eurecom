@@ -349,7 +349,7 @@ int Game::forceAIMove(const int col) {
 }
 
 int Game::scoreAIpos() {
-    return negamax(&ai_board, &human_board, col_heights, MAX_NBR_MOVE, - SCORE_SOMEONE_WIN, SCORE_SOMEONE_WIN);
+    return negamax(&ai_board, &human_board, col_heights, 13, - SCORE_SOMEONE_WIN, SCORE_SOMEONE_WIN);
 }
 
 void Game::resetBoard() {

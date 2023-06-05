@@ -40,7 +40,6 @@ class Config:
         self.var = var
         self.var.sound = not self.arg.novolume
         self.var.camera = not self.arg.nocamera
-        self.var.libai = not self.arg.no_libai
         self.language = self.arg.language
         self.load_language(self.language)
 

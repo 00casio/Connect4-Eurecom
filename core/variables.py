@@ -200,7 +200,6 @@ class Variables:
         }
 
         # Assets
-        self.libai = True
         self.camera = True
         self.sound = True
         self.sound_click_box = "assets/box.mp3"

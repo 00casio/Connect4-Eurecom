@@ -10,7 +10,6 @@ import pygame as pg
 from playsound import playsound
 
 import ai.libai as libai
-from ai.minimax_ai import minimax, opponent
 from core.screens import (
     GamingScreen,
     OpponentSelectionScreen,
@@ -56,15 +55,12 @@ class Player:
         self.online = online
 
     def play(
-        self, board: Board, root: Node, screen: Screen, volume: bool, ai_cpp
+        self, board: Board, screen: Screen, volume: bool, ai_cpp: libai.Game
     ) -> tuple[int, int]:
         """The function used when it's the player's turn"""
         assert self.online == False, "Can not play when the player is not local"
         if self.is_ai:
-            if ai_cpp is None:
-                score, col = minimax(root, 0, 0, True)
-            else:
-                col = ai_cpp.aiMove(3 * self.ai_difficulty + 1)
+            col = ai_cpp.aiMove(3 * self.ai_difficulty + 1)
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
@@ -72,22 +68,13 @@ class Player:
                 box_allowed, print_disk=True, symbol_player=self.symbol
             )
             col = (click[0] - self.var.padding) // self.var.size_cell
-        if ai_cpp is None:
-            for candidate in root.children:
-                if candidate.column_played == col:
-                    break
-            new_root = candidate
-            # print(root.depth, new_root.nbr_move)
-            # print(new_root.depth, new_root.nbr_move)
-            root = new_root.remove_old_root()
-            root.create_tree(4)
 
         row = board.find_free_slot(col)
         if row == -1:
             if volume:
                 playsound(self.var.sound_error, block=False)
-            col, row, root = self.play(board, root, screen, volume, ai_cpp)
-        return (col, row, root)
+            col, row = self.play(board, screen, volume, ai_cpp)
+        return (col, row)
 
     def __eq__(self, other: object) -> bool:
         """Allow to compare a player and another object"""
@@ -128,7 +115,6 @@ class Game:
         self.conf = Config(self.var, args)
         self.volume = self.var.sound
         self.camera = self.var.camera
-        self.libai = self.var.libai
         size_screen = (self.var.width_screen, self.var.height_screen)
 
         # Gestures
@@ -482,10 +468,6 @@ class Game:
             screen=gaming.screen,
         )
         pg.display.update()
-        if not self.libai:
-            self.root = Node(-1, None, self.player_playing.symbol.v, 0)
-            self.root.board = self.board.copy()
-            self.root.create_tree(4)
         while (
             self.who_is_winner() == self.player_null and self.num_turn < self.board.size
         ):
@@ -496,26 +478,24 @@ class Game:
                     row = self.board.find_free_slot(col)
                     assert row != -1, ValueError("the row must be valid")
                 else:
-                    col, row, self.root = self.player_1.play(
-                        self.board, self.root, gaming, self.volume, self.ai_cpp_1
+                    col, row = self.player_1.play(
+                        self.board, gaming, self.volume, self.ai_cpp_1
                     )
                     if self.player_2.online:
                         self.communication.send(f"00{col}")
-                if self.libai:
-                    self.ai_cpp_2.humanMove(col)
+                self.ai_cpp_2.humanMove(col)
             else:
                 if self.player_2.online:
                     col = int(self.communication.receive())
                     assert col < 10, ValueError(f"The code is not correct {col}")
                     row = self.board.find_free_slot(col)
                 else:
-                    col, row, self.root = self.player_2.play(
-                        self.board, self.root, gaming, self.volume, self.ai_cpp_2
+                    col, row = self.player_2.play(
+                        self.board, gaming, self.volume, self.ai_cpp_2
                     )
                     if self.player_1.online:
                         self.communication.send(f"00{col}")
-                if self.libai:
-                    self.ai_cpp_1.humanMove(col)
+                self.ai_cpp_1.humanMove(col)
 
             pg.event.get()
             gaming.animate_fall(col, row, self.player_playing.symbol)
