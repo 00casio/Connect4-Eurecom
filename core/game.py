@@ -50,17 +50,17 @@ class Player:
             self.color = self.var.color_player_2
         else:
             raise ValueError("There can not be more than 2 players")
-        self.is_ai = AI
         self.ai_difficulty = difficulty
         self.online = online
+        self.ai_cpp: Optional[libai.Game] = None
+        if AI:
+            self.ai_cpp = libai.Game()
 
-    def play(
-        self, board: Board, screen: Screen, volume: bool, ai_cpp: libai.Game
-    ) -> tuple[int, int, bool]:
+    def play(self, board: Board, screen: Screen, volume: bool) -> tuple[int, int, bool]:
         """The function used when it's the player's turn"""
         assert self.online == False, "Can not play when the player is not local"
-        if self.is_ai:
-            col = ai_cpp.aiMove(3 * self.ai_difficulty + 1)
+        if self.ai_cpp is not None:
+            col = self.ai_cpp.aiMove(3 * self.ai_difficulty + 1)
             click = (0, 0)
         else:
             p = self.var.padding
@@ -80,6 +80,10 @@ class Player:
             col, row, cancel = self.play(board, screen, volume, ai_cpp)
         return (col, row, cancel)
 
+    def resetBoard(self):
+        if self.ai_cpp is not None:
+            self.ai_cpp.resetBoard()
+
     def __eq__(self, other: object) -> bool:
         """Allow to compare a player and another object"""
         eq: bool = False
@@ -93,9 +97,7 @@ class Player:
 class Game:
     """The big class that will regulate everything"""
 
-    def __init__(
-        self, args: Namespace, ai_cpp_1: libai.Game, ai_cpp_2: libai.Game
-    ) -> None:
+    def __init__(self, args: Namespace) -> None:
         """Initialize the value needed for the game"""
         self.allowed_status = {
             "gaming": -1,
@@ -127,11 +129,6 @@ class Game:
         # Communication
         self.communication = None  # Communication()
 
-        # AI
-        self.root: Optional[Node] = None
-        self.ai_cpp_1 = ai_cpp_1
-        self.ai_cpp_2 = ai_cpp_2
-
         # Players
         self.player_1 = Player(self.var, 1, False, None)
         self.player_2 = Player(self.var, 2, False, None)
@@ -142,12 +139,14 @@ class Game:
         self.screen = pg.display.set_mode(size_screen, 0, 32)
         pg.display.set_caption(self.var.screen_title)
 
-    def inverse_player(self) -> None:
+    def inverse_players(self) -> None:
         """Return the symbols of the opponent of the player currently playing"""
         if self.player_playing == self.player_1:
             self.player_playing = self.player_2
+            self.opponent = self.player_1
         elif self.player_playing == self.player_2:
             self.player_playing = self.player_1
+            self.opponent = self.player_2
         else:
             raise ValueError(
                 "How is that possible ? Read carefully the error and send me everything"
@@ -450,8 +449,9 @@ class Game:
     def start_game(self) -> None:
         """Start the game"""
         self.player_playing = self.player_1
-        self.ai_cpp_1.resetBoard()
-        self.ai_cpp_2.resetBoard()
+        self.opponent = self.player_2
+        self.player_1.resetBoard()
+        self.player_2.resetBoard()
         gaming = GamingScreen(
             self.var,
             self.screen,
@@ -461,7 +461,7 @@ class Game:
             self.conf.language,
         )
         if self.player_1.online or self.player_2.online:
-            gaming.comm = self.communication
+            gaming.comm = self.communication # Used when quitting the game
         gaming.draw_board()
         gaming.draw_token(
             self.var.width_screen // 2,
@@ -475,31 +475,19 @@ class Game:
         while (
             self.who_is_winner() == self.player_null and self.num_turn < self.board.size and self.status == self.allowed_status["gaming"]
         ):
-            if self.player_playing == self.player_1:
-                if self.player_1.online:
-                    col = int(self.communication.receive())
-                    assert col < 10, ValueError(f"The code is not correct {col}")
-                    row = self.board.find_free_slot(col)
-                    assert row != -1, ValueError("the row must be valid")
-                else:
-                    col, row, cancel = self.player_1.play(
-                        self.board, gaming, self.volume, self.ai_cpp_1
-                    )
-                    if self.player_2.online:
-                        self.communication.send(f"00{col}")
-                self.ai_cpp_2.humanMove(col)
+            if self.player_playing.online:
+                col = int(self.communication.receive())
+                assert col < 10, ValueError(f"The code is not correct {col}")
+                row = self.board.find_free_slot(col)
+                assert row != -1, ValueError("The row must be valid")
             else:
-                if self.player_2.online:
-                    col = int(self.communication.receive())
-                    assert col < 10, ValueError(f"The code is not correct {col}")
-                    row = self.board.find_free_slot(col)
-                else:
-                    col, row, cancel = self.player_2.play(
-                        self.board, gaming, self.volume, self.ai_cpp_2
-                    )
-                    if self.player_1.online:
-                        self.communication.send(f"00{col}")
-                self.ai_cpp_1.humanMove(col)
+                col, row, cancel = self.player_playing.play(self.board, gaming, self.volume)
+
+                # for opponent
+                if self.opponent.online:
+                    self.communication.send(f"00{col}")
+            if self.opponent.ai_cpp is not None:
+                self.opponent.ai_cpp.humanMove(col)
 
             if cancel:
                 self.status = self.allowed_status["local"]
@@ -512,7 +500,7 @@ class Game:
             if self.status == self.allowed_status["gaming"]:
                 gaming.animate_fall(col, row, self.player_playing.symbol)
                 self.board[row, col] = self.player_playing.symbol.v
-                self.inverse_player()
+                self.inverse_players()
                 self.num_turn += 1
         if self.status == self.allowed_status["gaming"]:
             self.winning_surface = gaming.board_surface
