@@ -56,11 +56,12 @@ class Player:
 
     def play(
         self, board: Board, screen: Screen, volume: bool, ai_cpp: libai.Game
-    ) -> tuple[int, int]:
+    ) -> tuple[int, int, bool]:
         """The function used when it's the player's turn"""
         assert self.online == False, "Can not play when the player is not local"
         if self.is_ai:
             col = ai_cpp.aiMove(3 * self.ai_difficulty + 1)
+            click = (0, 0)
         else:
             p = self.var.padding
             box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
@@ -68,13 +69,16 @@ class Player:
                 box_allowed, print_disk=True, symbol_player=self.symbol
             )
             col = (click[0] - self.var.padding) // self.var.size_cell
+        cancel = screen.is_canceled(click)
+        if cancel:
+            return (0, 0, True)
 
         row = board.find_free_slot(col)
         if row == -1:
             if volume:
                 playsound(self.var.sound_error, block=False)
-            col, row = self.play(board, screen, volume, ai_cpp)
-        return (col, row)
+            col, row, cancel = self.play(board, screen, volume, ai_cpp)
+        return (col, row, cancel)
 
     def __eq__(self, other: object) -> bool:
         """Allow to compare a player and another object"""
@@ -271,8 +275,6 @@ class Game:
 
     def draw_play_local_options(self) -> None:
         """Show the different options when choosing to play locally"""
-        self.ai_cpp_1.resetBoard()
-        self.ai_cpp_2.resetBoard()
         screen = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
         box_HvH = Box(self.var.text_options_play_HvH)
         box_HvAI = Box(self.var.text_options_play_HvAI)
@@ -448,6 +450,8 @@ class Game:
     def start_game(self) -> None:
         """Start the game"""
         self.player_playing = self.player_1
+        self.ai_cpp_1.resetBoard()
+        self.ai_cpp_2.resetBoard()
         gaming = GamingScreen(
             self.var,
             self.screen,
@@ -469,7 +473,7 @@ class Game:
         )
         pg.display.update()
         while (
-            self.who_is_winner() == self.player_null and self.num_turn < self.board.size
+            self.who_is_winner() == self.player_null and self.num_turn < self.board.size and self.status == self.allowed_status["gaming"]
         ):
             if self.player_playing == self.player_1:
                 if self.player_1.online:
@@ -478,7 +482,7 @@ class Game:
                     row = self.board.find_free_slot(col)
                     assert row != -1, ValueError("the row must be valid")
                 else:
-                    col, row = self.player_1.play(
+                    col, row, cancel = self.player_1.play(
                         self.board, gaming, self.volume, self.ai_cpp_1
                     )
                     if self.player_2.online:
@@ -490,20 +494,29 @@ class Game:
                     assert col < 10, ValueError(f"The code is not correct {col}")
                     row = self.board.find_free_slot(col)
                 else:
-                    col, row = self.player_2.play(
+                    col, row, cancel = self.player_2.play(
                         self.board, gaming, self.volume, self.ai_cpp_2
                     )
                     if self.player_1.online:
                         self.communication.send(f"00{col}")
                 self.ai_cpp_1.humanMove(col)
 
-            pg.event.get()
-            gaming.animate_fall(col, row, self.player_playing.symbol)
-            self.board[row, col] = self.player_playing.symbol.v
-            self.inverse_player()
-            self.num_turn += 1
-        self.winning_surface = gaming.board_surface
-        self.status = self.allowed_status["winning"]
+            if cancel:
+                self.status = self.allowed_status["local"]
+            for event in gaming.get_event():
+                if event.type == pg.MOUSEBUTTONUP:
+                    gaming.handle_quit(gaming.get_mouse_pos())
+                    if gaming.is_canceled(gaming.get_mouse_pos()):
+                        self.status = self.allowed_status["local"]
+            
+            if self.status == self.allowed_status["gaming"]:
+                gaming.animate_fall(col, row, self.player_playing.symbol)
+                self.board[row, col] = self.player_playing.symbol.v
+                self.inverse_player()
+                self.num_turn += 1
+        if self.status == self.allowed_status["gaming"]:
+            self.winning_surface = gaming.board_surface
+            self.status = self.allowed_status["winning"]
 
     def draw_winner(self) -> None:
         """Draw the winner on the screen, with the line that made it win"""
@@ -571,7 +584,7 @@ class Game:
         complete(bits, 2)  # \
         complete(bits, 3)  # /
 
-        pg.event.get()
+        End.get_event() # Remove all clicks that happened during the game
         pg.display.update()
         End.click()
         self.status = self.allowed_status["start"]

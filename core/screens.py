@@ -214,6 +214,10 @@ class Screen(Tools):
         if cv2.waitKey(5) & 0xFF == 13:
             self.handle_quit(self.quit_box.box.center)
 
+    def get_event(self) -> list:
+        """ Return the list of events happening """
+        return pg.event.get()
+
     def click(
         self,
         rect_play: Optional[Rect] = None,
@@ -236,7 +240,7 @@ class Screen(Tools):
                 else:
                     print("Could not use the camera, disregarding this frame")
 
-            for event in pg.event.get():
+            for event in self.get_event():
                 if event.type == pg.MOUSEBUTTONUP:
                     allow_quit = True
                 if func is not None:
@@ -263,6 +267,8 @@ class Screen(Tools):
         # When a click is made we are here
         click = self.get_mouse_pos()
         self.handle_quit(click)
+        if self.is_canceled(click):
+            return click
         if rect_play is not None:
             while not self.x_in_rect(click, rect_play, ""):
                 click = self.click(rect_play, sound, print_disk, symbol_player)
@@ -294,6 +300,8 @@ class Screen(Tools):
         if rect is None:
             return False
         if isinstance(rect, Box):
+            if rect.hide:
+                return False
             rect = rect.box
         status = (
             rect.left <= coor[0] <= rect.right and rect.top <= coor[1] <= rect.bottom
@@ -590,7 +598,6 @@ class GamingScreen(Screen):
             volume,
             camera,
             language=language,
-            cancel_box=False,
         )
         self.color_screen = self.var.white
         self.color_board = self.var.blue
@@ -604,6 +611,7 @@ class GamingScreen(Screen):
         """Paste the state of the board onto the screen"""
         self.screen.blit(self.board_surface, (self.var.padding, self.var.padding))
         self.quit_box.render(self.screen)
+        self.cancel_box.render(self.screen)
 
     def draw_board(self) -> None:
         """Draw the board on the screen (needed to be sure to see the board)"""
