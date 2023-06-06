@@ -425,7 +425,6 @@ class Game:
         )
         screen.draw_agreement_box(f"You are {gethostname()}", position=0.20, hide=False)
         self.communication.wait_for_connection()
-        print(dir(self.communication.sock))
 
         screen.all_boxes = []
         screen.screen.fill(self.var.color_options_screen)
@@ -485,7 +484,9 @@ class Game:
                 col = int(self.communication.receive())
                 if col == 201:
                     cancel = True
-                row = self.board.find_free_slot(col)
+                    row = -1
+                else:
+                    row = self.board.find_free_slot(col)
             else:
                 col, row, cancel = self.player_playing.play(self.board, gaming, self.volume)
 
