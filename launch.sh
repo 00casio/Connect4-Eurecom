@@ -13,7 +13,7 @@ if [ $? -ne 0 ]; then
 else
   echo "We need your password to install prerequisite"
   echo "sudo apt install libcairomm-1.0-dev libgirepository1.0-dev libbluetooth-dev"
-  sudo apt install libcairomm-1.0-dev libgirepository1.0-dev libbluetooth-dev
+  sudo apt install libcairomm-1.0-dev libgirepository1.0-dev libbluetooth-dev -y
 fi
 
 # Find correct Python version
@@ -55,8 +55,13 @@ fi
 
 swig -version 2>&1 1>/dev/null
 if [ $? -ne 0 ]; then
-  echo "Unable to find swig, must stop now"
-  return 255
+  echo "export $PATH='$HOME/.local/bin:$PATH'" > $HOME/.profile
+  source $HOME/.profile
+  swig -version 2>&1 1>/dev/null
+  if [ $? -ne 0 ]; then
+    echo "Unable to find swig, must stop now"
+    exit 255
+  fi
 fi
 
 # Use swig to use the C++ code in Python
