@@ -443,7 +443,7 @@ class Game:
                 self.status = self.allowed_status["gaming"]
             elif screen.x_in_rect(mouse, nop):
                 self.communication.send("103")
-                self.communication.close()
+                self.communication.sock.close()
                 force_reload = True
             elif screen.is_canceled(mouse):
                 self.status = self.allowed_status["online"]
