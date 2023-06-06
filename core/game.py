@@ -127,7 +127,7 @@ class Game:
         self.gestures = GestureController()
 
         # Communication
-        self.communication = None  # Communication()
+        self.communication = Communication()
 
         # Players
         self.player_1 = Player(self.var, 1, False, None)
@@ -418,13 +418,11 @@ class Game:
             self.communication,
             self.volume,
             self.camera,
-            quit_box=False,
-            cancel_box=False
         )
         screen.write_message(
             ["Please wait, we are waiting for someone", "to connect to us."]
         )
-        screen.draw_agreement_box([f"You are {gethostname()}"], position=0.20)
+        screen.draw_agreement_box(f"You are {gethostname()}", position=0.20, hide=False)
         self.communication.wait_for_connection()
 
         screen.screen.fill(self.var.color_options_screen)
@@ -440,7 +438,7 @@ class Game:
             if screen.x_in_rect(mouse, yes):
                 self.communication.send("102")
                 self.status = self.allowed_status["gaming"]
-            elif screen.x_in_rect(mouse, no):
+            elif screen.x_in_rect(mouse, nop):
                 self.communication.send("103")
                 force_reload = True
             elif screen.is_canceled(mouse):

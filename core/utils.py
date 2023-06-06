@@ -209,7 +209,7 @@ class Tools:
         ).render(screen)
         pg.display.update()
 
-    def draw_agreement_box(self, text: str, position: float = 0.75) -> Box:
+    def draw_agreement_box(self, text: str, position: float = 0.75, hide: bool = True) -> Box:
         """Draw a agreement box in the center of the screen at position (in %) of the height of the screen"""
         agreement = Box(
             text,
@@ -221,7 +221,7 @@ class Tools:
             ),
             align=(0, 0),
         )
-        agreement.hide = True
+        agreement.hide = hide
         self.all_boxes.append(agreement)
         agreement.render(self.screen)
         pg.display.update()

@@ -1,8 +1,7 @@
 #!/usr/bin/python3
 # -*- coding: utf-8 -*-
 
-# import bluetooth
-bluetooth = None
+import bluetooth
 import os
 from time import sleep
 
