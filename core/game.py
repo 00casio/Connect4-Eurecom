@@ -223,7 +223,6 @@ class Game:
                     print(f"Ask the other group why we received {code}")
             elif self.status == self.allowed_status["online_server"]:
                 self.wait_as_server()
-            print(self.status)
 
     def draw_start_screen(self) -> None:
         """Show the starting screen, choose between the different possinilities"""
@@ -436,7 +435,7 @@ class Game:
         screen.center_all([[msg], [yes, nop]], update=False)
         screen.reset_screen(self.var.color_options_screen)
         force_reload = False
-        while self.status == self.allowed_status["online_server"] or not force_reload:
+        while self.status == self.allowed_status["online_server"] and not force_reload:
             mouse = screen.click()
             if screen.x_in_rect(mouse, yes):
                 self.communication.send("102")
