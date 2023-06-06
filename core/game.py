@@ -405,7 +405,7 @@ class Game:
                 boxes = screen_opp.update_all_boxes()
                 index = 0
         mode = "100"
-        if self.player_1.is_ai or self.player_2.is_ai:
+        if not self.player_1.ai_cpp is None and self.player_2.ai_cpp is None:
             mode = "101"
         code = self.communication.connect(final_index, mode)
         return code
@@ -478,6 +478,7 @@ class Game:
                 assert col < 10, ValueError(f"The code is not correct {col}")
                 row = self.board.find_free_slot(col)
                 assert row != -1, ValueError("The row must be valid")
+                cancel = False
             else:
                 col, row, cancel = self.player_playing.play(self.board, gaming, self.volume)
 

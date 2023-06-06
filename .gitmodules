@@ -1,6 +1,0 @@
-[submodule "docs/Hands-Gesture"]
-	path = docs/Hands-Gesture
-	url = https://github.com/xenon-19/Gesture-Controlled-Virtual-Mouse
-[submodule "docs/connect-4-c"]
-	path = docs/connect-4-c
-	url = https://github.com/joshuaspiral/c4c.git
