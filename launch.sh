@@ -53,11 +53,11 @@ else # *UNIX
   PYTHON_HEADERS="/usr/include/python${python_ver}"
 fi
 
-swig -version 2>&1 1>/dev/null
+swig -version 1>/dev/null 2>&1 
 if [ $? -ne 0 ]; then
-  echo "export PATH='\$HOME/.local/bin:\$PATH'" >> $HOME/.profile
+  echo 'export PATH="\$HOME/.local/bin:\$PATH"' >> $HOME/.profile
   source $HOME/.profile
-  swig -version 2>&1 1>/dev/null
+  swig -version 1>/dev/null 2>&1
   if [ $? -ne 0 ]; then
     echo "Unable to find swig, must stop now"
     exit 255
