@@ -216,7 +216,7 @@ class Game:
             elif self.status == self.allowed_status["online_client"]:
                 code = self.select_opponent()
                 if code == "103":
-                    self.communication = Communication()
+                    self.communication.sock.close()
                 elif code == "102":
                     self.status = self.allowed_status["gaming"]
                 else:
@@ -424,6 +424,7 @@ class Game:
         )
         screen.draw_agreement_box(f"You are {gethostname()}", position=0.20, hide=False)
         self.communication.wait_for_connection()
+        print(dir(self.communication.sock))
 
         screen.all_boxes = []
         screen.screen.fill(self.var.color_options_screen)
@@ -442,6 +443,7 @@ class Game:
                 self.status = self.allowed_status["gaming"]
             elif screen.x_in_rect(mouse, nop):
                 self.communication.send("103")
+                self.communication.close()
                 force_reload = True
             elif screen.is_canceled(mouse):
                 self.status = self.allowed_status["online"]
