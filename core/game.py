@@ -424,14 +424,17 @@ class Game:
         )
         screen.draw_agreement_box(f"You are {gethostname()}", position=0.20, hide=False)
         self.communication.wait_for_connection()
+        print(self.communication.sock)
 
+        screen.all_boxes = []
         screen.screen.fill(self.var.color_options_screen)
-        screen.cancel_box.hide = False
-        screen.quit_box.hide = False
+        screen.draw_cancel_box()
+        screen.draw_quit_box()
         msg = Box(f"Looks like {self.communication.client_info} want to play")
         yes = Box("Accept")
         nop = Box("Reject")
-        screen.center_all([[msg], [yes, nop]])
+        screen.center_all([[msg], [yes, nop]], update=False)
+        screen.reset_screen(self.var.color_options_screen)
         force_reload = False
         while self.status == self.allowed_status["online_server"] or not force_reload:
             mouse = screen.click()

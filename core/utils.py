@@ -181,7 +181,7 @@ class Tools:
             )
         return total_sizes
 
-    def center_all(self, list_lines_boxes: list[list[Box]]) -> None:
+    def center_all(self, list_lines_boxes: list[list[Box]], update: bool=True) -> None:
         n = len(list_lines_boxes)
         lines_size = self.compute_total_size(list_lines_boxes)
         c = self.var.center_screen
@@ -198,7 +198,8 @@ class Tools:
                 x += box.spacings[0] + box.spacings[2] + box.text_r.get_size()[0] + os
                 self.all_boxes.append(box)
             y += lines_size[i][1] + os
-        pg.display.update()
+        if update:
+            pg.display.update()
 
     def highlight_box(
         self, box: Box, color_box: Color, screen: Surface, color_text: Color
