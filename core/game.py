@@ -223,6 +223,7 @@ class Game:
                     print(f"Ask the other group why we received {code}")
             elif self.status == self.allowed_status["online_server"]:
                 self.wait_as_server()
+            print(self.status)
 
     def draw_start_screen(self) -> None:
         """Show the starting screen, choose between the different possinilities"""
@@ -424,7 +425,6 @@ class Game:
         )
         screen.draw_agreement_box(f"You are {gethostname()}", position=0.20, hide=False)
         self.communication.wait_for_connection()
-        print(self.communication.sock)
 
         screen.all_boxes = []
         screen.screen.fill(self.var.color_options_screen)
@@ -478,7 +478,7 @@ class Game:
         ):
             if self.player_playing.online:
                 col = int(self.communication.receive())
-                assert col < 10, ValueError(f"The code is not correct {col}")
+                assert col < 10, ValueError(f"The code is not correct ({col})")
                 row = self.board.find_free_slot(col)
                 assert row != -1, ValueError("The row must be valid")
                 cancel = False
