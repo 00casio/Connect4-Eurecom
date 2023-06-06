@@ -446,6 +446,7 @@ class Game:
                 self.communication.send("103")
                 self.communication.sock.close()
                 self.communication = Communication()
+                self.communication.type = "server"
                 force_reload = True
             elif screen.is_canceled(mouse):
                 self.status = self.allowed_status["online"]
