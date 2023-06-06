@@ -476,22 +476,27 @@ class Game:
             self.who_is_winner() == self.player_null and self.num_turn < self.board.size and self.status == self.allowed_status["gaming"]
         ):
             if self.player_playing.online:
-                col = int(self.communication.receive())
-                assert col < 10, ValueError(f"The code is not correct ({col})")
-                row = self.board.find_free_slot(col)
-                assert row != -1, ValueError("The row must be valid")
                 cancel = False
+                col = int(self.communication.receive())
+                if col == 201:
+                    cancel = True
+                row = self.board.find_free_slot(col)
             else:
                 col, row, cancel = self.player_playing.play(self.board, gaming, self.volume)
 
                 # for opponent
                 if self.opponent.online:
-                    self.communication.send(f"00{col}")
+                    if cancel:
+                        self.communication.send("201")
+                    else:
+                        self.communication.send(f"00{col}")
             if self.opponent.ai_cpp is not None:
                 self.opponent.ai_cpp.humanMove(col)
 
             if cancel:
                 self.status = self.allowed_status["local"]
+                if self.opponent.online or self.player_playing.online:
+                    self.status = self.allowed_status["online"]
             for event in gaming.get_event():
                 if event.type == pg.MOUSEBUTTONUP:
                     gaming.handle_quit(gaming.get_mouse_pos())
@@ -576,4 +581,6 @@ class Game:
         End.get_event() # Remove all clicks that happened during the game
         pg.display.update()
         End.click()
+        if self.opponent.online or self.player_playing.online:
+            self.communication.sock.close()
         self.status = self.allowed_status["start"]
