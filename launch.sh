@@ -55,7 +55,7 @@ fi
 
 swig -version 2>&1 1>/dev/null
 if [ $? -ne 0 ]; then
-  echo "export \$PATH='\$HOME/.local/bin:\$PATH'" > $HOME/.profile
+  echo "export PATH='\$HOME/.local/bin:\$PATH'" >> $HOME/.profile
   source $HOME/.profile
   swig -version 2>&1 1>/dev/null
   if [ $? -ne 0 ]; then
