@@ -217,6 +217,7 @@ class Game:
                 code = self.select_opponent()
                 if code == "103":
                     self.communication.sock.close()
+                    self.communication = Communication()
                 elif code == "102":
                     self.status = self.allowed_status["gaming"]
                 else:
@@ -430,7 +431,7 @@ class Game:
         screen.screen.fill(self.var.color_options_screen)
         screen.draw_cancel_box()
         screen.draw_quit_box()
-        msg = Box(f"Looks like {self.communication.client_info} want to play")
+        msg = Box(f"Looks like {self.communication.sock.getpeername()} want to play")
         yes = Box("Accept")
         nop = Box("Reject")
         screen.center_all([[msg], [yes, nop]], update=False)
@@ -444,6 +445,7 @@ class Game:
             elif screen.x_in_rect(mouse, nop):
                 self.communication.send("103")
                 self.communication.sock.close()
+                self.communication = Communication()
                 force_reload = True
             elif screen.is_canceled(mouse):
                 self.status = self.allowed_status["online"]
