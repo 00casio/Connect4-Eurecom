@@ -474,7 +474,7 @@ class OpponentSelectionScreen(Screen):
             boxes.append(tmp)
         self.all_boxes = []
         self.screen.fill(self.var.color_options_screen)
-        if len(self.comm.connections) == 0:
+        if len(self.comm.connections) != 0:
             self.draw_agreement_box(f"We found {len(self.comm.connections)} possible opponents", position=0.20, hide=False)
         self.center_all(boxes)
         return boxes
