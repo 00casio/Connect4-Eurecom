@@ -25,34 +25,6 @@ pieces are handled, and it may slow down a lot the algorithm.
 #define SIZE_VECT 8388593
 
 
-// Adapted from PascalPons' connect 4 AI
-class Table {
-public:
-    struct Entry {
-        uint64_t id: 56;
-        int8_t value;
-    };
-    std::vector<Entry> t;
-    Table(): t(SIZE_VECT) {
-    };
-
-    void put(uint64_t id, int8_t value) {
-        int i = id % SIZE_VECT;
-        t[i].id = id;
-        t[i].value = value;
-    }
-
-    int8_t get(uint64_t id) {
-        int i = id % SIZE_VECT;
-        if (t[i].id == id) {
-            return t[i].value;
-        } else {
-            return 0;
-        }
-    }
-};
-
-
 /**
  * @brief The class that contains all information about the game
  * 
@@ -70,8 +42,7 @@ private:
     // The depth of the current move
     int current_depth = 0;
 
-    int8_t col_ordering[7] = {3, 4, 2, 5, 1, 6, 0};
-    Table transTable; // Should reverse 2GB of memory
+    int8_t col_ordering[7] = {0, 1, 2, 3, 4, 5, 6};
 
     // The bitboards for the two players
     uint64_t human_board = 0b0;
