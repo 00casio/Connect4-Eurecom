@@ -6,10 +6,10 @@ from time import time
 import libai
 import matplotlib.pyplot as plt
 
-write = False
+write = True
 plot = False
 
-nbr_test = 1
+nbr_test = 10
 max_depth = 18
 compiler = input("Compiler: ")
 id_test = input("Id: ")
@@ -28,9 +28,9 @@ for depth in range(1, max_depth + 1):
         f"{depth:3d}: done, it took {t:21.12f} seconds ({g.get_count():10d} nodes visited)"
     )
     if write:
-        with open("benchmark_result.csv", "a") as fp:
+        with open("benchs.csv", "a") as fp:
             fp.write(
-                f"{depth:5d}, {compiler:>25s}, {nbr_test:10d}, {t/nbr_test:15.10f}, {id_test:>10s}\n"
+                f"{depth:5d}, {compiler:>25s}, {nbr_test:10d}, {t/nbr_test:15.10f}, {g.get_count():10d}, {id_test:>10s}\n"
             )
     if plot:
         plt.hist(total_t, bins=100)
