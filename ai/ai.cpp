@@ -229,9 +229,9 @@ int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const 
     }
 
     int maxScore = SCORE_SOMEONE_WIN - current_depth;
-    if (int value = transTable.get(*player)) {
-        maxScore = value + result - 1;
-    }
+    // if (int value = transTable.get(*player)) {
+    //     maxScore = value + result - 1;
+    // }
     if (beta > maxScore) {
         beta = maxScore;
         if (alpha >= beta) {
@@ -270,7 +270,7 @@ int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const 
             alpha = score;
         }
     }
-    transTable.put(2**player+*opponent, alpha - result + 1);
+    // transTable.put(2**player+*opponent, alpha - result + 1);
     // 2* the value of player + the value of opponent
     return alpha;
 }
