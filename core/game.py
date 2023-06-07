@@ -494,6 +494,8 @@ class Game:
                 if self.opponent.online:
                     if cancel:
                         self.communication.send("201")
+                        self.communication.sock.close()
+                        self.communication = Communication()
                     else:
                         self.communication.send(f"00{col}")
             if self.opponent.ai_cpp is not None:

@@ -430,7 +430,7 @@ class OpponentSelectionScreen(Screen):
         volume: bool,
         camera: bool,
     ) -> None:
-        Screen.__init__(self, var, screen, gesture, volume, camera)
+        Screen.__init__(self, var, screen, gesture, volume, camera, cancel_box=False, quit_box=False)
         self.opp = None
         self.comm = comm
         self.list_connec = []
@@ -490,6 +490,8 @@ class OpponentSelectionScreen(Screen):
             )
             boxes = self.update()
             if len(boxes) == 0:
+                self.quit_box.hide = True
+                self.cancel_box.hide = True
                 self.write_message(
                     [
                         "Looks like we did not find any.",
@@ -498,6 +500,9 @@ class OpponentSelectionScreen(Screen):
                     ]
                 )
                 sleep(3)
+            else:
+                self.quit_box.hide = False
+                self.cancel_box.hide = False
         return boxes
 
 
