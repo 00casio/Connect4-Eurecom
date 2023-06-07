@@ -423,14 +423,14 @@ class Game:
         screen.write_message(
             ["Please wait, we are waiting for someone", "to connect to us."]
         )
-        screen.draw_agreement_box(f"You are {gethostname()}", position=0.20, hide=False)
+        screen.draw_agreement_box(f"You are {gethostname()}", position=0.25, hide=False)
         self.communication.wait_for_connection()
 
         screen.all_boxes = []
         screen.screen.fill(self.var.color_options_screen)
         screen.draw_cancel_box()
         screen.draw_quit_box()
-        msg = Box(f"Looks like {self.communication.sock.getpeername()} want to play")
+        msg = Box(f"Looks like {self.communication.client_info[0]} want to play")
         yes = Box("Accept")
         nop = Box("Reject")
         screen.center_all([[msg], [yes, nop]], update=False)

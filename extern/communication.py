@@ -54,7 +54,6 @@ class Communication:
         for d in nearby_devices:
             # if "connect4" in d[1]:
             self.connections.append(d)
-        
         return self.connections
 
     def connect(self, index: int, message: str) -> str:
