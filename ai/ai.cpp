@@ -228,14 +228,6 @@ int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const 
         return result - current_depth;
     }
 
-    int maxScore = SCORE_SOMEONE_WIN - current_depth;
-    if (beta > maxScore) {
-        beta = maxScore;
-        if (alpha >= beta) {
-            return beta;
-        }
-    }
-
     // Testing if the player can win with his next move
     for (int i = 0; i < NBR_COL; i++) {
         int dpRes = putPiece(player, i, heights);
