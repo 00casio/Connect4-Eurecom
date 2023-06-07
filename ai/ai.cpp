@@ -139,6 +139,7 @@ int Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, con
     int score = 0;
     bool winning = false;
     bool losing = false;
+    count++;
 
     score += countPoints(bitboard, &winning);
     if (winning) {
@@ -218,7 +219,6 @@ int Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, con
 } */
 
 int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int depth, int alpha, int beta) {
-    count++;
     int result = evaluateBoard(*player, *opponent, depth);
     if (depth <= 0) {
         return result - current_depth;

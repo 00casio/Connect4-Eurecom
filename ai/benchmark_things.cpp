@@ -1,6 +1,7 @@
 #include <cstdint>
 #include <ctime>
 #include <random>
+#include <cassert>
 
 int method_doing_1(const uint32_t bitboard) {
     int count = 0;
@@ -20,7 +21,7 @@ int method_doing_1(const uint32_t bitboard) {
 int method_doing_2(const uint32_t bitboard) {
     int count = 0;
     int gaëtan = 1;
-    for (int i = 0; i < 42; i++) {
+    for (int i = 0; i < 64; i++) {
         if ((gaëtan & bitboard) != 0) {
             count++;
         }
@@ -43,18 +44,23 @@ int main() {
     uint64_t fin = 18446744073709551615;
     double t_1 = 0;
     double t_2 = 0;
-    clock_t start;
-    clock_t end;
+    int result_1 = 0;
+    int result_2 = 0;
+    clock_t start_1;
+    clock_t end_1;
+    clock_t start_2;
+    clock_t end_2;
     for (int i = 0; i < 10000000; i++) {
         a = random(debut, fin);
-        start = clock();
+        start_1 = clock();
         method_doing_1(a);
-        end = clock();
-        t_1 += (double) (end - start) / CLOCKS_PER_SEC;
-        start = clock();
+        end_1 = clock();
+        start_2 = clock();
         method_doing_2(a);
-        end = clock();
-        t_2 += (double) (end - start) / CLOCKS_PER_SEC;
+        end_2 = clock();
+
+        t_1 += (double) (end_1 - start_1) / CLOCKS_PER_SEC;
+        t_2 += (double) (end_2 - start_2) / CLOCKS_PER_SEC;
         if (i%1000 == 0) {
             printf("\r%i", i);
         }

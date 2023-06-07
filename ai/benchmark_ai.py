@@ -7,15 +7,15 @@ import libai
 import matplotlib.pyplot as plt
 
 write = False
-plot = True
+plot = False
 
-nbr_test = 10000
-max_depth = 13
+nbr_test = 1
+max_depth = 18
 compiler = input("Compiler: ")
 id_test = input("Id: ")
 for depth in range(1, max_depth + 1):
     total_t = []
-    for i in range(1, nbr_test):
+    for i in range(1, nbr_test+1):
         g = libai.Game()
         start = time()
         trash = g.aiMove(depth)
