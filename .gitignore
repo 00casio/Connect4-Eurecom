@@ -42,6 +42,7 @@ venv
 **.o
 
 ai/libai.py
+ai/plot.py
 
 # VSCode
 .vscode
