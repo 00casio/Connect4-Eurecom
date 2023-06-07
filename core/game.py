@@ -494,8 +494,6 @@ class Game:
                 if self.opponent.online:
                     if cancel:
                         self.communication.send("201")
-                        self.communication.sock.close()
-                        self.communication = Communication()
                     else:
                         self.communication.send(f"00{col}")
             if self.opponent.ai_cpp is not None:
@@ -504,6 +502,8 @@ class Game:
             if cancel:
                 self.status = self.allowed_status["local"]
                 if self.opponent.online or self.player_playing.online:
+                    self.communication.sock.close()
+                    self.communication = Communication()
                     self.status = self.allowed_status["online"]
             for event in gaming.get_event():
                 if event.type == pg.MOUSEBUTTONUP:
