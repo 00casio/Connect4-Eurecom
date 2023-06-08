@@ -147,11 +147,11 @@ double Game::minimax(unsigned long long *player, unsigned long long *opponent, u
             if (score > bestScore) {
                 bestScore = score;
             }
-            if (alpha > score) {
-                alpha = score;
-            }
-            if (beta <= alpha) {
+            if (bestScore > beta) {
                 break;
+            }
+            if (alpha < score) {
+                alpha = score;
             }
         }
         return bestScore;
@@ -169,11 +169,11 @@ double Game::minimax(unsigned long long *player, unsigned long long *opponent, u
             if (score < bestScore) {
                 bestScore = score;
             }
-            if (beta < score) {
-                beta = score;
-            }
-            if (beta <= alpha) {
+            if (bestScore < alpha) {
                 break;
+            }
+            if (beta > score) {
+                beta = score;
             }
         }
         return bestScore;
@@ -202,12 +202,15 @@ int Game::aiSearchMove(unsigned long long *player, unsigned long long *opponent,
         if (dpRes == NOT_ALLOWED) {
             continue;
         }
-        int score = minimax(opponent, player, heights, depth-1, false, alpha, beta);
+        int score = minimax(player, opponent, heights, depth-1, false, alpha, beta);
         removePiece(player, i, heights);
 
         if (score > alpha) {
             alpha = score;
             bestMove = i;
+        }
+        if (beta <= alpha) {
+            break;
         }
     }
     return bestMove;

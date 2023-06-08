@@ -10,7 +10,7 @@ write = True
 plot = False
 
 nbr_test = 10
-max_depth = 10
+max_depth = 14
 compiler = "clang++16 O3"
 id_test = input("Id: ")
 for depth in range(1, max_depth + 1):
