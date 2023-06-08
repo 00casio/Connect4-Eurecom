@@ -1,9 +1,10 @@
-\documentclass[12pt, a4paper, oneside]{report}
+\documentclass[11pt, a4paper, oneside]{report}
 \usepackage[utf8]{inputenc}
 % \usepackage{CormorantGaramond}
 \usepackage{hyperref}
 \usepackage{booktabs}
 \usepackage{graphicx}
+\usepackage{anysize}
 \graphicspath{ {./docs/} }
 
 \hypersetup{
@@ -19,6 +20,7 @@
 \date{}
 
 \begin{document}
+	\marginsize{2.5cm}{2.5cm}{3cm}{3cm}
 	\maketitle
 	\tableofcontents
 
@@ -41,7 +43,7 @@
 		\item A version of Python (preferably >= 3.11),
 		\item A C++ compiler (\textit{clang++} produces better binary but \textit{g++} works too),
 		\item A working bash interpreter,
-		\item A Raspberry Pi with a camera module, a Bluetooth chip, and at least 2 GB of RAM. We made sure that the code works on raspbian 32 bits
+		\item A Raspberry Pi under Raspbian64 with a camera module, a Bluetooth chip, and at least 2 GB of RAM.\@
 	\end{itemize}
 	All those requirements are easy to fulfil, and you should not have anything to install on your own. \\
 
@@ -87,7 +89,7 @@
 	We decided to represent the state of a game using 64 bits numbers. This representation is called a bitboard. The presence of a token in a position is translated into a 1 in its place on the bitboard. \\
 	We are using an 8 by 8 board (so that it fits into an \textit{uint64\_t} object), with the top row and right—most column always empty. Figure~\ref{fig:example_game_state} shows an example of a game state with the bitboard corresponding to the first ('x') and second ('o') player.
 
-	\begin{figure}[h]
+	\begin{figure}[ht]
 		\includegraphics[scale=0.4]{example.png}
 		\centering
 		\caption{Example of a game state (without empty top row)}\label{fig:example_game_state}
@@ -110,7 +112,7 @@
 	Now that we have created a structure in which the states of the boards would be represented, we have to choose the method to explore this jungle of possibilities and find the best possible path each time. For that, we used the minimax algorithm. It is a recursive algorithm which is implemented in decision—making game and game theory fields. It tries to analyse the possible paths and returns the optimal move for a player assuming that the opponent is also playing optimally. \\
 
 	To accomplish that, there is a maximizing player (with which we try to have as many points as possible) and a minimizing player (with which we try to have as fewer points as possible). Both are using the same heuristic function. The algorithm performs a depth—first search (DFS), it will explore the complete game tree as deep as possible, all the way down to the leafs. \\
-	The minimax was not hard to implement, and after this stage we had a decent AI. However, the computational time was way too long, so we had to implement other features and optimizations in our code. \\
+	The minimax was not hard to implement, and after this stage we had a decent AI.\@ However, the computational time was way too long, so we had to implement other features and optimizations in our code. \\
 
 	\subsection{Fourth stage, Features and Optimizations}
 	Now that we have a working algorithm, we can focus on improving it. \\
@@ -132,10 +134,10 @@
 	— We used negamax, a minimax variant make use of the zero—sum property of the game. This reduced the number of comparison needed at each step. \\
 
 	Several other small computing time related optimizations were made. In order to judge those optimizations several benchmarks were made.
-	\begin{figure}[h]
+	\begin{figure}[ht]
 		\includegraphics[scale=0.4]{example.png}
 		\centering
-		\caption{MAKE THE FIGURE YOU FAJ\^RÀIZÂ\$É"=IRÇÀFGZA SLOB!}\label{fig:ai_benchmarks}
+		\caption{MAKE THE FIGURE YOU FAJ\^RÀIZÂ\$É\"=IRÇÀFGZA SLOB!}\label{fig:ai_benchmarks}
 	\end{figure}
 
 	Finally, our artificial intelligence was made, and the deeper the level, the harder it was for us to beat it. Even when losing, it gave a truly satisfying result. But how could we judge the efficiency of our artificial intelligence ? We decided to do so by creating a small set of criteria:
@@ -147,8 +149,8 @@
 	— Finally, for a given depth level, the AI who starts first must beat an AI with the same depth. \\
 
 	As you can see in Figure~\ref{fig:summary_criteria}, they are not always respected, but most of the time it is the case.
-	\begin{figure}[h]
-		\includegraphics[scale=1]{result_criteria.png}
+	\begin{figure}[ht]
+		\includegraphics[scale=0.7]{result_criteria.png}
 		\centering
 		\caption{Summary of the evaluation criteria 2 and 3}\label{fig:summary_criteria}
 	\end{figure}
@@ -175,7 +177,7 @@
 	
 	It's worth noting that Bluetooth has limitations in terms of range compared to other wireless technologies like Wi—Fi Ad—Hoc that we implemented at first. However, for a localized gaming scenario like Connect 4, where the Raspberry Pis are in close proximity, the limited range of Bluetooth is typically not a significant issue. \\
 
-	For the transport layer, we use RFCOMM (Radio Frequency Communication) which meets the reliability criteria as the TCP protocol does and allows us to maintain the integrity of the game state as the order of each move is essential for a game like Connect 4. It is a protocol based on L2CAP. RFCOMM “connect4” service is advertised on the network (using an UUID, the same for everyone). 
+	For the transport layer, we use RFCOMM (Radio Frequency Communication) which meets the reliability criteria as the TCP protocol does and allows us to maintain the integrity of the game state as the order of each move is essential for a game like Connect 4. It is a protocol based on L2CAP.\@ RFCOMM “connect4” service is advertised on the network (using an UUID, the same for everyone). 
 
 	\subsection{Codetable}
 	\begin{tabular}{ |c|c|c| }
