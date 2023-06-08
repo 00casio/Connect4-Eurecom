@@ -2,6 +2,7 @@
 \usepackage[utf8]{inputenc}
 % \usepackage{CormorantGaramond}
 \usepackage{hyperref}
+\usepackage{booktabs}
 \usepackage{graphicx}
 \graphicspath{ {./docs/} }
 
@@ -178,16 +179,16 @@
 
 	\subsection{Codetable}
 	\begin{tabular}{|l|c|r|}
-		\hline
+		\toprule
 		Code & Meaning & Actions upon reception \\
-		\hline
+		\midrule
 		000 - 006 & Column number & Put token into right column \\
 		100 & Asking for a game (Asker will play in human mode) & Respond with 102 or 103 \\
 		101 & Asking for a game (Asker will play in AI mode) & Respond with 102 or 103 \\
-		102 & Game accepted & Launch grid, wait for asker to play
-		103 & Game refused & No required action 
-		201 & Game aborted by user (during a game) & End game  
-		\hline
+		102 & Game accepted & Launch grid, wait for asker to play \\
+		103 & Game refused & No required action \\
+		201 & Game aborted by user (during a game) & End game \\
+		\bottomrule
 	  \end{tabular}
 
 	\subsection{Code source}
@@ -195,19 +196,19 @@
 
 	There are error-handling for the cases where the player tries to place a token in a column that doesn’t exist (like column 0 or 8) or a column that is already full. \\
 
-	Here is an explanation of each method’s role in the ‘Communication’ class which overall allows the device to act as either a server or a client and exchange data with other Bluetooth devices: \\
+	Here is an explanation of each method’s role in the `Communication' class which overall allows the device to act as either a server or a client and exchange data with other Bluetooth devices: \\
 
-	- The __init__ method initializes various attributes of the Communication class, including a UUID (Universally Unique Identifier), a list of connections, and a Bluetooth socket. \\
+	- The `\_\_init\_\_' method initializes various attributes of the Communication class, including a UUID (Universally Unique Identifier), a list of connections, and a Bluetooth socket. \\
 
-	- The send method sends a string value over the Bluetooth connection. The value is encoded as bytes before being sent. \\
+	- The `send' method sends a string value over the Bluetooth connection. The value is encoded as bytes before being sent. \\
 
-	- The receive method receives data from the Bluetooth connection and decodes it into a string. \\
+	- The `receive' method receives data from the Bluetooth connection and decodes it into a string. \\
 
-	- The wait_for_connection method is used when the script is running in server mode. It binds the Bluetooth socket to a random RFCOMM channel and starts listening for incoming connections. Once a connection is established, it prints the client's information and ensures before starting the game that the received code is either "100" or "101". \\
+	- The `wait\_for\_connection' method is used when the script is running in server mode. It binds the Bluetooth socket to a random RFCOMM channel and starts listening for incoming connections. Once a connection is established, it prints the client's information and ensures before starting the game that the received code is either “100” or “101”. \\
 
-	- The list_connections method is used when the script is running in client mode. It discovers nearby Bluetooth devices and populates the connections list with their information. \\
+	- The `list\_connections' method is used when the script is running in client mode. It discovers nearby Bluetooth devices and populates the connections list with their information. \\
 
-	- The connect method is used to connect to a server in client mode. It takes an index indicating the desired connection from the connections list and a message to send to the server. It searches for the server with the specified UUID and address, establishes a connection, sends the message, and returns a code indicating the success or failure of the connection. \\
+	- The `connect' method is used to connect to a server in client mode. It takes an index indicating the desired connection from the connections list and a message to send to the server. It searches for the server with the specified UUID and address, establishes a connection, sends the message, and returns a code indicating the success or failure of the connection. \\
 	
 	\chapter{Conclusion}
 \end{document}
