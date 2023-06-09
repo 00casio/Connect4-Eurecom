@@ -25,12 +25,12 @@
 	\tableofcontents
 
 	\chapter{Introduction}
-	The Connect 4 game is a classical and well—known game. It is often used as a mean to evaluate how comfortable someone is in it's programming capabilities. \\
+	The Connect 4 game is a classical and well-known game. It is often used as a mean to evaluate how comfortable someone is in it's programming capabilities. \\
 	Today, we are the one evaluated on it, but with a few twists. We have to create an AI to play the game, communicate with another player wirelessly, and accept some signs that someone does to a camera as an input. \\
-	This represents a four—way challenge.
+	This represents a four-way challenge.
 	\begin{itemize}
-		\item First, we have to code the logic behind the Connect 4 in a way that makes it easy for the other parts to work with.
-		\item Secondly, our AI needs to be fast, robust, and precise.\footnote{More on those terms in the dedicated section (\ref{AI_section}).} (change them if needed)
+		\item Firstly, we have to code the logic behind the Connect 4 in a way that makes it easy for the other parts to work with.
+		\item Secondly, our AI needs to be fast, and robust.
 		\item Thirdly, we have to choose some gestures, make it fast and easy to use.
 		\item Last but not least, we need to define the protocols and technologies used to communicate.
 	\end{itemize}
@@ -52,7 +52,7 @@
 	If the script does not find something, then it prints it and launches the program with some options disabled.
 
 	\section{Indications}
-	Once the program opened, you should be able to understand easily what to do, and how to do it. However, if it is needed, here is the explanation about the different screens of the game. \\
+	Once the program opens, you should be able to understand easily what to do, and how to do it. However, if it is needed, here is the explanation about the different screens of the game. \\
 
 	This first screen displays to you the menu. You may go to the options or play menu. \\
 	\hspace*{1cm} In the options screen, you can choose the language you want the program to use, if you want to use the camera, if you want to have sound when playing. To change those, just click on the relevant icon. \\
@@ -81,13 +81,13 @@
 
 	\section{AI}\label{AI_section}
 
-	We went through several stages while implementing the artificial intelligence. We improved the code step—by—step in order to have the best behaviour possible. \\
+	We went through several stages while implementing the artificial intelligence. We improved the code step-by-step in order to have the best behaviour possible. \\
 
 	\subsection{First stage, Basic functionalities}
 
 	The first stage was very simple, we had to implement some basic functions. \\
 	We decided to represent the state of a game using 64 bits numbers. This representation is called a bitboard. The presence of a token in a position is translated into a 1 in its place on the bitboard. \\
-	We are using an 8 by 8 board (so that it fits into an \textit{uint64\_t} object), with the top row and right—most column always empty. Figure~\ref{fig:example_game_state} shows an example of a game state with the bitboard corresponding to the first ('x') and second ('o') player.
+	We are using an 8 by 8 board (so that it fits into an \textit{uint64\_t} object), with the top row and right-most column always empty. Figure~\ref{fig:example_game_state} shows an example of a game state with the bitboard corresponding to the first ('x') and second ('o') player.
 
 	\begin{figure}[ht]
 		\includegraphics[scale=0.4]{example.png}
@@ -109,15 +109,15 @@
 
 	First, we decided to implement a decisional tree. The root of the tree is our starting game state, each branch is a possible move, and each subsecant node is the game state should we follow this path. This tree has all game states until a depth chosen before starting the exploration. There are at most 7 branches for each state, and the player playing switches at every depth. \\
 
-	Now that we have created a structure in which the states of the boards would be represented, we have to choose the method to explore this jungle of possibilities and find the best possible path each time. For that, we used the minimax algorithm. It is a recursive algorithm which is implemented in decision—making game and game theory fields. It tries to analyse the possible paths and returns the optimal move for a player assuming that the opponent is also playing optimally. \\
+	Now that we have created a structure in which the states of the boards will be represented, we have to choose the method to explore this jungle of possibilities and find the best possible path each time. For that, we used the minimax algorithm. It is a recursive algorithm which is implemented in decision-making game and game theory fields. It tries to analyse the possible paths and returns the optimal move for a player assuming that the opponent is also playing optimally. \\
 
-	To accomplish that, there is a maximizing player (with which we try to have as many points as possible) and a minimizing player (with which we try to have as fewer points as possible). Both are using the same heuristic function. The algorithm performs a depth—first search (DFS), it will explore the complete game tree as deep as possible, all the way down to the leafs. \\
+	To accomplish that, there is a maximizing player (with which we try to have as many points as possible) and a minimizing player (with which we try to have as fewer points as possible). Both are using the same heuristic function. The algorithm performs a depth-first search (DFS), it will explore the complete game tree as deep as possible, all the way down to the leafs. \\
 	The minimax was not hard to implement, and after this stage we had a decent AI.\@ However, the computational time was way too long, so we had to implement other features and optimizations in our code. \\
 
 	\subsection{Fourth stage, Features and Optimizations}
 	Now that we have a working algorithm, we can focus on improving it. \\
 
-	First, we implemented alpha—beta pruning. It introduces a score window [alpha, beta] within which the actual score of the game state is searched. Thus, we do not have to explore all paths and compute scores associated with boards we know to be worse than what we have already explored. It allows us to prune the search tree on some conditions. \\
+	At first, we implemented alpha-beta pruning. It introduces a score window [alpha, beta] within which the actual score of the game state is searched. Thus, we do not have to explore all paths and compute scores associated with boards we know to be worse than what we have already explored. It allows us to prune the search tree on some conditions. \\
 	There are 3 possible cases:
 
 	— The score of the position is within the window, the function returns the exact score.
@@ -129,7 +129,7 @@
 	
 	— We translated the minimax algorithm in C++ to reduce the overhead and thus the computing time,
 
-	— We implemented column ordering: explore the columns starting from the middle and expanding one by one to the sides (usually, the middle column gives better odds at winning, thus furthering the improvements made by alpha—beta pruning),
+	— We implemented column ordering: explore the columns starting from the middle and expanding one by one to the sides (usually, the middle column gives better odds at winning, thus furthering the improvements made by alpha-beta pruning),
 
 	— We used negamax, a minimax variant make use of the zero-sum property of the game. This reduced the number of comparison needed at each step. \\
 
@@ -148,7 +148,7 @@
 
 	— Finally, for a given depth level, the AI who starts first must beat an AI with the same depth. \\
 
-	As you can see in Figure~\ref{fig:summary_criteria}, they are not always respected, but most of the time it is the case.
+	As you can see in Figure~\ref{fig:summary_criteria}, they are not always respected (except for the 1st criterion), but most of the time it is the case.
 	\begin{figure}[ht]
 		\includegraphics[scale=0.7]{result_criteria.png}
 		\centering
@@ -156,7 +156,7 @@
 	\end{figure}
 
 	\section{Gestures}
-	In the gesture part, we used the MediaPipe library for hand tracking. It provides us with pre—trained models and APIs to accurately track the position of interest points (landmarks) of the hand. \\
+	In the gesture part, we used the MediaPipe library for hand tracking. It provides us with pre-trained models and APIs to accurately track the position of interest points (landmarks) of the hand. \\
 
 	To classify the gestures, we used mathematical functions that analysed the shape of the landmarks. These functions utilize the Euclidean distance between the landmarks to compute whether the hand forms a V, an open palm, or a fist. This approach allows us to recognize, differentiate between the gestures, and link a command with a gesture. \\
 	For example, to detect the V shape, we measure the distances between the landmarks of the thumb, index, middle, and ring finger. If the distance between the thumb and index is larger than the distance between the other fingers, we classify it as a V shape gesture. \\
@@ -167,19 +167,20 @@
 
 	During the development process, we encountered an initial challenge with lag when using continuous control on the Raspberry Pi which has limited RAM resources compared to desktop computers. To address this issue, we temporarily switched to discrete control, where each gesture corresponded to a discrete action, such as moving the game disk left or right by only one displacement or performing a click. However, after optimizing the code, we were able to reintroduce continuous control, ensuring a minimum lag experience. \\
 
-	Overall, by combining the capabilities of MediaPipe for hand tracking, mathematical functions for landmark analysis, PyAutoGUI for mouse control, and OpenCV for image processing, we successfully implemented an interactive gesture—based interface for controlling the Connect 4 game. \\
+	Overall, by combining the capabilities of MediaPipe for hand tracking, mathematical functions for landmark analysis, PyAutoGUI for mouse control, and OpenCV for image processing, we successfully implemented an interactive gesture-based interface for controlling the Connect 4 game. \\
 
 	\section{Communication}
 	\subsection{Goal and protocol choices}
-	The goal here was to set up and choose an effective inter—device communication protocol to play with two different Raspberry Pis and to communicate the position played. We, at first, began tests using the widely used TCP/IP protocol paired with a wireless protocol set up on the Raspberry Pi, allowing it to communicate with another one without the need for network infrastructure. The choice was made to begin tests with the use of WIFI Ad—Hoc to be able to play even without being connected to a router: every device has a fixed IP address and network packets can be send directly from one device to another when it is reachable. \\
+	The goal was to set up and choose an effective inter-device communication protocol to play with two different Raspberry Pi and to communicate the position played. At first, we made tests using the widely used TCP/IP protocol paired with a wireless technology set up on the Raspberry Pi. It enables communication with another without the need for network infrastructure. Our first choice was to use Wi-Fi Ad-Hoc, so we could play even without being connected to a router: every device has a fixed IP address and network packets can be sent directly from one device to another when it is reachable. \\
 
-	However, it was finally decided to implement Bluetooth instead for its simplicity of use and installation regarding of the existing Python library. Bluetooth has the advantage to be low energy consuming and to already provide many tools to handle the advertisement and discovery process of the devices. We use bluetooth (through bluez on Linux) and the python library wrapping bluez is PyBluez. \\
+	However, it was finally decided to implement Bluetooth instead, for its simplicity of use and installation regarding of the existing Python library. Bluetooth has the advantage to be low energy consuming and to already provide many tools to handle the advertisement and discovery process of the devices. We use Bluetooth through BlueZ on Linux and the library wrapping for Python is PyBluez. \\
 	
-	It's worth noting that Bluetooth has limitations in terms of range compared to other wireless technologies like Wi—Fi Ad—Hoc that we implemented at first. However, for a localized gaming scenario like Connect 4, where the Raspberry Pis are in close proximity, the limited range of Bluetooth is typically not a significant issue. \\
+	It's worth noting that Bluetooth has limitations in terms of range compared to other wireless technologies like Wi-Fi Ad-Hoc. However, for a localized gaming scenario like we were in, where the Raspberry Pi are near each other, the limited range of Bluetooth is not a significant issue. \\
 
-	For the transport layer, we use RFCOMM (Radio Frequency Communication) which meets the reliability criteria as the TCP protocol does and allows us to maintain the integrity of the game state as the order of each move is essential for a game like Connect 4. It is a protocol based on L2CAP.\@ RFCOMM “connect4” service is advertised on the network (using an UUID, the same for everyone). 
+	For the transport layer, we use RFCOMM (Radio Frequency COMMunication) a protocol based on L2CAP, which meets the reliability criteria like the TCP protocol does. This allows us to maintain the integrity of the game state as the order of each move is essential for Connect 4.\@ RFCOMM “connect4” service is advertised on the network (using a UUID, the same for everyone).
 
 	\subsection{Codetable}
+	The data that can be sent and received and their meanings are displayed in the following table.
 	\begin{tabular}{ |c|c|c| }
 		\toprule
 		Code & Meaning & Actions upon reception \\
@@ -194,14 +195,18 @@
 	  \end{tabular}
 
 	\subsection{Code source}
-	In order for devices to be recognizable for each other and filter other Bluetooth devices, the human-readable name of the device have a defined prefix (`connect4—'). A timeout of 1 minute for each packet was installed: if no response is given, the socket is closed. \\
-	Error—handling behaviour are in place in the interface for the cases where the player tries to place a token in a column that doesn’t exist (like column 0) or one that is already full. \\
+	In order for devices to be recognizable for each other and filter other Bluetooth devices, the human-readable name of the device must have a defined prefix (`connect4-'). A timeout of 1 minute for each packet was installed: if no response is given, the socket is closed. \\
+	Error-handling behaviour are in place in the interface for the cases where the player tries to place a token in a column that doesn’t exist (like column 0) or one that is already full. \\
 
 	The communication process takes place in a dedicated class, which has methods defined for all behaviour we may want. \\
-	All values used in both the client and server mode are initialized in the aptly named `\_\_init\_\_' method. The `send' and `receive' methods are used to send and receive data using the socket, while the `wait\_for\_connection' method is ued in server mode to wait for a connection, what a shock. \\
+	All values used in both the client and server mode are initialized in the aptly named `\_\_init\_\_' method. The `send' and `receive' methods are used to send and receive data using the socket, while the `wait\_for\_connection' method is used in server mode to wait for a connection, what a shock. \\
 	Finally, `list\_connections' and `connect' are used by the client to list all possible connections and connect to a server. Those can only be used when in client mode.
 	
 	\chapter{Conclusion}
-	
-\end{document}
+	As we said in the AI part, our AI is not yet perfect. Trying to make it better (faster, stronger) would be a possible improvement. \\
+	The interface can always be improved (especially the design part), by making it more customizable, adding languages, improved sprites, and such. \\
+	The hand gesture recognition part could be made lighter and smoother to be made less on a burden on the Raspberry Pi. \\
+	The communication could be improved by allowing to choose between different protocols and means of communication depending on where the opponent is located (same room, same network, different country). \\
 
+	This project made us think about and work around limitations of the hardware, use previous and ongoing courses.
+\end{document}
