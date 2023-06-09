@@ -90,18 +90,18 @@ class Variables:
                     "Rydych yn deffro'r ddraig goch",
                 ],
                 "options_play_local": "Chwarae",
-                "options_play_online": "Chwarae 2 [to change]",
+                "options_play_online": "Ar-lein",
                 "options_options": "Dewisiadau",
                 "options_play_HvH": "Dynol vs. Dynol",
                 "options_play_HvAI": "Dynol vs. Ddraig",
                 "options_play_AIvAI": "Welwn ni chi yn uffern",
-                "options_difficulty_HvAI": "Choose your poison",
-                "options_difficulty_AIvAI": "How badly do you want this game to go ?",
-                "confirmation_button": "Sarah Connor ?",
-                "cancel_box": "Return",
-                "quit_box": "Quit",
-                "message_quit": "You chose to quit the game\nYou are disapointing me",
-                "text_levels": "Level",
+                "options_difficulty_HvAI": "Dewiswch eich gwenwyn",
+                "options_difficulty_AIvAI": "Faint ydych chi am gael eich curo ?",
+                "confirmation_button": "Gwneud Geraint yn falch",
+                "cancel_box": "Dychwelyd",
+                "quit_box": "Ymddiswyddo",
+                "message_quit": "Byddai gan Aeronwen gywilydd ohonoch chi",
+                "text_levels": "Lefel",
             },
         }
 
@@ -214,6 +214,7 @@ class Variables:
         self.image_english = "assets/english.svg"
         self.image_french = "assets/french.svg"
         self.image_cat = "assets/cat.png"
+        self.image_welsh = "assets/welsh.svg"
         self.image_cat_tails = "assets/cat/tails.png"
         self.image_cat_heads = "assets/cat/heads_1.png"
 

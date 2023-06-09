@@ -45,7 +45,7 @@ class Config:
 
     def load_language(self, language: str) -> None:
         """Load the correct language in the variables"""
-        if language not in ["en", "fr", "cat"]:
+        if language not in list(self.var.texts):
             print("This language is not available.\nI will use English")
             language = "en"
         self.var.boxAI_text_levels = self.var.texts[language]["boxAI_text_levels"]

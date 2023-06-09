@@ -17,7 +17,7 @@ from core.screens import (
     Screen,
     Screen_AI,
 )
-from core.structure import Board, Node
+from core.structure import Board
 from core.utils import Box, Config, Symbol
 from core.variables import Rect, Surface, Variables
 from extern.communication import Communication
@@ -271,6 +271,8 @@ class Game:
                 self.conf.load_language("fr")
             elif options.x_in_rect(click, options.flags[2]):
                 self.conf.load_language("cat")
+            elif options.x_in_rect(click, options.flags[3]):
+                self.conf.load_language("wls")
             options.reset_options_screen()
 
     def draw_play_local_options(self) -> None:
