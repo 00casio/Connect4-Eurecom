@@ -5,6 +5,7 @@
 */
 
 #include "ai.h"
+#include <cstdint>
 
 int Game::putPiece(uint64_t *player, const int col, uint8_t *heights) {
     if (heights[col] > MAX_ALLOWED_HEIGHT) {
@@ -24,13 +25,10 @@ void Game::removePiece(uint64_t *player, const int col, uint8_t *heights) {
 
 int Game::countNbrOne(const uint64_t bitboard) {
     int count_one = 0;
-    int64_t gaëtan = 1;
-    for (int i = 0; i < NBR_LINE; i++) {
-        for (int j = 0; j < NBR_COL; j++) {
-            if ((gaëtan & bitboard) != 0) {
-                count_one++;
-            }
-            gaëtan <<= 1;
+    int gaëtan = 1;
+    for (int i = 0; i < 64; i++) {
+        if ((gaëtan & bitboard) != 0) {
+            count_one++;
         }
         gaëtan <<= 1;
     }
@@ -143,14 +141,14 @@ int Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, con
 
     score += countPoints(bitboard, &winning);
     if (winning) {
-        return SCORE_SOMEONE_WIN;
+        return SCORE_SOMEONE_WIN - current_depth;
     }
     score -= countPoints(oppBitboard, &losing);
     if (losing) {
-        return - SCORE_SOMEONE_WIN;
+        return - SCORE_SOMEONE_WIN + current_depth;
     }
 
-    // if board is maxed out (excluding top row)
+    // if board is maxed out (excluding 2 top row and right-most column)
     if ((bitboard | oppBitboard) == 280371153272574) {
         return 0;
     }
@@ -161,71 +159,23 @@ int Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, con
     return 111;
 }
 
-/* int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int max_depth, double alpha, double beta) {
-// double Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int depth, const int sign_result, double alpha, double beta) {
-    count++;
-    if (this->current_depth >= NBR_COL*NBR_LINE) {
-        return 0;
-    }
-    // if (max_depth <= 0) {
-    //     return evaluateBoard(*player, *opponent, 0);
-    // }
-
-    bool winning = false;
-    for (int col = 0; col < NBR_COL; col++) {
-        int dpRes = putPiece(player, col, heights);
-        if (dpRes == NOT_ALLOWED) {
-            continue;
-        }
-        countPoints(*player, &winning);
-        removePiece(player, col, heights);
-        if (winning) {
-            // return (NBR_COL*NBR_LINE + 1 - this->current_depth)/2;
-            return INFINITY;
-        }
-    }
-
-    int maxScore = (NBR_COL*NBR_LINE - 1 - this->current_depth)/2;
-    if (int value = transTable.get(*player)) {
-        maxScore = value + MIN_SCORE - 1;
-    }
-    if (beta > maxScore) {
-        beta = maxScore;
-        if (alpha >= beta) {
-            return beta;
-        }
-    }
-
-    // int bestScore = - NBR_COL*NBR_LINE;
-    for (int i = 0; i < NBR_COL; i++) {
-        int col = col_ordering[i];
-        int dpRes = putPiece(player, col, heights);
-        if (dpRes == NOT_ALLOWED) {
-            continue;
-        }
-        double score = - negamax(opponent, player, heights, max_depth - 1, - beta, - alpha);
-        removePiece(player, col, heights);
-
-        if (score >= beta) {
-            return score;
-        }
-        if (score > alpha) {
-            alpha = score;
-        }
-    }
-    transTable.put(2**player+*opponent, alpha - MIN_SCORE + 1);
-    // 2* the value of player + the value of opponent
-    return alpha;
-} */
-
 int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int depth, int alpha, int beta) {
-    int result = evaluateBoard(*player, *opponent, depth);
+    int result = evaluateBoard(*player, *opponent, depth); /*Possible improvements:
+    - if quickWinning for player, return SCORE_SOMEONE_WIN
+    - if quickWinning for opponent, return - SCORE_SOMEONE_WIN
+    - if depth <= 0, compute and return score
+    - if draw, return 0
+    - then do everything else*/
     if (depth <= 0) {
-        return result - current_depth;
+        return result;
+        // printBoard();
+        // printf("direct return %d, depth = %d, score = %d\n", result - current_depth, current_depth, result);
     }
 
     if (result != 111) {
-        return result - current_depth;
+        return result;
+        // printBoard();
+        // printf("direct return %d, depth = %d, score = %d\n", result - current_depth, current_depth, result);
     }
 
     int maxScore = SCORE_SOMEONE_WIN - current_depth;
@@ -252,6 +202,18 @@ int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const 
         removePiece(player, dpRes, heights);
     }
 
+    // for (int i = 0; i < NBR_COL; i++) {
+    //     int dpRes = putPiece(opponent, i, heights);
+    //     if (dpRes == NOT_ALLOWED) {
+    //         continue;
+    //     }
+    //     if (quickWinning(*opponent)) {
+    //         removePiece(opponent, dpRes, heights);
+    //         return - SCORE_SOMEONE_WIN - current_depth;
+    //     }
+    //     removePiece(opponent, dpRes, heights);
+    // }
+
     // Do all move and look for the result of the opponent
     for (int i = 0; i < NBR_COL; i++) {
         int col = col_ordering[i];
@@ -261,6 +223,8 @@ int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const 
         }
 
         int score = - negamax(opponent, player, heights, depth - 1, - beta, - alpha);
+        // printBoard();
+        // printf("depth = %d, score = %d\n", current_depth, score);
         removePiece(player, col, heights);
 
         if (score >= beta) {
@@ -292,44 +256,88 @@ int Game::bestStartingMove(const uint8_t *heights) {
     exit(-1);
 }
 
+void Game::start_search(value_search values, int column_played, int *best_score, int *best_move) {
+    int dpRes = putPiece(&values.player, column_played, values.heights);
+    if (dpRes == NOT_ALLOWED) {
+        return;
+    }
+
+    int score = - negamax(&values.opponent, &values.player, values.heights, values.depth - 1, - SCORE_SOMEONE_WIN, SCORE_SOMEONE_WIN);
+    removePiece(&values.player, column_played, values.heights);
+
+    if (score > *best_score) {
+        *best_score = score;
+        *best_move = column_played;
+    }
+}
+
 int Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, uint8_t *heights) {
-    // if ((ai_board == 0) && (human_board == 0)) {
-    //     return 3;
-    // }
     int bestMove = bestStartingMove(heights);
+    int bestScore = - SCORE_SOMEONE_WIN;
     int alpha = - SCORE_SOMEONE_WIN;
     int beta = SCORE_SOMEONE_WIN;
+    value_search tmp(*player, *opponent, depth, heights);
+
+    for (int i = 0; i < NBR_COL; i++) {
+        int dpRes = putPiece(player, i, heights);
+        if (dpRes == NOT_ALLOWED) {
+            continue;
+        }
+        if (quickWinning(*player)) {
+            removePiece(player, dpRes, heights);
+            return i;
+        }
+        removePiece(player, dpRes, heights);
+    }
+
+    // for (int i = 0; i < NBR_COL; i++) {
+    //     int dpRes = putPiece(opponent, i, heights);
+    //     if (dpRes == NOT_ALLOWED) {
+    //         continue;
+    //     }
+    //     if (quickWinning(*opponent)) {
+    //         removePiece(opponent, dpRes, heights);
+    //         return i;
+    //     }
+    //     removePiece(opponent, dpRes, heights);
+    // }
+
+    // ThreadPool thread_pool(thread_count);
+    int scores[7] = {-SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN};
 
     for (int i = 0; i < NBR_COL; i++) {
         int col = col_ordering[i];
+        // int *pointer = &scores[col];
+        // thread_pool.addTask([this, tmp, col, pointer, &bestMove]{
+        //     start_search(tmp, col, pointer, &bestMove);
+        // });
         int dpRes = putPiece(player, col, heights);
         if (dpRes == NOT_ALLOWED) {
             continue;
         }
         int score = - negamax(opponent, player, heights, depth - 1, - beta, - alpha);
+        // printBoard();
+        // printf("depth = %d, score = %d\n", current_depth, score);
         removePiece(player, col, heights);
 
+        scores[col] = score;
         if (score > alpha) {
             alpha = score;
             bestMove = col;
         }
     }
-    return bestMove;
-
-    // return negamax(player, opponent, heights, depth, +1, - INFINITY, +INFINITY);
-/*     ThreadPool thread_pool(thread_count);
-    int bestMove = bestStartingMove(heights);
-    double bestScore = - INFINITY;
-    value_search tmp(*player, *opponent, depth, heights);
-
+    // thread_pool.waitForCompletion();
+    bestMove = 3;
+    bestScore = scores[bestMove];
     for (int i = 0; i < NBR_COL; i++) {
-        //thread_pool.addTask([this, tmp, i, &bestScore, &bestMove]{
-        //     start_search(tmp, i, &bestScore, &bestMove);
-        // });
-        start_search(tmp, i, &bestScore, &bestMove);
+        int col = col_ordering[i];
+        if (scores[col] > bestScore) {
+            bestScore = scores[col];
+            bestMove = col;
+        }
+        // printf("%d => %d, ", i, scores[i]);
     }
-    thread_pool.waitForCompletion();
-    return bestMove; */
+    return bestMove;
 }
 
 int Game::aiMove(const int depth) {
@@ -391,6 +399,7 @@ void Game::printBoard() {
     for (int i = 0; i < NBR_COL; i++)
         printf(" %d  ", i);
     printf("\n");
+    // printf("nbr human: %d, nbr ai: %d\n", countNbrOne(human_board), countNbrOne(ai_board));
 }
 
 int Game::run() {
@@ -416,22 +425,19 @@ int Game::run() {
             printf("and it took %lf seconds\n", (double)(end - start) / CLOCKS_PER_SEC);
         }
         current_player = ((current_player == HUMAN) ? AI : HUMAN);
-        int32_t result = evaluateBoard(ai_board, human_board, 1);
-        if (result > 30000) {
+
+        if (quickWinning(ai_board)) {
             printf("AI WINS!\n");
             printBoard();
             return EXIT_SUCCESS;
-        } else if (result < -30000) {
+        } else if (quickWinning(human_board)) {
             printf("HUMAN WINS!\n");
             printBoard();
             return EXIT_SUCCESS;
-        } else if (result == 0) {
+        } else if (draw()) {
             printf("DRAW!\n");
             printBoard();
             return EXIT_SUCCESS;
-        }
-        if (result == 111) {
-            continue;
         }
     }
 

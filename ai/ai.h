@@ -189,7 +189,7 @@ private:
      * @param best_score A pointer to the variable storing the best score
      * @param best_move A pointer to the variable storing the best move
      */
-    void start_search(value_search values, int column_played, double *best_score, int *best_move);
+    void start_search(value_search values, int column_played, int *best_score, int *best_move);
 
     /**
      * @brief Search the best move the AI can make
