@@ -482,23 +482,12 @@ class OpponentSelectionScreen(Screen):
     def update_all_boxes(self):
         boxes = []
         while len(boxes) == 0:
-            self.write_message(
-                [
-                    "Please wait a few seconds",
-                    "We are getting a list of all potential opponents",
-                ]
-            )
+            self.write_message(self.var.text_online_waiting)
             boxes = self.update()
             if len(boxes) == 0:
                 self.quit_box.hide = True
                 self.cancel_box.hide = True
-                self.write_message(
-                    [
-                        "Looks like we did not find any.",
-                        "Please wait we will look",
-                        "again in a few seconds",
-                    ]
-                )
+                self.write_message(self.var.text_online_empty_waiting)
                 sleep(3)
             else:
                 self.quit_box.hide = False

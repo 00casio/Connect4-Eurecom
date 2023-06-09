@@ -133,13 +133,13 @@
 
 	— We used negamax, a minimax variant make use of the zero-sum property of the game. This reduced the number of comparison needed at each step. \\
 
-	Several other small computing time-related optimizations were made. On Figure~\ref{fig:ai_benchmarks}, you can see a graph summarizing the benchmarks of those optimizations. Step 0 is the minimax alone, step 1 is the minimax algorithm with alpha-beta pruning, step 2 is negamax with alpha-beta pruning, step 3 is column ordering in negamax, and finally step 4 is with all other optimizations. \\
-
+	Several other small computing time-related optimizations were made. On Figure~\ref{fig:ai_benchmarks}, you can see a graph summarizing the benchmarks of those optimizations. Step 0 is the minimax alone, step 1 is the minimax algorithm with alpha-beta pruning, step 2 is negamax with alpha-beta pruning, step 3 is column ordering in negamax, and finally step 4 is with all other optimizations. % 922252800000 nodes explored for minimax alone before being stopped at more than 2h of running
 	\begin{figure}[ht]
 		\includegraphics[scale=0.7]{Comparison_ai_stages.png}
 		\centering
 		\caption{Comparison between different stages.}\label{fig:ai_benchmarks}
 	\end{figure}
+
 	Finally, our artificial intelligence was made, and the deeper the level, the harder it was for us to beat it. Even when losing, it gave a truly satisfying result. But how could we judge the efficiency of our artificial intelligence ? We decided to do so by creating a small set of criteria:
 
 	— At any depth, an AI must beat a player that is always choosing a column randomly.

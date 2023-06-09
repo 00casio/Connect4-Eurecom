@@ -36,6 +36,16 @@ class Variables:
                 "quit_box": "Quit",
                 "message_quit": "You chose to quit the game\nYou are disapointing me",
                 "text_levels": "Level",
+                "online_agreement_box": "Broadcast myself as is",
+                "online_text_waiting": [
+                        "Please wait a few seconds",
+                        "We are getting a list of all potential opponents",
+                    ],
+                "online_text_waiting_empty": [
+                        "Looks like we did not find any.",
+                        "Please wait we will look",
+                        "again in a few seconds",
+                    ]
             },
             "fr": {
                 "boxAI_text_levels": [
@@ -58,6 +68,15 @@ class Variables:
                 "quit_box": "Quitter",
                 "message_quit": "Vous avez choisis d'abandonner le jeu.\nVous me décevez.",
                 "text_levels": "Niveau",
+                "online_agreement_box": "Participer ainsi",
+                "online_text_waiting": [
+                        "Merci d'attendre un peu",
+                        "Nous cherchons des adversaires",
+                    ],
+                "online_text_waiting_empty": [
+                        "Ici t'es personne ! Non sérieusement.",
+                        "On cherche à nouveau dans quelques secondes"
+                    ]
             },
             "cat": {
                 "boxAI_text_levels": [
@@ -80,6 +99,16 @@ class Variables:
                 "quit_box": "Nya Nya",
                 "message_quit": "Nya nya.\n Nya nya (－‸ლ) nya",
                 "text_levels": "Nyaaa",
+                "online_agreement_box": "Nya nyyyya nya !",
+                "online_text_waiting": [
+                        "Nya ! Nya nyaaaa nya nhya. nyah",
+                        "NYYYA, nhya NYA. Nyaaaah nyyaa",
+                    ],
+                "online_text_waiting_empty": [
+                        "Nyanyanya nya NHAY???",
+                        "Nya nyaaaaa nya...",
+                        "Nya nya nyaaah nyyyyya",
+                    ]
             },
             "wls": {
                 "boxAI_text_levels": [
@@ -102,7 +131,25 @@ class Variables:
                 "quit_box": "Ymddiswyddo",
                 "message_quit": "Byddai gan Aeronwen gywilydd ohonoch chi",
                 "text_levels": "Lefel",
+                "online_agreement_box": "Dechreuwch y twrnamaint",
+                "online_text_waiting": [
+                        "Arhoswch ychydig eiliadau os gwelwch yn dda",
+                        "Rydym yn cael rhestr o'r holl wrthwynebwyr posibl",
+                    ],
+                "online_text_waiting_empty": [
+                        "Nid oes neb o gwmpas",
+                        "Os gwelwch yn dda aros,",
+                        "byddwn yn edrych mewn ychydig eiliadau",
+                    ]
             },
+        }
+        self.language = "en"
+
+        self.text_draw = {
+            "en": "No one won",
+            "fr": "C'est une égalité",
+            "cat": "Nya nya...",
+            "welsh": "Rydych yn mynd i raffl"
         }
 
         # Symbols
@@ -115,7 +162,6 @@ class Variables:
         self.boxAI_out = -1
         self.boxAI_play = -255
         self.boxAI_cancel = 255
-        self.boxAI_text_levels = self.texts["en"]["boxAI_text_levels"]
 
         # Colors
         self.white = Color(255, 255, 255)
@@ -176,28 +222,6 @@ class Variables:
         self.pos_max_x = self.padding + self.width_board - self.size_cell // 2
         self.text_size = 30
         self.text_font = "monospace"
-        self.text_options_play_local = self.texts["en"]["options_play_local"]
-        self.text_options_play_online = self.texts["en"]["options_play_online"]
-        self.text_options_options = self.texts["en"]["options_options"]
-        self.text_options_play_HvH = self.texts["en"]["options_play_HvH"]
-        self.text_options_play_HvAI = self.texts["en"]["options_play_HvAI"]
-        self.text_options_play_AIvAI = self.texts["en"]["options_play_AIvAI"]
-        self.text_options_difficulty_HvAI = self.texts["en"]["options_difficulty_HvAI"]
-        self.text_options_difficulty_AIvAI = self.texts["en"][
-            "options_difficulty_AIvAI"
-        ]
-        self.text_difficulty_options = [
-            "Waouh, an easter egg !",
-            self.text_options_difficulty_HvAI,
-            self.text_options_difficulty_AIvAI,
-        ]
-        self.text_confirmation = self.texts["en"]["confirmation_button"]
-        self.text_box_levels = self.texts["en"]["text_levels"]
-        self.text_draw = {
-            "en": "No one won",
-            "fr": "C'est une égalité",
-            "cat": "Nya nya...",
-        }
 
         # Assets
         self.camera = True
@@ -222,8 +246,32 @@ class Variables:
         self.main_font = pg.font.SysFont(self.text_font, self.text_size)
 
         # Quit and cancel
-        self.text_cancel_box = self.texts["en"]["cancel_box"]
         self.coor_cancel_box = (10, 10)
-        self.text_quit_box = self.texts["en"]["quit_box"]
         self.coor_quit_box = (self.width_screen - 10, 10)
-        self.message_quit = self.texts["en"]["message_quit"]
+
+    # Text changing with language
+    def load_language(self) -> None:
+        self.text_options_play_local = self.texts[self.language]["options_play_local"]
+        self.text_options_play_online = self.texts[self.language]["options_play_online"]
+        self.text_options_options = self.texts[self.language]["options_options"]
+        self.text_options_play_HvH = self.texts[self.language]["options_play_HvH"]
+        self.text_options_play_HvAI = self.texts[self.language]["options_play_HvAI"]
+        self.text_options_play_AIvAI = self.texts[self.language]["options_play_AIvAI"]
+        self.text_options_difficulty_HvAI = self.texts[self.language]["options_difficulty_HvAI"]
+        self.text_options_difficulty_AIvAI = self.texts[self.language][
+            "options_difficulty_AIvAI"
+        ]
+        self.text_difficulty_options = [
+            "Waouh, an easter egg !",
+            self.text_options_difficulty_HvAI,
+            self.text_options_difficulty_AIvAI,
+        ]
+        self.text_confirmation = self.texts[self.language]["confirmation_button"]
+        self.text_box_levels = self.texts[self.language]["text_levels"]
+        self.text_online_agreement_box = self.texts[self.language]["online_agreement_box"]
+        self.boxAI_text_levels = self.texts[self.language]["boxAI_text_levels"]
+        self.text_cancel_box = self.texts[self.language]["cancel_box"]
+        self.text_quit_box = self.texts[self.language]["quit_box"]
+        self.message_quit = self.texts[self.language]["message_quit"]
+        self.text_online_waiting = self.texts[self.language]["online_text_waiting"]
+        self.text_online_empty_waiting = self.texts[self.language]["online_text_waiting_empty"]

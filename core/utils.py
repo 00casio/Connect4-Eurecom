@@ -48,36 +48,9 @@ class Config:
         if language not in list(self.var.texts):
             print("This language is not available.\nI will use English")
             language = "en"
-        self.var.boxAI_text_levels = self.var.texts[language]["boxAI_text_levels"]
-        self.var.text_options_play_local = self.var.texts[language][
-            "options_play_local"
-        ]
-        self.var.text_options_play_online = self.var.texts[language][
-            "options_play_online"
-        ]
-        self.var.text_options_options = self.var.texts[language]["options_options"]
-        self.var.text_options_play_HvH = self.var.texts[language]["options_play_HvH"]
-        self.var.text_options_play_HvAI = self.var.texts[language]["options_play_HvAI"]
-        self.var.text_options_play_AIvAI = self.var.texts[language][
-            "options_play_AIvAI"
-        ]
-        self.var.text_options_difficulty_HvAI = self.var.texts[language][
-            "options_difficulty_HvAI"
-        ]
-        self.var.text_options_difficulty_AIvAI = self.var.texts[language][
-            "options_difficulty_AIvAI"
-        ]
-        self.var.text_difficulty_options = [
-            "",
-            self.var.text_options_difficulty_HvAI,
-            self.var.text_options_difficulty_AIvAI,
-        ]
-        self.var.text_confirmation = self.var.texts[language]["confirmation_button"]
-        self.var.text_cancel_box = self.var.texts[language]["cancel_box"]
-        self.var.text_quit_box = self.var.texts[language]["quit_box"]
-        self.var.text_box_levels = self.var.texts[language]["text_levels"]
-        self.var.message_quit = self.var.texts[language]["message_quit"]
+        self.var.language = language
         self.language = language
+        self.var.load_language()
 
 
 class Box:

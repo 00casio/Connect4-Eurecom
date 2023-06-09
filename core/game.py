@@ -303,7 +303,7 @@ class Game:
         box_machi = Box("As AI")
         type_me = None
         player_me = None
-        final_box = online.draw_agreement_box("J'accepte")
+        final_box = online.draw_agreement_box(self.var.text_online_agreement_box)
         online.center_all([[box_client, box_server], [box_human, box_machi]])
 
         while self.status == self.allowed_status["online"]:
@@ -383,12 +383,7 @@ class Game:
             self.volume,
             self.camera,
         )
-        screen_opp.write_message(
-            [
-                "Please wait a few seconds",
-                "We are getting a list of all potential opponents",
-            ]
-        )
+        screen_opp.write_message(self.var.text_online_waiting)
         boxes = screen_opp.update_all_boxes()
         index = 0
         final_index = -1
