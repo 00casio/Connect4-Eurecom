@@ -6,14 +6,14 @@ from time import time
 import libai
 import matplotlib.pyplot as plt
 
-write = False
+write = True
 plot = False
 
 nbr_test = 1
-max_depth = 17
+max_depth = 18
 compiler = input("Compiler: ")
 id_test = input("Id: ")
-for depth in range(15, max_depth + 1):
+for depth in range(1, max_depth + 1):
     total_t = []
     for i in range(1, nbr_test+1):
         g = libai.Game()

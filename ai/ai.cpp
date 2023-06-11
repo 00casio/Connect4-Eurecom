@@ -52,7 +52,7 @@ bool Game::draw() {
     return false;
 }
 
-int Game::countPoints(const uint64_t bitboard) {
+int Game::countPoints(const uint64_t bitboard, bool *state) {
     int nbr_3_in_line = 0;
     int nbr_2_in_line = 0;
 
@@ -62,6 +62,7 @@ int Game::countPoints(const uint64_t bitboard) {
         tmp &= (bitboard >> 16);
         if (tmp != 0) {
             if (tmp & (bitboard >> 24)) {
+                *state = true;
                 return 0;
             }
             nbr_3_in_line += countNbrOne(tmp);
@@ -74,6 +75,7 @@ int Game::countPoints(const uint64_t bitboard) {
         tmp &= (bitboard >> 2);
         if (tmp != 0) {
             if (tmp & (bitboard >> 3)) {
+                *state = true;
                 return 0;
             }
             nbr_3_in_line += countNbrOne(tmp);
@@ -86,6 +88,7 @@ int Game::countPoints(const uint64_t bitboard) {
         tmp &= (bitboard >> 14);
         if (tmp != 0) {
             if (tmp & (bitboard >> 21)) {
+                *state = true;
                 return 0;
             }
             nbr_3_in_line += countNbrOne(tmp);
@@ -98,6 +101,7 @@ int Game::countPoints(const uint64_t bitboard) {
         tmp &= (bitboard >> 18);
         if (tmp != 0) {
             if (tmp & (bitboard >> 27)) {
+                *state = true;
                 return 0;
             }
             nbr_3_in_line += countNbrOne(tmp);
@@ -127,27 +131,36 @@ bool Game::quickWinning(const uint64_t bitboard) {
     return false;
 }
 
-int Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard) {
+int Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, const int depth) {
     int score = 0;
-    score += countPoints(bitboard);
-    score -= countPoints(oppBitboard);
-    return score;
+    bool winning = false;
+    bool losing = false;
+    count++;
+
+    score += countPoints(bitboard, &winning);
+    if (winning) {
+        return SCORE_SOMEONE_WIN;
+    }
+    score -= countPoints(oppBitboard, &losing);
+    if (losing) {
+        return - SCORE_SOMEONE_WIN;
+    }
+
+    // if board is maxed out (excluding top row)
+    if ((bitboard | oppBitboard) == 280371153272574) {
+        return 0;
+    }
+
+    if (!depth) {
+        return score;
+    }
+    return 111;
 }
 
 int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int depth, int alpha, int beta) {
-    count++;
-    if (quickWinning(*player)) {
-        return SCORE_SOMEONE_WIN - current_depth;
-    }
-    if (quickWinning(*opponent)) {
-        return - SCORE_SOMEONE_WIN + current_depth;
-    }
-    if ((*player | *opponent) == 280371153272574) { // If no more place in board
-        return 0;
-    }
-    int result = evaluateBoard(*player, *opponent);
-    if (!depth) {
-        return result;
+    int result = evaluateBoard(*player, *opponent, depth);
+    if ((depth <= 0) | (result != 111)) {
+        return result - current_depth;
     }
 
     int maxScore = SCORE_SOMEONE_WIN - current_depth;
