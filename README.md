@@ -13,13 +13,8 @@ The project S6 of:
 - Correct bugs:
   - Seems like when root, hovering line is not correct
 - Polish the game:
-  - Show name of raspberry for server
   - Place filter on possible communications
-  - Put texts in variables (with languages)
   - Fuse a "perfect" (look for all poss) AI in our program
-- Report:
-  - Make benchmarks, comparisons
-  - Do almost everything
 
 ### Objectives
 
