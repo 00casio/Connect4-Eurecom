@@ -9,20 +9,12 @@ import matplotlib.pyplot as plt
 write = False
 plot = False
 
-nbr_test = 100
-max_depth = 18
+nbr_test = 1
+max_depth = 17
 compiler = input("Compiler: ")
 id_test = input("Id: ")
-for depth in range(1, max_depth + 1):
+for depth in range(15, max_depth + 1):
     total_t = []
-    if 0 <= depth < 13:
-        nbr_test = 100
-    if depth == 13:
-        nbr_test = 50
-    if depth >= 14:
-        nbr_test = 10
-    if depth >= 16:
-        nbr_test = 2
     for i in range(1, nbr_test+1):
         g = libai.Game()
         start = time()
@@ -33,7 +25,7 @@ for depth in range(1, max_depth + 1):
             print(f"{depth:3d}: {i}", end="\r")
     t = sum(total_t)
     print(
-        f"{depth:3d}: done, it took {t/nbr_test:21.12f} seconds ({g.get_count():10d} nodes visited)"
+        f"{depth:3d}: done, it took {t:21.12f} seconds ({g.get_count():10d} nodes visited)"
     )
     if write:
         with open("benchmark_result.csv", "a") as fp:

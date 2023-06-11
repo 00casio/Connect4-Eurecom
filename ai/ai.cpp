@@ -5,7 +5,6 @@
 */
 
 #include "ai.h"
-#include <cstdint>
 
 int Game::putPiece(uint64_t *player, const int col, uint8_t *heights) {
     if (heights[col] > MAX_ALLOWED_HEIGHT) {
@@ -25,10 +24,13 @@ void Game::removePiece(uint64_t *player, const int col, uint8_t *heights) {
 
 int Game::countNbrOne(const uint64_t bitboard) {
     int count_one = 0;
-    int gaëtan = 1;
-    for (int i = 0; i < 64; i++) {
-        if ((gaëtan & bitboard) != 0) {
-            count_one++;
+    int64_t gaëtan = 1;
+    for (int i = 0; i < NBR_LINE; i++) {
+        for (int j = 0; j < NBR_COL; j++) {
+            if ((gaëtan & bitboard) != 0) {
+                count_one++;
+            }
+            gaëtan <<= 1;
         }
         gaëtan <<= 1;
     }
@@ -216,7 +218,7 @@ int Game::bestStartingMove(const uint8_t *heights) {
 
 int Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, uint8_t *heights) {
     int bestMove = bestStartingMove(heights);
-    int bestScore = - SCORE_SOMEONE_WIN;
+    // int bestScore = - SCORE_SOMEONE_WIN;
     int alpha = - SCORE_SOMEONE_WIN;
     int beta = SCORE_SOMEONE_WIN;
 
@@ -232,7 +234,7 @@ int Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, ui
         removePiece(player, dpRes, heights);
     }
 
-    int scores[7] = {-SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN};
+    // int scores[7] = {-SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN};
 
     for (int i = 0; i < NBR_COL; i++) {
         int col = col_ordering[i];
@@ -245,22 +247,22 @@ int Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, ui
         // printf("depth = %d, score = %d\n", current_depth, score);
         removePiece(player, col, heights);
 
-        scores[col] = score;
+        // scores[col] = score;
         if (score > alpha) {
             alpha = score;
             bestMove = col;
         }
     }
-    bestMove = 3;
-    bestScore = scores[bestMove];
-    for (int i = 0; i < NBR_COL; i++) {
-        int col = col_ordering[i];
-        if (scores[col] > bestScore) {
-            bestScore = scores[col];
-            bestMove = col;
-        }
-        // printf("%d => %d, ", i, scores[i]);
-    }
+    // bestMove = 3;
+    // bestScore = scores[bestMove];
+    // for (int i = 0; i < NBR_COL; i++) {
+    //     int col = col_ordering[i];
+    //     if (scores[col] > bestScore) {
+    //         bestScore = scores[col];
+    //         bestMove = col;
+    //     }
+    //     // printf("%d => %d, ", i, scores[i]);
+    // }
     return bestMove;
 }
 
