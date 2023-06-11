@@ -1,4 +1,3 @@
-#include "threads.hpp"
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
@@ -59,9 +58,6 @@ public:
  */
 class Game {
 private:
-    // Multithreading variables
-    int thread_count = 4;
-
     // Players variables
     int HUMAN = 1;
     int AI = ~HUMAN; // This way we are sure they are not the same
@@ -116,6 +112,13 @@ private:
      */
     int countPoints(const uint64_t bitboard, bool *state);
 
+    /**
+     * @brief Compute if the bitboard passed is one of a winning state
+     * 
+     * @param bitboard  The board representation
+     * @return true if the board have 4 token aligned
+     * @return false in all other cases
+     */
     bool quickWinning(const uint64_t bitboard);
 
     /**
@@ -142,54 +145,12 @@ private:
     int negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int max_depth, int alpha, int beta);
 
     /**
-     * @brief Apply the minmax algorithm with alpha-beta prunning
-     * 
-     * @param player The board representation of the player
-     * @param opponent The board representation of the opponent
-     * @param heights The list of the heights of the different columns
-     * @param depth The maximum depth of the minmax algorithm at this moment
-     * @param isMaximising Is we want to maximize or minimize the score the player
-     * @param alpha The alpha parameter
-     * @param beta The beta parameter
-     * @return The score of the minimax algorithm at this level
-     */
-    double minimax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int depth, const bool isMaximising, double alpha, double beta);
-
-    /**
      * @brief Return the best starting move when no evaluation is done
      * 
      * @param heights The list of the heights of the different columns
      * @return the column played
      */
     int bestStartingMove(const uint8_t *heights);
-
-    /**
-     * @brief A structure to copy the important values for multithreading
-     * 
-     */
-    struct value_search {
-        uint64_t player;
-        uint64_t opponent;
-        int depth;
-        uint8_t heights[7];
-
-        value_search(uint64_t p, uint64_t o, int d, uint8_t *h) {
-            player = p;
-            opponent = o;
-            depth = d;
-            for (int i = 0; i < 7; i++) {heights[i] = h[i];}
-        }
-    };
-
-    /**
-     * @brief The function used for multithreading
-     * 
-     * @param values The structure for the values copied
-     * @param column_played The column for the first move
-     * @param best_score A pointer to the variable storing the best score
-     * @param best_move A pointer to the variable storing the best move
-     */
-    void start_search(value_search values, int column_played, int *best_score, int *best_move);
 
     /**
      * @brief Search the best move the AI can make

@@ -16,26 +16,26 @@ def test_for_plot(depth_ai1, depth_ai2):
     j = depth_ai2
     ai1 = libai.Game()
     ai2 = libai.Game()
-    print(f"Doing {i+1:02d} vs {j+1:02d}", end="\r")
+    print(f"Doing {i:02d} vs {j:02d}", end="\r")
     k = 1
     while not (ai1.ai_winning() or ai1.human_winning() or ai1.draw()):
         ai1_m = ai1.aiMove(i)
         ai2.humanMove(ai1_m)
         k += 1
-        print(f"Doing {i+1:02d} vs {j+1:02d}, move nbr {k:02d}", end="\r")
+        print(f"Doing {i:02d} vs {j:02d}, move nbr {k:02d}", end="\r")
         if ai1.ai_winning():
             break
         ai2_m = ai2.aiMove(j)
         ai1.humanMove(ai2_m)
         k += 1
-        print(f"Doing {i+1:02d} vs {j+1:02d}, move nbr {k:02d}", end="\r")
+        print(f"Doing {i:02d} vs {j:02d}, move nbr {k:02d}", end="\r")
     if ai1.ai_winning():
         result = ai1_winning
     elif ai1.human_winning():
         result = ai2_winning
     else:
         result = ai1_ai2_draw
-    print(f"{i+1:02d} {j+1:02d} are done", " "* 20, end="\r")
+    print(f"{i:02d} {j:02d} are done", " "* 20, end="\r")
     return result
 
 
