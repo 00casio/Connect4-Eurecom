@@ -8,14 +8,14 @@ import threading
 
 
 class Communication:
-    def __init__(self):
+    def __init__(self, mode:str="client"):
         self.uuid = "94f39d29-7d6d-437d-973b-fba39e49d4ee"
         self.connections = []
         os.system("bluetoothctl discoverable on")
         os.system("bluetoothctl pairable on")
         self.sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
-        self.type = "client"
-        self.thread_connections = threading.Thread(target=self.list_connections)
+        self.type = mode
+        self.thread_connections = threading.Thread(target=self.list_connections) # Update the connections in the background
         self.thread_connections.start()
 
     def send(self, value: str):
@@ -24,7 +24,7 @@ class Communication:
     def receive(self):
         return self.sock.recv(1024).decode()
 
-    def wait_for_connection(self):
+    def wait_for_connection(self) -> str:
         """Used in server mode"""
         assert self.type == "server", ValueError("Must be server")
 
@@ -45,8 +45,8 @@ class Communication:
 
         # Need to wait for code 100 or 101
         code = self.receive()
-        assert code == "100" or code == "101", ValueError(f"Wrong code {code}")
-    
+        return code
+
     def get_name_client(self) -> str:
         """ Get the name of the device trying to connect to us """
         assert self.type == "server", ValueError(f"Must be server, not {self.type}")
@@ -63,6 +63,7 @@ class Communication:
         )
         self.connections = []
         for d in nearby_devices:
+            # Filter the devices
             # if "connect4" in d[1]:
             self.connections.append(d)
 
@@ -75,9 +76,10 @@ class Communication:
         i = 0
         while matches == []:
             print("Searching", " " * 30, end="\r")
-            matches = bluetooth.find_service(uuid=self.uuid, address=addr)
+            matches = bluetooth.find_service(uuid=self.uuid, address=addr) # Find the device we choosed
             if matches == []:
                 i += 1
+                # Somtimes it does not found it despite it being here, wait a little then search again
                 print(f"Nothing found, sleeping... x{i}", end="\r")
                 sleep(2.5)
             else:
@@ -87,5 +89,6 @@ class Communication:
         self.sock.connect((choosed["host"], choosed["port"]))
         self.send(message)
 
+        # Receive the code, but let something else decide what to do with the code
         code = self.receive()
         return code

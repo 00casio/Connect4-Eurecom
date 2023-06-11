@@ -13,6 +13,7 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
     """The Board class contains the state of the board"""
 
     def __new__(cls: np.ndarray[Any, np.dtype[Any]]) -> Any:
+        """ The Board class inherit from the Numpy Arrays """
         self = np.array([[Variables().symbol_no_player] * 7 for i in range(6)]).view(
             cls
         )
@@ -63,7 +64,7 @@ class Board(np.ndarray[Any, np.dtype[Any]]):
 
     def is_valid_col(
         self, col: int
-    ) -> bool:  # on regarde si la colonne est pleine ou pas
+    ) -> bool:
         """Return if the column we want to play in is not full"""
         return self[0, col] == Variables().symbol_no_player
 

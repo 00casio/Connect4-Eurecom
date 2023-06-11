@@ -5,7 +5,7 @@ import sys
 from os import listdir
 from random import choice as random_choice
 from time import sleep, time
-from typing import Any, Callable, Iterator, Optional, Union
+from typing import Any, Iterator, Optional, Union
 
 import cv2
 import numpy as np
@@ -41,14 +41,14 @@ class Screen(Tools):
         self.quit_box: Optional[Box] = None
         self.screen.fill(color_fill)
         self.last_position = 0
-        self.last_box_hovered = None
+        self.last_box_hovered = None # Use when drawing a rectangle around the box
         self.language = language
         self.draw_cancel_box(hide=not cancel_box)
         self.draw_quit_box()
 
     def draw_cancel_box(self, force_reload: bool = False, hide: bool = False) -> None:
         """Draw the box that allow the user to take a step back"""
-        if self.cancel_box is None or force_reload:
+        if self.cancel_box is None or force_reload: # Don't draw it if already exist, unless forced
             self.cancel_box = Box(
                 self.var.text_cancel_box,
                 self.var.black,
@@ -58,7 +58,7 @@ class Screen(Tools):
             )
             self.cancel_box.hide = hide
         self.cancel_box.render(self.screen)
-        if self.cancel_box not in self.all_boxes:
+        if self.cancel_box not in self.all_boxes: # Don't add it in all_boxes if already in it
             self.all_boxes.append(self.cancel_box)
 
     def draw_quit_box(self, force_reload: bool = False) -> None:
@@ -117,14 +117,15 @@ class Screen(Tools):
                 color = self.var.color_player_2
             self.draw_circle(x, y, color, r, screen)
 
-            if self.language == "cat":
+            if self.language == "cat": # In cat mode, we have special drawings
                 if symbol == self.var.symbol_player_1:
                     disk = pg.image.load(self.var.image_cat_tails)
                 elif symbol == self.var.symbol_player_2:
                     disk = pg.image.load(self.var.image_cat_heads)
                 screen.blit(disk, (x - self.var.radius_disk, y - self.var.radius_disk))
 
-    def hovering_box(self, box: Box, hover=True):
+    def hovering_box(self, box: Box, hover=True) -> None:
+        """ The function that draw the rectangle around the box the mouse if hovering over """
         if box is None:
             return
         color = box.color_rect
@@ -135,7 +136,6 @@ class Screen(Tools):
 
     def get_mouse_pos(self, force_mouse: bool = False) -> tuple[int, int]:
         """Return the mouse position"""
-        # print("Change this to have the position from the camera")
         return pg.mouse.get_pos()
 
     def human_move(self, player: Symbol) -> None:
@@ -148,6 +148,7 @@ class Screen(Tools):
         pg.draw.rect(self.screen, self.var.color_screen, top_rect)
 
         mouse_x, mouse_y = self.get_mouse_pos()
+        # Limit the position of the mouse
         if mouse_x < self.var.pos_min_x:
             mouse_x = self.var.pos_min_x
         elif mouse_x > self.var.pos_max_x:
@@ -224,11 +225,8 @@ class Screen(Tools):
         sound: str = Variables().sound_click_box,
         print_disk: bool = False,
         symbol_player: Symbol = Symbol(None),
-        func: Callable = None,
-        **args,
     ) -> tuple[int, int]:
-        """Quit the function only when there is a click. Return the position of the click.
-        If f is not None, then the function is called whith the argument 'event' at every iteration"""
+        """Quit the function only when there is a click. Return the position of the click"""
         allow_quit = False
         while not allow_quit:
             # (suppose and) Use the camera if usable
@@ -243,8 +241,6 @@ class Screen(Tools):
             for event in self.get_event():
                 if event.type == pg.MOUSEBUTTONUP:
                     allow_quit = True
-                if func is not None:
-                    func(**args)
 
             # Actions independant of the usage of the camera
             if print_disk:
@@ -366,7 +362,7 @@ class Screen_AI(Screen):
             )
         self.boxes_options.append(boxes_ai_1)
 
-        # self.options_levels is used to know in which the user clicked
+        # self.options_levels is used to know in which line the user clicked
         if self.number_AI == 2:
             self.boxes_options.append(boxes_ai_2)
             self.options_levels = [*boxes_ai_1, *boxes_ai_2]
@@ -436,7 +432,8 @@ class OpponentSelectionScreen(Screen):
         self.comm = comm
         self.list_connec = []
 
-    def write_message(self, msg: Union[str, list[str]]):
+    def write_message(self, msg: Union[str, list[str]]) -> None:
+        """ Reset the screen, write the message """
         self.all_boxes = []
         self.screen.fill(self.var.color_options_screen)
         self.draw_quit_box()
@@ -448,7 +445,8 @@ class OpponentSelectionScreen(Screen):
             box_temp.append([Box(msg)])
         self.center_all(box_temp)
 
-    def split_list(self, list_to_split):
+    def split_list(self, list_to_split: list[tuple[str, i]]) -> list[list[tuple[str, i]]]:
+        """ Split the list in arguments to make displaying it prettier """
         if list_to_split == []:
             return []
         size = int(np.sqrt(len(list_to_split) - 1)) + 1
@@ -462,7 +460,8 @@ class OpponentSelectionScreen(Screen):
             list_splitted.append(temp)
         return list_splitted
 
-    def update(self):
+    def update(self) -> list[list[Box]]:
+        """ Display the list of opponents on the screen """
         assert self.comm.type == "client", ValueError(
             "The module is not in client mode"
         )
@@ -480,7 +479,8 @@ class OpponentSelectionScreen(Screen):
         self.center_all(boxes)
         return boxes
 
-    def update_all_boxes(self):
+    def update_all_boxes(self) -> list[list[Box]]:
+        """ Write a message, update and write the list of opponents """
         boxes = []
         while len(boxes) == 0:
             boxes = self.update()
@@ -593,7 +593,7 @@ class GamingScreen(Screen):
         self.height_board = self.var.height_board
         self.board_surface = Surface(
             (self.width_board, self.height_board)
-        ).convert_alpha()
+        ).convert_alpha() # The board surface is sometimes transparent
 
     def blit_board(self) -> None:
         """Paste the state of the board onto the screen"""
@@ -611,7 +611,7 @@ class GamingScreen(Screen):
         )
         for i in range(7):
             for j in range(6):
-                self.draw_token(i, j, None, self.var.radius_hole)
+                self.draw_token(i, j, None, self.var.radius_hole) # Draw transparent holes where the disks will be placed during the game
         self.blit_board()
         pg.display.update()
 

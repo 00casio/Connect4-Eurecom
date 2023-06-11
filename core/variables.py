@@ -251,6 +251,7 @@ class Variables:
 
     # Text changing with language
     def load_language(self) -> None:
+        """ Change the variables according to the language chosen """
         self.text_options_play_local = self.texts[self.language]["options_play_local"]
         self.text_options_play_online = self.texts[self.language]["options_play_online"]
         self.text_options_options = self.texts[self.language]["options_options"]

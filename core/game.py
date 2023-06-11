@@ -34,11 +34,12 @@ class Player:
         var: Variables,
         number: int,
         AI: bool,
-        difficulty: int = -1,
+        level: int = -1,
         online: bool = False,
     ) -> None:
         """Initialize the values for the Players"""
         self.var = var
+        # Associate the appropriate symbol and color for the player
         if number == 0:
             self.symbol = Symbol(self.var.symbol_no_player)
             self.color = self.var.color_trans
@@ -50,7 +51,7 @@ class Player:
             self.color = self.var.color_player_2
         else:
             raise ValueError("There can not be more than 2 players")
-        self.ai_difficulty = difficulty
+        self.ai_depth = 3 * level + 1
         self.online = online
         self.ai_cpp: Optional[libai.Game] = None
         if AI:
@@ -60,27 +61,29 @@ class Player:
         """The function used when it's the player's turn"""
         assert self.online == False, "Can not play when the player is not local"
         if self.ai_cpp is not None:
-            col = self.ai_cpp.aiMove(3 * self.ai_difficulty + 1)
-            click = (0, 0)
+            # if the player is an AI, search the move
+            col = self.ai_cpp.aiMove(self.ai_depth)
+            click = (-1, -1) # Here to avoid error
         else:
             p = self.var.padding
-            box_allowed = Rect(p, p, self.var.width_board, self.var.height_board)
+            box_allowed = Rect(p, p, self.var.width_board, self.var.height_board) # Where the user is allowed to click
             click = screen.click(
                 box_allowed, print_disk=True, symbol_player=self.symbol
             )
-            col = (click[0] - self.var.padding) // self.var.size_cell
+            col = (click[0] - self.var.padding) // self.var.size_cell # Compute the col clicked
         cancel = screen.is_canceled(click)
         if cancel:
-            return (0, 0, True)
+            return (-1, -1, True)
 
         row = board.find_free_slot(col)
         if row == -1:
+            # If we clicked on a full column, we need to ask again for a cick
             if volume:
                 playsound(self.var.sound_error, block=False)
             col, row, cancel = self.play(board, screen, volume, ai_cpp)
         return (col, row, cancel)
 
-    def resetBoard(self):
+    def resetBoard(self) -> None:
         if self.ai_cpp is not None:
             self.ai_cpp.resetBoard()
 
@@ -149,7 +152,7 @@ class Game:
             self.opponent = self.player_2
         else:
             raise ValueError(
-                "How is that possible ? Read carefully the error and send me everything"
+                "How is that possible ? Read carefully the stack trace and send me everything"
             )
 
     def who_is_winner(self) -> Player:
@@ -163,7 +166,8 @@ class Game:
 
     def start(self, skip_start_screen=False) -> None:
         """The start function to use when wanting to start the program"""
-        while True:
+        while True: # We never quit this loop
+            # self.status give us what screen we should use
             if self.status == self.allowed_status["start"]:
                 self.draw_start_screen()
             elif self.status == self.allowed_status["gaming"]:
@@ -215,10 +219,10 @@ class Game:
                     self.status = self.allowed_status["local"]
             elif self.status == self.allowed_status["online_client"]:
                 code = self.select_opponent()
-                if code == "103":
+                if code == "103": # Connection refused
                     self.communication.sock.close()
                     self.communication = Communication()
-                elif code == "102":
+                elif code == "102": # Connection accepted
                     self.status = self.allowed_status["gaming"]
                 else:
                     print(f"Ask the other group why we received {code}")
@@ -260,11 +264,12 @@ class Game:
             if options.is_canceled(click):
                 self.status = self.allowed_status["start"]
             if options.x_in_rect(click, options.vol):
-                self.volume = not self.volume
+                self.volume = not self.volume # Inverse the volume option
                 options.volume = self.volume
             elif options.x_in_rect(click, options.cam):
-                self.camera = not self.camera
+                self.camera = not self.camera # Inverse the camera option
                 options.camera = self.camera
+            # Change the language depending on where the click is
             elif options.x_in_rect(click, options.flags[0]):
                 self.conf.load_language("en")
             elif options.x_in_rect(click, options.flags[1]):
@@ -309,6 +314,8 @@ class Game:
         while self.status == self.allowed_status["online"]:
             mouse = online.click()
             box = None
+            other_box = None
+            # If the click is not in a box, we need to reset the screen
             out = True
             for b in online.all_boxes:
                 if online.x_in_rect(mouse, b):
@@ -318,29 +325,30 @@ class Game:
                 online.reset_screen(self.var.color_options_screen)
                 type_me = None
                 player_me = None
-            
+
             if online.is_canceled(mouse):
                 self.status = self.allowed_status["start"]
 
             if online.x_in_rect(mouse, box_client):
-                box_server.render(self.screen)
+                other_box = box_server
                 box = box_client
                 type_me = "client"
             elif online.x_in_rect(mouse, box_server):
-                box_client.render(self.screen)
+                other_box = box_client
                 box = box_server
                 type_me = "server"
             if online.x_in_rect(mouse, box_human):
-                box_machi.render(self.screen)
+                other_box = box_machi
                 box = box_human
                 player_me = "human"
             elif online.x_in_rect(mouse, box_machi):
-                box_human.render(self.screen)
+                other_box = box_human
                 box = box_machi
                 player_me = "ai"
 
             if box is not None:
-                online.highlight_box(
+                other_box.render(self.screen) # Reset the other box
+                online.highlight_box( # Highlight the selected box
                     box,
                     self.var.color_options_highlight_box,
                     online.screen,
@@ -348,6 +356,7 @@ class Game:
                 )
 
             if player_me is not None and type_me is not None:
+                # If we selected both our mode and our type, print the confirmation box
                 final_box.hide = False
                 final_box.render(self.screen)
                 pg.display.update()
@@ -360,14 +369,16 @@ class Game:
 
         is_ai = player_me == "ai"
         print("We need to allow the change of the difficulty")
+        # Create the two player
         if type_me == "client":
             self.player_1 = Player(self.var, 1, False, online=True)
-            self.player_2 = Player(self.var, 2, is_ai, 10)
+            self.player_2 = Player(self.var, 2, is_ai, 15)
         else:
-            self.player_1 = Player(self.var, 1, is_ai, 10)
+            self.player_1 = Player(self.var, 1, is_ai, 15)
             self.player_2 = Player(self.var, 2, False, online=True)
         self.communication.type = type_me
 
+        # Change the status depending on the type selected
         if type_me == "client":
             self.status = self.allowed_status["online_client"]
         else:
@@ -391,16 +402,19 @@ class Game:
             screen_opp.screen.fill(self.var.color_options_screen)
             screen_opp.draw_quit_box()
             mouse = screen_opp.click()
+            # Go throught all boxes for the connections
             for i in range(len(boxes)):
                 line = boxes[i]
                 for j in range(len(line)):
                     b = line[j]
+                    # to know if we clicked in it
                     if screen_opp.x_in_rect(mouse, b):
                         final_index = index
                     index += 1
-            if final_index == -1:
-                boxes = screen_opp.update_all_boxes()
+            if final_index == -1: # If we clicked in no box,
+                boxes = screen_opp.update_all_boxes() # update the boxes
                 index = 0
+        # By default we play as human, but if we selected ai, then we change the mode
         mode = "100"
         if not self.player_1.ai_cpp is None and self.player_2.ai_cpp is None:
             mode = "101"
@@ -420,8 +434,12 @@ class Game:
             ["Please wait, we are waiting for someone", "to connect to us."]
         )
         screen.draw_agreement_box(f"You are {gethostname()}", position=0.25, hide=False)
-        self.communication.wait_for_connection()
+        code = "000"
+        while code not in ["100", "101"]:
+            # Wait for someone to really try to connect to us
+            code = self.communication.wait_for_connection()
 
+        # Reset the boxes present on the screen
         screen.all_boxes = []
         screen.screen.fill(self.var.color_options_screen)
         screen.draw_cancel_box()
@@ -431,6 +449,7 @@ class Game:
         nop = Box("Reject")
         screen.center_all([[msg], [yes, nop]], update=False)
         screen.reset_screen(self.var.color_options_screen)
+        # Act according to the box selected
         force_reload = False
         while self.status == self.allowed_status["online_server"] and not force_reload:
             mouse = screen.click()
@@ -440,8 +459,7 @@ class Game:
             elif screen.x_in_rect(mouse, nop):
                 self.communication.send("103")
                 self.communication.sock.close()
-                self.communication = Communication()
-                self.communication.type = "server"
+                self.communication = Communication("server")
                 force_reload = True
             elif screen.is_canceled(mouse):
                 self.status = self.allowed_status["online"]
@@ -463,68 +481,72 @@ class Game:
         if self.player_1.online or self.player_2.online:
             gaming.comm = self.communication # Used when quitting the game
         gaming.draw_board()
-        gaming.draw_token(
-            self.var.width_screen // 2,
-            self.var.padding // 2,
-            self.player_playing.symbol,
-            self.var.radius_disk,
-            col_row=False,
-            screen=gaming.screen,
-        )
-        pg.display.update()
         while (
             self.who_is_winner() == self.player_null and self.num_turn < self.board.size and self.status == self.allowed_status["gaming"]
-        ):
+        ): # Until we have a draw, a winner, or a cancel, play
             if self.player_playing.online:
                 cancel = False
                 col = int(self.communication.receive())
-                if col == 201:
+                if col == 201: # If the code was the one to abort the game
                     cancel = True
                     row = -1
                 else:
                     row = self.board.find_free_slot(col)
             else:
+                # If the player is local, wait for a valid click
                 col, row, cancel = self.player_playing.play(self.board, gaming, self.volume)
 
                 # for opponent
                 if self.opponent.online:
-                    if cancel:
-                        self.communication.send("201")
-                    else:
-                        self.communication.send(f"00{col}")
+                    msg = "201" if cancel else f"00{col}"
+                    self.communication.send(msg)
             if self.opponent.ai_cpp is not None:
+                # If the opponent is an ai, then make the same move
                 self.opponent.ai_cpp.humanMove(col)
 
             if cancel:
+                # If the game was canceled, go to the appropriate screen
                 self.status = self.allowed_status["local"]
                 if self.opponent.online or self.player_playing.online:
                     self.communication.sock.close()
                     self.communication = Communication()
                     self.status = self.allowed_status["online"]
             for event in gaming.get_event():
+                # This is for when we clicked when the other player (ai or online) played
                 if event.type == pg.MOUSEBUTTONUP:
                     gaming.handle_quit(gaming.get_mouse_pos())
                     if gaming.is_canceled(gaming.get_mouse_pos()):
                         self.status = self.allowed_status["local"]
-            
+
             if self.status == self.allowed_status["gaming"]:
-                gaming.animate_fall(col, row, self.player_playing.symbol)
                 self.board[row, col] = self.player_playing.symbol.v
+                # Maybe multithread this animation ?
+                gaming.animate_fall(col, row, self.player_playing.symbol)
                 self.inverse_players()
                 self.num_turn += 1
+        # if status was gaming and we are out of the loop, then the game was not aborted
         if self.status == self.allowed_status["gaming"]:
             self.winning_surface = gaming.board_surface
             self.status = self.allowed_status["winning"]
 
     def draw_winner(self) -> None:
         """Draw the winner on the screen, with the line that made it win"""
+
+        # Change the message and sound according to the options
         winner = self.who_is_winner()
         text = f"Player {winner.symbol.v} won !"
         if self.conf.language == "fr":
             text = f"Le joueur {winner.symbol.v} a gagné !"
         elif self.conf.language == "cat":
             text = f"Nyah ! {winner.symbol.v} nyah !"
+        elif self.conf.language == "wls":
+            text = f"Chwaraewr {winner.symbol.v} yn ennill"
         sound = self.var.sound_winner_victory
+        if winner != self.player_1 and winner != self.player_2:
+            text = self.var.text_draw[self.conf.language]
+            sound = self.var.sound_winner_draw
+        print(text)
+
         End = Screen(
             self.var,
             self.screen,
@@ -535,10 +557,6 @@ class Game:
         )
         End.screen.fill(self.var.color_screen)
         End.draw_quit_box()
-        if winner != self.player_1 and winner != self.player_2:
-            text = self.var.text_draw[self.conf.language]
-            sound = self.var.sound_winner_draw
-        print(text)
 
         p = self.var.padding
         box_winner = Box(
@@ -557,6 +575,7 @@ class Game:
         bits = int(self.board.state_to_bits(), 2)
 
         def complete(bits: int, direction: int) -> None:
+            """ Fucntion to check in a direction if there was a winner and draw a line where the winner won """
             d = {0: 7, 1: 1, 2: 6, 3: 8}
             m = bits & (bits >> d[direction])
             m2 = m & (m >> 2 * d[direction])
@@ -587,4 +606,4 @@ class Game:
         End.click()
         if self.opponent.online or self.player_playing.online:
             self.communication.sock.close()
-        self.status = self.allowed_status["start"]
+        self.status = self.allowed_status["start"] # Go back to the main menu after a game ended

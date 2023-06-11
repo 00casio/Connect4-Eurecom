@@ -33,7 +33,7 @@ class Symbol:
 
 
 class Config:
-    """The config class cotains all possible variables for the game"""
+    """The config class is a simple wrapper around the Variables class"""
 
     def __init__(self, var: Variables, arguments: Namespace) -> None:
         self.arg = arguments
@@ -54,6 +54,7 @@ class Config:
 
 
 class Box:
+    """ A class to help create, place and manage the text on screen """
     def __init__(
         self,
         text: str,
@@ -100,7 +101,7 @@ class Box:
 
         self.box = Rect(x, y, spa[0] + spa[2] + s[0], spa[1] + spa[3] + s[1])
 
-        if self.hide:
+        if self.hide: # If we don't want to show the box, don't show it
             return
         pg.draw.rect(screen, self.color_rect, self.box)
         screen.blit(self.text_r, (x + spa[0], y + spa[1]))
@@ -111,6 +112,7 @@ class Box:
         new_font: Optional[int] = None,
         spacings: list[int] = [],
     ) -> None:
+        """ Allow the change of font size, font, and all spacings """
         if new_size is not None:
             self.font_size = new_size
         if new_font is not None:
@@ -140,6 +142,7 @@ class Tools:
         self.all_boxes: list[Box] = []
 
     def compute_total_size(self, list_boxes: list[list[Box]]) -> list[tuple[int, int]]:
+        """ Compute the total width and max height of each line """
         total_sizes = []
         for line in list_boxes:
             line_h = 0
@@ -155,6 +158,7 @@ class Tools:
         return total_sizes
 
     def center_all(self, list_lines_boxes: list[list[Box]], update: bool=True) -> None:
+        """ Write all boxes in list_lines_boxes centered on the middle of the screen """
         n = len(list_lines_boxes)
         lines_size = self.compute_total_size(list_lines_boxes)
         c = self.var.center_screen
