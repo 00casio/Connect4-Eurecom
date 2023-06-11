@@ -110,7 +110,7 @@ private:
      * @param state The state of the board (if winning or not)
      * @return the score associated with the bitboard
      */
-    int countPoints(const uint64_t bitboard, bool *state);
+    int countPoints(const uint64_t bitboard);
 
     /**
      * @brief Compute if the bitboard passed is one of a winning state
@@ -129,7 +129,7 @@ private:
      * @param depth The depth at wich we are looking
      * @return The score computed
      */
-    int evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, const int depth);
+    int evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard);
 
     /**
      * @brief The negamax variant of the minimax algorithm

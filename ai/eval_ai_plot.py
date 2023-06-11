@@ -50,11 +50,11 @@ def plot_result(x, y, tableau):
     cbar = plt.colorbar(ticks=[-0.70, 0, 0.70])
     cbar.ax.set_yticklabels(["2 win", "Draw", "1 win"])
 
-    plt.savefig("result_1.png")
+    plt.savefig("test_1.png")
     plt.close()
 
 
-max_level = 15
+max_level = 13
 tableau = np.zeros((max_level, max_level))
 x = np.linspace(1, max_level, max_level)
 y = np.linspace(1, max_level, max_level)
