@@ -286,6 +286,7 @@ class Screen(Tools):
             if self.comm is not None:
                 self.comm.send("201")
                 self.comm.sock.close()
+                self.comm.thread_connections.join()
             print(self.var.message_quit)
             pg.quit()
             sys.exit()
@@ -465,7 +466,7 @@ class OpponentSelectionScreen(Screen):
         assert self.comm.type == "client", ValueError(
             "The module is not in client mode"
         )
-        self.list_connec = self.split_list(self.comm.list_connections())
+        self.list_connec = self.split_list(self.comm.connections)
         boxes = []
         for line in self.list_connec:
             tmp = []
@@ -482,7 +483,6 @@ class OpponentSelectionScreen(Screen):
     def update_all_boxes(self):
         boxes = []
         while len(boxes) == 0:
-            self.write_message(self.var.text_online_waiting)
             boxes = self.update()
             if len(boxes) == 0:
                 self.quit_box.hide = True

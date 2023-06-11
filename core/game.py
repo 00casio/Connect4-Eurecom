@@ -383,7 +383,6 @@ class Game:
             self.volume,
             self.camera,
         )
-        screen_opp.write_message(self.var.text_online_waiting)
         boxes = screen_opp.update_all_boxes()
         index = 0
         final_index = -1
@@ -427,7 +426,7 @@ class Game:
         screen.screen.fill(self.var.color_options_screen)
         screen.draw_cancel_box()
         screen.draw_quit_box()
-        msg = Box(f"Looks like {self.communication.client_info[0]} want to play")
+        msg = Box(f"Looks like {self.communication.get_name_client()} want to play")
         yes = Box("Accept")
         nop = Box("Reject")
         screen.center_all([[msg], [yes, nop]], update=False)

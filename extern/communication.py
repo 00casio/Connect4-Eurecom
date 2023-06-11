@@ -4,6 +4,7 @@
 import bluetooth
 import os
 from time import sleep
+import threading
 
 
 class Communication:
@@ -14,6 +15,8 @@ class Communication:
         os.system("bluetoothctl pairable on")
         self.sock = bluetooth.BluetoothSocket(bluetooth.RFCOMM)
         self.type = "client"
+        self.thread_connections = threading.Thread(target=self.list_connections)
+        self.thread_connections.start()
 
     def send(self, value: str):
         self.sock.send(value.encode())
@@ -43,10 +46,18 @@ class Communication:
         # Need to wait for code 100 or 101
         code = self.receive()
         assert code == "100" or code == "101", ValueError(f"Wrong code {code}")
+    
+    def get_name_client(self) -> str:
+        """ Get the name of the device trying to connect to us """
+        assert self.type == "server", ValueError(f"Must be server, not {self.type}")
+        mac = self.client_info[0]
+        for d in self.connections:
+            if d[0] == self.client_info[0]:
+                return d[1]
+        return "[unknow device]"
 
-    def list_connections(self):
-        """List the connections. Usable only in cient mode"""
-        assert self.type == "client", ValueError("Must be client")
+    def list_connections(self) -> None:
+        """List the connections. Can be used in both mode"""
         nearby_devices = bluetooth.discover_devices(
             duration=5, lookup_names=True, flush_cache=True, lookup_class=False
         )
@@ -54,7 +65,6 @@ class Communication:
         for d in nearby_devices:
             # if "connect4" in d[1]:
             self.connections.append(d)
-        return self.connections
 
     def connect(self, index: int, message: str) -> str:
         """Connect to a server. Usable only on client mode"""
