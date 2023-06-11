@@ -209,10 +209,28 @@ public:
         return count;
     }
 
+    /**
+     * @brief As the name suggests, compute if human win / ai win / that is a draw
+     * 
+     * @return true if the human/ai win or draw
+     * @return false in all other cases
+     */
     bool human_winning();
     bool ai_winning();
     bool draw();
 
+    /**
+     * @brief Place a token in the column wanted without using negamax
+     * 
+     * @param col The column in which to place the token
+     * @return int The status
+     */
     int forceAIMove(const int col);
+
+    /**
+     * @brief Return the score of the score of the position of the AI
+     * 
+     * @return the score
+     */
     int scoreAIpos();
 };

@@ -6,7 +6,7 @@ from time import time
 import libai
 import matplotlib.pyplot as plt
 
-write = True
+write = False
 plot = False
 
 nbr_test = 1
