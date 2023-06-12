@@ -558,9 +558,10 @@ class Game:
             self.gestures,
             volume=self.volume,
             camera=self.camera,
-            cancel_box=False,
         )
         End.screen.fill(self.var.color_screen)
+        End.cancel_box.text = "Retry"
+        End.cancel_box.render(End.screen)
         End.draw_quit_box()
 
         p = self.var.padding
@@ -608,7 +609,10 @@ class Game:
 
         End.get_event() # Remove all clicks that happened during the game
         pg.display.update()
-        End.click()
-        if self.opponent.online or self.player_playing.online:
-            self.communication.sock.close()
-        self.status = self.allowed_status["start"] # Go back to the main menu after a game ended
+        mouse = End.click()
+        if End.is_canceled(mouse):
+            self.status = self.allowed_status["gaming"]
+        else:
+            if self.opponent.online or self.player_playing.online:
+                self.communication.sock.close()
+            self.status = self.allowed_status["start"] # Go back to the main menu after a game ended
