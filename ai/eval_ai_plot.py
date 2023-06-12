@@ -54,12 +54,12 @@ def plot_result(x, y, tableau):
     plt.close()
 
 
-max_level = 13
+max_level = 17
 tableau = np.zeros((max_level, max_level))
 x = np.linspace(1, max_level, max_level)
 y = np.linspace(1, max_level, max_level)
 
-for i in range(max_level):
-    for j in range(max_level):
-        tableau[j, i] = test_for_plot(i + 1, j + 1)
-        plot_result(x, y, tableau)
+# for i in range(max_level):
+#     for j in range(max_level):
+#         tableau[j, i] = test_for_plot(i + 1, j + 1)
+#         plot_result(x, y, tableau)

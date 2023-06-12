@@ -282,6 +282,7 @@ class Screen(Tools):
             if self.comm is not None:
                 self.comm.send("201")
                 self.comm.sock.close()
+                print("Closing the last thread...")
                 self.comm.thread_connections.join()
             print(self.conf.message_quit)
             pg.quit()

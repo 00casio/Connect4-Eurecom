@@ -49,7 +49,8 @@
 
 	\section{Setting up}
 	When the previous requirements are fulfilled, you only need to use the \textit{launch.sh} script, and every other software and libraries required should be installed. \\
-	If the script does not find something, then it prints it and launches the program with some options disabled.
+	If the script does not find something, then it prints it and launches the program with some options disabled. \\
+	If you want to use Bluetooth in server mode, then you need to run the script as root (under Linux, you just need to use \textit{sudo ./launch.sh}). It is because advertising the Bluetooth service need root permission.
 
 	\section{Indications}
 	Once the program opens, you should be able to understand easily what to do, and how to do it. However, if it is needed, here is the explanation about the different screens of the game. \\
@@ -71,13 +72,12 @@
 
 	\section{Interface}
 	For the interface, we chose to use Python for its ease of use. We used classes because this representation is very flexible and close to what we want. \\
+	The most challenging part in writing the interface was managing to integrate the communication, AI, and gestures recognition in the code in a way that makes it easy to modify things. Using classes was a way to solve those problems before they became hindrances. \\
 
 	Each “screen” of the game (All the menus + the game screen (with the board)) is its own class, inherited from a base class common to all screens. The basic principle to display things is the same, only the content is different. This way, a graphical continuity is preserved between all screens. \\
 
 	Classes are made for each player, the board of the game, the gestures, the AI, and the communication, as well as for the game itself. \\
 	This way, all the code is well compartmented and we can easily change how something is done in the backend as long as we don't change the API (meaning, the arguments and return statements of the functions) calls. \\
-
-	The most challenging part in writing the interface was managing to integrate the communication, AI, and gestures recognition in the code in a way that makes it easy to modify things. Using classes was a way to solve those problems before they became hindrances.
 
 	\section{AI}\label{AI_section}
 

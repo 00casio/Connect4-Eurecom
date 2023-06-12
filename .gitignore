@@ -35,6 +35,7 @@ venv
 **.log
 **.pdf
 **.tmp
+tmp
 
 # C/C++
 **.cxx
