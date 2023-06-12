@@ -445,7 +445,7 @@ class OpponentSelectionScreen(Screen):
             box_temp.append([Box(msg)])
         self.center_all(box_temp)
 
-    def split_list(self, list_to_split: list[tuple[str, i]]) -> list[list[tuple[str, i]]]:
+    def split_list(self, list_to_split: list[tuple[str, int]]) -> list[list[tuple[str, int]]]:
         """ Split the list in arguments to make displaying it prettier """
         if list_to_split == []:
             return []

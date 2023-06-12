@@ -34,7 +34,7 @@ class Player:
         var: Variables,
         number: int,
         AI: bool,
-        level: int = -1,
+        level: int = 0,
         online: bool = False,
     ) -> None:
         """Initialize the values for the Players"""
@@ -51,6 +51,8 @@ class Player:
             self.color = self.var.color_player_2
         else:
             raise ValueError("There can not be more than 2 players")
+        if level is None:
+            level = 0
         self.ai_depth = 3 * level + 1
         self.online = online
         self.ai_cpp: Optional[libai.Game] = None
@@ -545,6 +547,9 @@ class Game:
         if winner != self.player_1 and winner != self.player_2:
             text = self.var.text_draw[self.conf.language]
             sound = self.var.sound_winner_draw
+        if (winner == self.player_1 and self.player_1.online) or (winner == self.player_2 and self.player_2.online):
+            sound = self.var.sound_winner_defeat
+            text = "You lose"
         print(text)
 
         End = Screen(

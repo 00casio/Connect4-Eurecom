@@ -231,6 +231,7 @@ class Variables:
         self.sound_disk_touch = "assets/tuck.mp3"
         self.sound_winner_draw = "assets/draw.mp3"
         self.sound_winner_victory = "assets/victory.mp3"
+        self.sound_winner_defeat = "assets/lose.mp3"
         self.image_volume_on = "assets/volume.svg"
         self.image_volume_muted = "assets/muted.svg"
         self.image_camera = "assets/camera.svg"
