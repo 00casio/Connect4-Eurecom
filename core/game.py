@@ -560,7 +560,7 @@ class Game:
             camera=self.camera,
         )
         End.screen.fill(self.var.color_screen)
-        End.cancel_box.text = "Retry"
+        End.cancel_box.text = self.var.text_retry
         End.cancel_box.render(End.screen)
         End.draw_quit_box()
 

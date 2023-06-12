@@ -45,7 +45,8 @@ class Variables:
                         "Looks like we did not find any.",
                         "Please wait we will look",
                         "again in a few seconds",
-                    ]
+                    ],
+                "text_retry": "Retry"
             },
             "fr": {
                 "boxAI_text_levels": [
@@ -76,7 +77,8 @@ class Variables:
                 "online_text_waiting_empty": [
                         "Ici t'es personne ! Non sérieusement.",
                         "On cherche à nouveau dans quelques secondes"
-                    ]
+                    ],
+                "text_retry": "Recommencer"
             },
             "cat": {
                 "boxAI_text_levels": [
@@ -108,7 +110,8 @@ class Variables:
                         "Nyanyanya nya NHAY???",
                         "Nya nyaaaaa nya...",
                         "Nya nya nyaaah nyyyyya",
-                    ]
+                    ],
+                "text_retry": "Nyhaaa"
             },
             "wls": {
                 "boxAI_text_levels": [
@@ -140,7 +143,8 @@ class Variables:
                         "Nid oes neb o gwmpas",
                         "Os gwelwch yn dda aros,",
                         "byddwn yn edrych mewn ychydig eiliadau",
-                    ]
+                    ],
+                "text_retry": "Ailgynnig"
             },
         }
         self.language = "en"
@@ -277,3 +281,4 @@ class Variables:
         self.message_quit = self.texts[self.language]["message_quit"]
         self.text_online_waiting = self.texts[self.language]["online_text_waiting"]
         self.text_online_empty_waiting = self.texts[self.language]["online_text_waiting_empty"]
+        self.text_retry = self.texts[self.language]["text_retry"]
