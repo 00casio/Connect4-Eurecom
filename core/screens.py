@@ -13,7 +13,7 @@ import pygame as pg
 from playsound import playsound
 
 from core.utils import Box, Symbol, Tools
-from core.variables import Color, Rect, Surface, Variables
+from core.variables import Color, Rect, Surface, Config, Variables
 from extern.communication import Communication
 from extern.gesture import *
 
@@ -23,7 +23,7 @@ class Screen(Tools):
 
     def __init__(
         self,
-        var: Variables,
+        conf: Config,
         screen: Surface,
         gesture: GestureController,
         volume: bool,
@@ -34,7 +34,7 @@ class Screen(Tools):
         language: str = "en",
     ) -> None:
         """Initialize the values"""
-        Tools.__init__(self, var, screen, volume, camera)
+        Tools.__init__(self, conf, screen, volume, camera)
         self.gestures = gesture
         self.comm = None
         self.cancel_box: Optional[Box] = None
@@ -50,10 +50,10 @@ class Screen(Tools):
         """Draw the box that allow the user to take a step back"""
         if self.cancel_box is None or force_reload: # Don't draw it if already exist, unless forced
             self.cancel_box = Box(
-                self.var.text_cancel_box,
-                self.var.black,
-                self.var.white,
-                coordinate=self.var.coor_cancel_box,
+                self.conf.text_cancel_box,
+                self.conf.black,
+                self.conf.white,
+                coordinate=self.conf.coor_cancel_box,
                 align=(-1, 1),
             )
             self.cancel_box.hide = hide
@@ -65,10 +65,10 @@ class Screen(Tools):
         """Draw the box that allow the user to take a step back"""
         if self.quit_box is None or force_reload:
             self.quit_box = Box(
-                self.var.text_quit_box,
-                self.var.black,
-                self.var.white,
-                coordinate=self.var.coor_quit_box,
+                self.conf.text_quit_box,
+                self.conf.black,
+                self.conf.white,
+                coordinate=self.conf.coor_quit_box,
                 align=(1, 1),
             )
         self.quit_box.render(self.screen)
@@ -101,7 +101,7 @@ class Screen(Tools):
         If col_row is true, then n and m are column and row number, if they are not, then n and m are a position"""
         if screen is None:
             screen = self.board_surface
-        sc = self.var.size_cell
+        sc = self.conf.size_cell
         if col_row:
             x = n * sc + sc // 2
             y = m * sc + sc // 2
@@ -109,20 +109,20 @@ class Screen(Tools):
             x = n
             y = m
         if symbol is None:
-            self.draw_circle(x, y, self.var.color_trans, r, screen)
+            self.draw_circle(x, y, self.conf.color_trans, r, screen)
         else:
-            if symbol == self.var.symbol_player_1:
-                color = self.var.color_player_1
-            elif symbol == self.var.symbol_player_2:
-                color = self.var.color_player_2
+            if symbol == self.conf.symbol_player_1:
+                color = self.conf.color_player_1
+            elif symbol == self.conf.symbol_player_2:
+                color = self.conf.color_player_2
             self.draw_circle(x, y, color, r, screen)
 
             if self.language == "cat": # In cat mode, we have special drawings
-                if symbol == self.var.symbol_player_1:
-                    disk = pg.image.load(self.var.image_cat_tails)
-                elif symbol == self.var.symbol_player_2:
-                    disk = pg.image.load(self.var.image_cat_heads)
-                screen.blit(disk, (x - self.var.radius_disk, y - self.var.radius_disk))
+                if symbol == self.conf.symbol_player_1:
+                    disk = pg.image.load(self.conf.image_cat_tails)
+                elif symbol == self.conf.symbol_player_2:
+                    disk = pg.image.load(self.conf.image_cat_heads)
+                screen.blit(disk, (x - self.conf.radius_disk, y - self.conf.radius_disk))
 
     def hovering_box(self, box: Box, hover=True) -> None:
         """ The function that draw the rectangle around the box the mouse if hovering over """
@@ -140,23 +140,23 @@ class Screen(Tools):
 
     def human_move(self, player: Symbol) -> None:
         """Function to use when it's the human's turn to move"""
-        p = self.var.padding
-        sc = self.var.size_cell
+        p = self.conf.padding
+        sc = self.conf.size_cell
         last = self.last_position
 
-        top_rect = Rect(p, 0, self.var.width_board, p)
-        pg.draw.rect(self.screen, self.var.color_screen, top_rect)
+        top_rect = Rect(p, 0, self.conf.width_board, p)
+        pg.draw.rect(self.screen, self.conf.color_screen, top_rect)
 
         mouse_x, mouse_y = self.get_mouse_pos()
         # Limit the position of the mouse
-        if mouse_x < self.var.pos_min_x:
-            mouse_x = self.var.pos_min_x
-        elif mouse_x > self.var.pos_max_x:
-            mouse_x = self.var.pos_max_x
+        if mouse_x < self.conf.pos_min_x:
+            mouse_x = self.conf.pos_min_x
+        elif mouse_x > self.conf.pos_max_x:
+            mouse_x = self.conf.pos_max_x
 
         self.last_position = mouse_x
 
-        if p > mouse_x or mouse_x > p + self.var.width_board:
+        if p > mouse_x or mouse_x > p + self.conf.width_board:
             return
 
         new_col = (mouse_x - p) // sc
@@ -165,13 +165,13 @@ class Screen(Tools):
         old_rect = (p + old_col * sc, 0, sc, p)
 
         self.draw_quit_box()
-        pg.draw.rect(self.screen, self.var.color_screen, old_rect)
-        pg.draw.rect(self.screen, self.var.color_highlight_column, new_rect)
+        pg.draw.rect(self.screen, self.conf.color_screen, old_rect)
+        pg.draw.rect(self.screen, self.conf.color_highlight_column, new_rect)
         self.draw_token(
             mouse_x,
             p // 2,
             player,
-            self.var.radius_disk,
+            self.conf.radius_disk,
             col_row=False,
             screen=self.screen,
         )
@@ -283,7 +283,7 @@ class Screen(Tools):
                 self.comm.send("201")
                 self.comm.sock.close()
                 self.comm.thread_connections.join()
-            print(self.var.message_quit)
+            print(self.conf.message_quit)
             pg.quit()
             sys.exit()
 
@@ -320,14 +320,14 @@ class Screen(Tools):
 class Screen_AI(Screen):
     def __init__(
         self,
-        var: Variables,
+        conf: Config,
         screen: Surface,
         gesture: GestureController,
         volume: bool,
         camera: bool,
         number_AI: int = 1,
     ) -> None:
-        Screen.__init__(self, var, screen, gesture, volume, camera)
+        Screen.__init__(self, conf, screen, gesture, volume, camera)
         self.number_AI = number_AI
         self.begin = 1
 
@@ -335,29 +335,29 @@ class Screen_AI(Screen):
         self.boxes_options = [
             [
                 Box(
-                    self.var.text_difficulty_options[number_AI],
-                    color_hovering=self.var.color_options_box,
+                    self.conf.text_difficulty_options[number_AI],
+                    color_hovering=self.conf.color_options_box,
                 )
             ]
         ]
         boxes_ai_1 = []
-        for i in range(len(self.var.boxAI_text_levels)):
+        for i in range(len(self.conf.boxAI_text_levels)):
             boxes_ai_1.append(
                 Box(
-                    f"{self.var.text_box_levels} {i}",
-                    self.var.black,
-                    self.var.color_player_1,
-                    self.var.color_hover_player_1,
+                    f"{self.conf.text_box_levels} {i}",
+                    self.conf.black,
+                    self.conf.color_player_1,
+                    self.conf.color_hover_player_1,
                 )
             )
         boxes_ai_2 = []
-        for i in range(len(self.var.boxAI_text_levels)):
+        for i in range(len(self.conf.boxAI_text_levels)):
             boxes_ai_2.append(
                 Box(
-                    f"{self.var.text_box_levels} {i}",
-                    self.var.black,
-                    self.var.color_player_2,
-                    self.var.color_hover_player_2,
+                    f"{self.conf.text_box_levels} {i}",
+                    self.conf.black,
+                    self.conf.color_player_2,
+                    self.conf.color_hover_player_2,
                 )
             )
         self.boxes_options.append(boxes_ai_1)
@@ -369,7 +369,7 @@ class Screen_AI(Screen):
         else:
             self.options_levels = [*boxes_ai_1]
 
-        self.play_box = self.draw_agreement_box(self.var.text_confirmation)
+        self.play_box = self.draw_agreement_box(self.conf.text_confirmation)
         self.diff_AI_1, self.diff_AI_2 = -1, -1
         self.nbr_levels_AI_1 = len(self.boxes_options[1])
         self.center_all(self.boxes_options)
@@ -402,9 +402,9 @@ class Screen_AI(Screen):
                     self.play_box.render(self.screen)
                 self.highlight_box(
                     self.options_levels[index_box],
-                    self.var.color_options_highlight_box,
+                    self.conf.color_options_highlight_box,
                     self.screen,
-                    self.var.color_options_highlight_text,
+                    self.conf.color_options_highlight_text,
                 )
             elif not self.play_box.hide and self.x_in_rect(mouse_click, self.play_box):
                 self.ready_play = True
@@ -412,7 +412,7 @@ class Screen_AI(Screen):
                 self.play_box.hide = True
                 self.diff_AI_1 = -1
                 self.diff_AI_2 = -1
-                self.reset_screen(self.var.color_options_screen)
+                self.reset_screen(self.conf.color_options_screen)
 
 
 class OpponentSelectionScreen(Screen):
@@ -420,14 +420,14 @@ class OpponentSelectionScreen(Screen):
 
     def __init__(
         self,
-        var: Variables,
+        conf: Config,
         screen: Surface,
         gesture: GestureController,
         comm: Communication,
         volume: bool,
         camera: bool,
     ) -> None:
-        Screen.__init__(self, var, screen, gesture, volume, camera, cancel_box=False, quit_box=False)
+        Screen.__init__(self, conf, screen, gesture, volume, camera, cancel_box=False, quit_box=False)
         self.opp = None
         self.comm = comm
         self.list_connec = []
@@ -435,7 +435,7 @@ class OpponentSelectionScreen(Screen):
     def write_message(self, msg: Union[str, list[str]]) -> None:
         """ Reset the screen, write the message """
         self.all_boxes = []
-        self.screen.fill(self.var.color_options_screen)
+        self.screen.fill(self.conf.color_options_screen)
         self.draw_quit_box()
         box_temp = []
         if type(msg) == list:
@@ -473,7 +473,7 @@ class OpponentSelectionScreen(Screen):
                 tmp.append(Box(l[1]))
             boxes.append(tmp)
         self.all_boxes = []
-        self.screen.fill(self.var.color_options_screen)
+        self.screen.fill(self.conf.color_options_screen)
         if len(self.comm.connections) != 0:
             self.draw_agreement_box(f"We found {len(self.comm.connections)} possible opponents", position=0.20, hide=False)
         self.center_all(boxes)
@@ -487,7 +487,7 @@ class OpponentSelectionScreen(Screen):
             if len(boxes) == 0:
                 self.quit_box.hide = True
                 self.cancel_box.hide = True
-                self.write_message(self.var.text_online_empty_waiting)
+                self.write_message(self.conf.text_online_empty_waiting)
                 sleep(3)
             else:
                 self.quit_box.hide = False
@@ -498,15 +498,15 @@ class OpponentSelectionScreen(Screen):
 class OptionsScreen(Screen):
     def __init__(
         self,
-        var: Variables,
+        conf: Config,
         game,
         screen: Surface,
         gesture: GestureController,
         volume: bool,
         camera: bool,
     ) -> None:
-        Screen.__init__(self, var, screen, gesture, volume, camera)
-        self.size = (self.var.width_screen // 10, self.var.height_screen // 10)
+        Screen.__init__(self, conf, screen, gesture, volume, camera)
+        self.size = (self.conf.width_screen // 10, self.conf.height_screen // 10)
         self.nbr_line = 2
         self.vol, self.cam = self.draw_vol_cam()
         self.flags = list(self.draw_language())
@@ -515,7 +515,7 @@ class OptionsScreen(Screen):
     def reset_options_screen(self) -> None:
         """Reset the appearance of the option screen to the default"""
         self.all_boxes = []
-        self.screen.fill(self.var.color_options_screen)
+        self.screen.fill(self.conf.color_options_screen)
         self.draw_cancel_box(force_reload=True)
         self.draw_quit_box(force_reload=True)
         self.vol, self.cam = self.draw_vol_cam()
@@ -538,32 +538,32 @@ class OptionsScreen(Screen):
 
     def draw_vol_cam(self) -> tuple[Rect, Rect]:
         """Draw the icon for the volume and the camera"""
-        cs = self.var.center_screen
-        sp = self.var.options_spacing
+        cs = self.conf.center_screen
+        sp = self.conf.options_spacing
         x_now = cs[0] - self.size[0] - sp
         y = cs[1] - self.size[1] // 2 - 3 * sp // 2
         vol = self.dfites(
             self.volume,
             (x_now, y),
-            self.var.image_volume_on,
-            self.var.image_volume_muted,
+            self.conf.image_volume_on,
+            self.conf.image_volume_muted,
         )
-        x_now += sp + self.size[0] + 2 * self.var.text_box_spacing
+        x_now += sp + self.size[0] + 2 * self.conf.text_box_spacing
         cam = self.dfites(
-            self.camera, (x_now, y), self.var.image_camera, self.var.image_nocamera
+            self.camera, (x_now, y), self.conf.image_camera, self.conf.image_nocamera
         )
         return vol, cam
 
     def draw_language(self) -> Iterator[Rect]:
         """Draw the languages"""
-        cs = self.var.center_screen
-        sp = self.var.options_spacing
+        cs = self.conf.center_screen
+        sp = self.conf.options_spacing
         y_now = cs[1] + 3 * sp // 2
-        l = [self.var.image_english, self.var.image_french, self.var.image_cat, self.var.image_welsh]
+        l = [self.conf.image_english, self.conf.image_french, self.conf.image_cat, self.conf.image_welsh]
         x_now = cs[0] - len(l) * self.size[0] // 2 - (len(l) - 1) * sp
         for lan in l:
             yield self.draw_icon(lan, self.size, (x_now, y_now))
-            x_now += sp + self.size[0] + 2 * self.var.text_box_spacing
+            x_now += sp + self.size[0] + 2 * self.conf.text_box_spacing
 
 
 class GamingScreen(Screen):
@@ -571,7 +571,7 @@ class GamingScreen(Screen):
 
     def __init__(
         self,
-        var: Variables,
+        conf: Config,
         screen: Surface,
         gesture: GestureController,
         volume: bool,
@@ -580,24 +580,24 @@ class GamingScreen(Screen):
     ) -> None:
         Screen.__init__(
             self,
-            var,
+            conf,
             screen,
             gesture,
             volume,
             camera,
             language=language,
         )
-        self.color_screen = self.var.white
-        self.color_board = self.var.blue
-        self.width_board = self.var.width_board
-        self.height_board = self.var.height_board
+        self.color_screen = self.conf.white
+        self.color_board = self.conf.blue
+        self.width_board = self.conf.width_board
+        self.height_board = self.conf.height_board
         self.board_surface = Surface(
             (self.width_board, self.height_board)
         ).convert_alpha() # The board surface is sometimes transparent
 
     def blit_board(self) -> None:
         """Paste the state of the board onto the screen"""
-        self.screen.blit(self.board_surface, (self.var.padding, self.var.padding))
+        self.screen.blit(self.board_surface, (self.conf.padding, self.conf.padding))
         self.quit_box.render(self.screen)
         self.cancel_box.render(self.screen)
 
@@ -611,40 +611,40 @@ class GamingScreen(Screen):
         )
         for i in range(7):
             for j in range(6):
-                self.draw_token(i, j, None, self.var.radius_hole) # Draw transparent holes where the disks will be placed during the game
+                self.draw_token(i, j, None, self.conf.radius_hole) # Draw transparent holes where the disks will be placed during the game
         self.blit_board()
         pg.display.update()
 
     def animate_fall(self, col: int, row: int, player: Symbol) -> None:
         """Animate the fall of a disk"""
-        p = self.var.padding
-        x = p + col * self.var.size_cell + self.var.size_cell // 2
+        p = self.conf.padding
+        x = p + col * self.conf.size_cell + self.conf.size_cell // 2
         for y in range(
             p // 2,
-            p + row * self.var.size_cell + self.var.size_cell // 2,
+            p + row * self.conf.size_cell + self.conf.size_cell // 2,
             5,
         ):
-            self.screen.fill(self.var.color_screen)
+            self.screen.fill(self.conf.color_screen)
             self.draw_token(
-                x, y, player, self.var.radius_disk, col_row=False, screen=self.screen
+                x, y, player, self.conf.radius_disk, col_row=False, screen=self.screen
             )
             self.blit_board()
             pg.display.update()
-        self.screen.fill(self.var.color_screen)
-        self.draw_token(col, row, player, self.var.radius_hole)
+        self.screen.fill(self.conf.color_screen)
+        self.draw_token(col, row, player, self.conf.radius_hole)
         self.draw_circle(
             x - p,
             y - p + 5,
-            self.var.color_board,
-            self.var.radius_disk,
+            self.conf.color_board,
+            self.conf.radius_disk,
             self.board_surface,
-            width=self.var.radius_disk - self.var.radius_hole,
+            width=self.conf.radius_disk - self.conf.radius_hole,
         )
         self.blit_board()
         pg.display.update()
         if self.volume:
             if self.language != "cat":
-                sound = self.var.sound_disk_touch
+                sound = self.conf.sound_disk_touch
             else:
                 sound = ".png"
                 while sound.split(".")[-1] != "mp3":

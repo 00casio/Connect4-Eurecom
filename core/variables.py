@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pygame as pg
+from argparse import Namespace
 
 pg.init()
 Color = pg.Color
@@ -282,3 +283,22 @@ class Variables:
         self.text_online_waiting = self.texts[self.language]["online_text_waiting"]
         self.text_online_empty_waiting = self.texts[self.language]["online_text_waiting_empty"]
         self.text_retry = self.texts[self.language]["text_retry"]
+
+
+class Config(Variables):
+    """The config class is a simple wrapper around the Variables class"""
+
+    def __init__(self, arguments: Namespace) -> None:
+        Variables.__init__(self)
+        self.sound = not arguments.novolume
+        self.camera = not arguments.nocamera
+        self.language = arguments.language
+        self.load_language()
+
+    def change_language(self, language: str) -> None:
+        """Load the correct language in the variables"""
+        if language not in list(self.texts):
+            print("This language is not available.\nI will use English")
+            language = "en"
+        self.language = language
+        self.load_language()

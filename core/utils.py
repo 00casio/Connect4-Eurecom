@@ -6,7 +6,7 @@ from typing import Any, Optional, Sequence, Union
 
 import pygame as pg
 
-from core.variables import Color, Rect, Surface, Variables
+from core.variables import Color, Rect, Surface, Variables, Config
 
 
 def opponent(symbol_player: Any) -> Any:
@@ -30,27 +30,6 @@ class Symbol:
             return o == self.v
         else:
             raise NotImplementedError
-
-
-class Config:
-    """The config class is a simple wrapper around the Variables class"""
-
-    def __init__(self, var: Variables, arguments: Namespace) -> None:
-        self.arg = arguments
-        self.var = var
-        self.var.sound = not self.arg.novolume
-        self.var.camera = not self.arg.nocamera
-        self.language = self.arg.language
-        self.load_language(self.language)
-
-    def load_language(self, language: str) -> None:
-        """Load the correct language in the variables"""
-        if language not in list(self.var.texts):
-            print("This language is not available.\nI will use English")
-            language = "en"
-        self.var.language = language
-        self.language = language
-        self.var.load_language()
 
 
 class Box:
@@ -132,13 +111,13 @@ class Tools:
     """A class aggregating many tools"""
 
     def __init__(
-        self, var: Variables, screen: Surface, volume: bool, camera: bool
+        self, conf: Config, screen: Surface, volume: bool, camera: bool
     ) -> None:
         """Initialize the values"""
         self.screen = screen
         self.volume = volume
         self.camera = camera
-        self.var = var
+        self.conf = conf
         self.all_boxes: list[Box] = []
 
     def compute_total_size(self, list_boxes: list[list[Box]]) -> list[tuple[int, int]]:
@@ -153,7 +132,7 @@ class Tools:
                 line_w += s[0] + spa[0] + spa[2]
                 line_h = max(s[1] + spa[1] + spa[3], line_h)
             total_sizes.append(
-                (line_w + self.var.options_spacing * (len(line) - 1), line_h)
+                (line_w + self.conf.options_spacing * (len(line) - 1), line_h)
             )
         return total_sizes
 
@@ -161,8 +140,8 @@ class Tools:
         """ Write all boxes in list_lines_boxes centered on the middle of the screen """
         n = len(list_lines_boxes)
         lines_size = self.compute_total_size(list_lines_boxes)
-        c = self.var.center_screen
-        os = self.var.options_spacing
+        c = self.conf.center_screen
+        os = self.conf.options_spacing
 
         y = c[1] - sum([lines_size[i][1] for i in range(n)]) // 2 - os * (n - 1) // 2
         for i in range(n):
@@ -191,11 +170,11 @@ class Tools:
         """Draw a agreement box in the center of the screen at position (in %) of the height of the screen"""
         agreement = Box(
             text,
-            self.var.black,
-            self.var.color_screen,
+            self.conf.black,
+            self.conf.color_screen,
             coordinate=(
-                self.var.center_screen[0],
-                int(self.var.height_screen * position),
+                self.conf.center_screen[0],
+                int(self.conf.height_screen * position),
             ),
             align=(0, 0),
         )
@@ -215,9 +194,9 @@ class Tools:
         self, image_path: str, size: tuple[int, int], position: tuple[int, int]
     ) -> Rect:
         """Draw the image at image_path with the size and position wanted"""
-        p = self.var.text_box_spacing
+        p = self.conf.text_box_spacing
         icon = self.make_icon(image_path, size)
         box = Rect(position[0] - p, position[1] - p, size[0] + 2 * p, size[1] + 2 * p)
-        pg.draw.rect(self.screen, self.var.very_light_blue, box)
+        pg.draw.rect(self.screen, self.conf.very_light_blue, box)
         self.screen.blit(icon, position)
         return box

@@ -19,7 +19,7 @@ from core.screens import (
 )
 from core.structure import Board
 from core.utils import Box, Config, Symbol
-from core.variables import Rect, Surface, Variables
+from core.variables import Rect, Surface, Config
 from extern.communication import Communication
 from extern.gesture import GestureController
 
@@ -31,24 +31,24 @@ class Player:
 
     def __init__(
         self,
-        var: Variables,
+        conf: Config,
         number: int,
         AI: bool,
         level: int = 0,
         online: bool = False,
     ) -> None:
         """Initialize the values for the Players"""
-        self.var = var
+        self.conf = conf
         # Associate the appropriate symbol and color for the player
         if number == 0:
-            self.symbol = Symbol(self.var.symbol_no_player)
-            self.color = self.var.color_trans
+            self.symbol = Symbol(self.conf.symbol_no_player)
+            self.color = self.conf.color_trans
         elif number == 1:
-            self.symbol = Symbol(self.var.symbol_player_1)
-            self.color = self.var.color_player_1
+            self.symbol = Symbol(self.conf.symbol_player_1)
+            self.color = self.conf.color_player_1
         elif number == 2:
-            self.symbol = Symbol(self.var.symbol_player_2)
-            self.color = self.var.color_player_2
+            self.symbol = Symbol(self.conf.symbol_player_2)
+            self.color = self.conf.color_player_2
         else:
             raise ValueError("There can not be more than 2 players")
         if level is None:
@@ -67,12 +67,12 @@ class Player:
             col = self.ai_cpp.aiMove(self.ai_depth)
             click = (-1, -1) # Here to avoid error
         else:
-            p = self.var.padding
-            box_allowed = Rect(p, p, self.var.width_board, self.var.height_board) # Where the user is allowed to click
+            p = self.conf.padding
+            box_allowed = Rect(p, p, self.conf.width_board, self.conf.height_board) # Where the user is allowed to click
             click = screen.click(
                 box_allowed, print_disk=True, symbol_player=self.symbol
             )
-            col = (click[0] - self.var.padding) // self.var.size_cell # Compute the col clicked
+            col = (click[0] - self.conf.padding) // self.conf.size_cell # Compute the col clicked
         cancel = screen.is_canceled(click)
         if cancel:
             return (-1, -1, True)
@@ -81,7 +81,7 @@ class Player:
         if row == -1:
             # If we clicked on a full column, we need to ask again for a cick
             if volume:
-                playsound(self.var.sound_error, block=False)
+                playsound(self.conf.sound_error, block=False)
             col, row, cancel = self.play(board, screen, volume, ai_cpp)
         return (col, row, cancel)
 
@@ -122,11 +122,10 @@ class Game:
         self.winning_surface = None
 
         # Players
-        self.var = Variables()
-        self.conf = Config(self.var, args)
-        self.volume = self.var.sound
-        self.camera = self.var.camera
-        size_screen = (self.var.width_screen, self.var.height_screen)
+        self.conf = Config(args)
+        self.volume = self.conf.sound
+        self.camera = self.conf.camera
+        size_screen = (self.conf.width_screen, self.conf.height_screen)
 
         # Gestures
         self.gestures = GestureController()
@@ -135,14 +134,14 @@ class Game:
         self.communication = Communication()
 
         # Players
-        self.player_1 = Player(self.var, 1, False, None)
-        self.player_2 = Player(self.var, 2, False, None)
-        self.player_null = Player(self.var, 0, False)
+        self.player_1 = Player(self.conf, 1, False, None)
+        self.player_2 = Player(self.conf, 2, False, None)
+        self.player_null = Player(self.conf, 0, False)
         self.player_playing = self.player_1
 
         # Pygame
         self.screen = pg.display.set_mode(size_screen, 0, 32)
-        pg.display.set_caption(self.var.screen_title)
+        pg.display.set_caption(self.conf.screen_title)
 
     def inverse_players(self) -> None:
         """Return the symbols of the opponent of the player currently playing"""
@@ -186,35 +185,35 @@ class Game:
             elif self.status == self.allowed_status["options"]:
                 self.draw_options_screen()
             elif self.status == self.allowed_status["loc_HvH"]:
-                self.player_1 = Player(self.var, 1, False)
-                self.player_2 = Player(self.var, 2, False)
+                self.player_1 = Player(self.conf, 1, False)
+                self.player_2 = Player(self.conf, 2, False)
                 self.status = self.allowed_status["gaming"]
             elif self.status == self.allowed_status["loc_HvAI"]:
                 self.screen_AI = Screen_AI(
-                    self.var,
+                    self.conf,
                     self.screen,
                     self.gestures,
                     volume=self.volume,
                     camera=self.camera,
                     number_AI=1,
                 )
-                self.player_1 = Player(self.var, 1, False)
-                self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_1)
+                self.player_1 = Player(self.conf, 1, False)
+                self.player_2 = Player(self.conf, 2, True, self.screen_AI.diff_AI_1)
                 if self.screen_AI.ready_play:
                     self.status = self.allowed_status["gaming"]
                 else:
                     self.status = self.allowed_status["local"]
             elif self.status == self.allowed_status["loc_AIvAI"]:
                 self.screen_AI = Screen_AI(
-                    self.var,
+                    self.conf,
                     self.screen,
                     self.gestures,
                     volume=self.volume,
                     camera=self.camera,
                     number_AI=2,
                 )
-                self.player_1 = Player(self.var, 1, True, self.screen_AI.diff_AI_1)
-                self.player_2 = Player(self.var, 2, True, self.screen_AI.diff_AI_2)
+                self.player_1 = Player(self.conf, 1, True, self.screen_AI.diff_AI_1)
+                self.player_2 = Player(self.conf, 2, True, self.screen_AI.diff_AI_2)
                 if self.screen_AI.ready_play:
                     self.status = self.allowed_status["gaming"]
                 else:
@@ -235,16 +234,16 @@ class Game:
         """Show the starting screen, choose between the different possinilities"""
 
         start_screen = Screen(
-            self.var,
+            self.conf,
             self.screen,
             self.gestures,
             cancel_box=False,
             volume=self.volume,
             camera=self.camera,
         )
-        box_play_local = Box(self.var.text_options_play_local)
-        box_play_online = Box(self.var.text_options_play_online)
-        box_options = Box(self.var.text_options_options)
+        box_play_local = Box(self.conf.text_options_play_local)
+        box_play_online = Box(self.conf.text_options_play_online)
+        box_options = Box(self.conf.text_options_options)
         start_screen.center_all([[box_play_local], [box_play_online], [box_options]])
 
         while self.status == self.allowed_status["start"]:
@@ -259,7 +258,7 @@ class Game:
     def draw_options_screen(self) -> None:
         """Draw the options screen (language, if camera, if sound, etc.)"""
         options = OptionsScreen(
-            self.var, self, self.screen, self.gestures, self.volume, self.camera
+            self.conf, self, self.screen, self.gestures, self.volume, self.camera
         )
         while self.status == self.allowed_status["options"]:
             click = options.click()
@@ -273,21 +272,21 @@ class Game:
                 options.camera = self.camera
             # Change the language depending on where the click is
             elif options.x_in_rect(click, options.flags[0]):
-                self.conf.load_language("en")
+                self.conf.change_language("en")
             elif options.x_in_rect(click, options.flags[1]):
-                self.conf.load_language("fr")
+                self.conf.change_language("fr")
             elif options.x_in_rect(click, options.flags[2]):
-                self.conf.load_language("cat")
+                self.conf.change_language("cat")
             elif options.x_in_rect(click, options.flags[3]):
-                self.conf.load_language("wls")
+                self.conf.change_language("wls")
             options.reset_options_screen()
 
     def draw_play_local_options(self) -> None:
         """Show the different options when choosing to play locally"""
-        screen = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
-        box_HvH = Box(self.var.text_options_play_HvH)
-        box_HvAI = Box(self.var.text_options_play_HvAI)
-        box_AIvAI = Box(self.var.text_options_play_AIvAI)
+        screen = Screen(self.conf, self.screen, self.gestures, self.volume, self.camera)
+        box_HvH = Box(self.conf.text_options_play_HvH)
+        box_HvAI = Box(self.conf.text_options_play_HvAI)
+        box_AIvAI = Box(self.conf.text_options_play_AIvAI)
         screen.center_all([[box_HvH], [box_HvAI], [box_AIvAI]])
 
         self.screen_AI = None
@@ -303,14 +302,14 @@ class Game:
                 self.status = self.allowed_status["start"]
 
     def draw_play_online_options(self) -> None:
-        online = Screen(self.var, self.screen, self.gestures, self.volume, self.camera)
+        online = Screen(self.conf, self.screen, self.gestures, self.volume, self.camera)
         box_client = Box("Client")
         box_server = Box("Server")
         box_human = Box("Human")
         box_machi = Box("As AI")
         type_me = None
         player_me = None
-        final_box = online.draw_agreement_box(self.var.text_online_agreement_box)
+        final_box = online.draw_agreement_box(self.conf.text_online_agreement_box)
         online.center_all([[box_client, box_server], [box_human, box_machi]])
 
         while self.status == self.allowed_status["online"]:
@@ -324,7 +323,7 @@ class Game:
                     out = False
             if out:
                 final_box.hide = True
-                online.reset_screen(self.var.color_options_screen)
+                online.reset_screen(self.conf.color_options_screen)
                 type_me = None
                 player_me = None
 
@@ -352,9 +351,9 @@ class Game:
                 other_box.render(self.screen) # Reset the other box
                 online.highlight_box( # Highlight the selected box
                     box,
-                    self.var.color_options_highlight_box,
+                    self.conf.color_options_highlight_box,
                     online.screen,
-                    self.var.color_options_highlight_text,
+                    self.conf.color_options_highlight_text,
                 )
 
             if player_me is not None and type_me is not None:
@@ -373,11 +372,11 @@ class Game:
         print("We need to allow the change of the difficulty")
         # Create the two player
         if type_me == "client":
-            self.player_1 = Player(self.var, 1, False, online=True)
-            self.player_2 = Player(self.var, 2, is_ai, 15)
+            self.player_1 = Player(self.conf, 1, False, online=True)
+            self.player_2 = Player(self.conf, 2, is_ai, 15)
         else:
-            self.player_1 = Player(self.var, 1, is_ai, 15)
-            self.player_2 = Player(self.var, 2, False, online=True)
+            self.player_1 = Player(self.conf, 1, is_ai, 15)
+            self.player_2 = Player(self.conf, 2, False, online=True)
         self.communication.type = type_me
 
         # Change the status depending on the type selected
@@ -389,7 +388,7 @@ class Game:
     def select_opponent(self) -> str:
         """Select the opponent between all opponents available"""
         screen_opp = OpponentSelectionScreen(
-            self.var,
+            self.conf,
             self.screen,
             self.gestures,
             self.communication,
@@ -401,7 +400,7 @@ class Game:
         final_index = -1
         while final_index == -1:
             screen_opp.all_boxes = []
-            screen_opp.screen.fill(self.var.color_options_screen)
+            screen_opp.screen.fill(self.conf.color_options_screen)
             screen_opp.draw_quit_box()
             mouse = screen_opp.click()
             # Go throught all boxes for the connections
@@ -425,7 +424,7 @@ class Game:
 
     def wait_as_server(self) -> None:
         screen = OpponentSelectionScreen(
-            self.var,
+            self.conf,
             self.screen,
             self.gestures,
             self.communication,
@@ -443,14 +442,14 @@ class Game:
 
         # Reset the boxes present on the screen
         screen.all_boxes = []
-        screen.screen.fill(self.var.color_options_screen)
+        screen.screen.fill(self.conf.color_options_screen)
         screen.draw_cancel_box()
         screen.draw_quit_box()
         msg = Box(f"Looks like {self.communication.get_name_client()} want to play")
         yes = Box("Accept")
         nop = Box("Reject")
         screen.center_all([[msg], [yes, nop]], update=False)
-        screen.reset_screen(self.var.color_options_screen)
+        screen.reset_screen(self.conf.color_options_screen)
         # Act according to the box selected
         force_reload = False
         while self.status == self.allowed_status["online_server"] and not force_reload:
@@ -473,7 +472,7 @@ class Game:
         self.player_1.resetBoard()
         self.player_2.resetBoard()
         gaming = GamingScreen(
-            self.var,
+            self.conf,
             self.screen,
             self.gestures,
             self.volume,
@@ -543,33 +542,33 @@ class Game:
             text = f"Nyah ! {winner.symbol.v} nyah !"
         elif self.conf.language == "wls":
             text = f"Chwaraewr {winner.symbol.v} yn ennill"
-        sound = self.var.sound_winner_victory
+        sound = self.conf.sound_winner_victory
         if winner != self.player_1 and winner != self.player_2:
-            text = self.var.text_draw[self.conf.language]
-            sound = self.var.sound_winner_draw
+            text = self.conf.text_draw[self.conf.language]
+            sound = self.conf.sound_winner_draw
         if (winner == self.player_1 and self.player_1.online) or (winner == self.player_2 and self.player_2.online):
-            sound = self.var.sound_winner_defeat
+            sound = self.conf.sound_winner_defeat
             text = "You lose"
         print(text)
 
         End = Screen(
-            self.var,
+            self.conf,
             self.screen,
             self.gestures,
             volume=self.volume,
             camera=self.camera,
         )
-        End.screen.fill(self.var.color_screen)
-        End.cancel_box.text = self.var.text_retry
+        End.screen.fill(self.conf.color_screen)
+        End.cancel_box.text = self.conf.text_retry
         End.cancel_box.render(End.screen)
         End.draw_quit_box()
 
-        p = self.var.padding
+        p = self.conf.padding
         box_winner = Box(
             text,
-            color_text=self.var.black,
-            color_rect=self.var.white,
-            coordinate=(self.var.width_screen // 2, p // 2),
+            color_text=self.conf.black,
+            color_rect=self.conf.white,
+            coordinate=(self.conf.width_screen // 2, p // 2),
             align=(0, 0),
         )
         box_winner.font_size = 64
@@ -588,10 +587,10 @@ class Game:
             if m2:
                 bs = bin(m2)[2:]
                 i = 48 - ("0" * (49 - len(bs)) + bs).find("1")
-                p = self.var.padding
-                c = self.var.size_cell
+                p = self.conf.padding
+                c = self.conf.size_cell
                 x_s = p + (i // 7) * c + c // 2
-                y_s = self.var.height_board - (i % 7 - 1) * c
+                y_s = self.conf.height_board - (i % 7 - 1) * c
                 x_e = x_s
                 y_e = y_s
                 if direction in [0, 2, 3]:
@@ -600,7 +599,7 @@ class Game:
                     y_e -= 3 * c
                 if direction == 2:
                     y_e += 3 * c
-                pg.draw.line(self.screen, self.var.black, (x_s, y_s), (x_e, y_e), 15)
+                pg.draw.line(self.screen, self.conf.black, (x_s, y_s), (x_e, y_e), 15)
 
         complete(bits, 0)  # Horizontal check
         complete(bits, 1)  # Vert
