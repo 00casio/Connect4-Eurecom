@@ -64,8 +64,8 @@ class Communication:
         self.connections = []
         for d in nearby_devices:
             # Filter the devices
-            # if "connect4" in d[1]:
-            self.connections.append(d)
+            if "connect4" in d[1]:
+                self.connections.append(d)
 
     def connect(self, index: int, message: str) -> str:
         """Connect to a server. Usable only on client mode"""
