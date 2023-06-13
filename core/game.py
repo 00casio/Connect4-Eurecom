@@ -82,7 +82,7 @@ class Player:
             # If we clicked on a full column, we need to ask again for a cick
             if volume:
                 playsound(self.conf.sound_error, block=False)
-            col, row, cancel = self.play(board, screen, volume, ai_cpp)
+            col, row, cancel = self.play(board, screen, volume)
         return (col, row, cancel)
 
     def resetBoard(self) -> None:
@@ -535,6 +535,7 @@ class Game:
 
         # Change the message and sound according to the options
         winner = self.who_is_winner()
+        sound = self.conf.sound_winner_victory
         text = f"Player {winner.symbol.v} won !"
         if self.conf.language == "fr":
             text = f"Le joueur {winner.symbol.v} a gagné !"
@@ -542,12 +543,15 @@ class Game:
             text = f"Nyah ! {winner.symbol.v} nyah !"
         elif self.conf.language == "wls":
             text = f"Chwaraewr {winner.symbol.v} yn ennill"
-        sound = self.conf.sound_winner_victory
+        elif self.conf.language == "fra":
+            sound = self.conf.sound_franz_win
         if winner != self.player_1 and winner != self.player_2:
             text = self.conf.text_draw[self.conf.language]
             sound = self.conf.sound_winner_draw
         if (winner == self.player_1 and self.player_1.online) or (winner == self.player_2 and self.player_2.online):
             sound = self.conf.sound_winner_defeat
+            if self.conf.language == "fra":
+                sound = self.conf.sound_franz_lose
             text = "You lose"
         print(text)
 
@@ -560,7 +564,7 @@ class Game:
         )
         End.screen.fill(self.conf.color_screen)
         End.cancel_box.text = self.conf.text_retry
-        End.cancel_box.render(End.screen, self.conf)
+        End.cancel_box.render(End.screen)
         End.draw_quit_box()
 
         p = self.conf.padding
@@ -570,6 +574,7 @@ class Game:
             color_rect=self.conf.white,
             coordinate=(self.conf.width_screen // 2, p // 2),
             align=(0, 0),
+            language=self.conf.language
         )
         box_winner.font_size = 64
         box_winner.render(self.screen)

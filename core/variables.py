@@ -271,6 +271,9 @@ class Variables:
         self.sound_winner_draw = "assets/draw.mp3"
         self.sound_winner_victory = "assets/victory.mp3"
         self.sound_winner_defeat = "assets/lose.mp3"
+        self.sound_franz_disk = "assets/franz/tuck.mp3"
+        self.sound_franz_win = "assets/franz/win.mp3"
+        self.sound_franz_lose = "assets/franz/lose.mp3"
         self.image_volume_on = "assets/volume.svg"
         self.image_volume_muted = "assets/muted.svg"
         self.image_camera = "assets/camera.svg"
@@ -316,6 +319,10 @@ class Variables:
         self.text_online_waiting = self.texts[self.language]["online_text_waiting"]
         self.text_online_empty_waiting = self.texts[self.language]["online_text_waiting_empty"]
         self.text_retry = self.texts[self.language]["text_retry"]
+        if self.language == "fra":
+            self.color_board = self.color_trans
+        else:
+            self.color_board = self.blue
 
 
 class Config(Variables):
@@ -334,6 +341,4 @@ class Config(Variables):
             print(f"This language {language} is not available.\nI will use English")
             language = "en"
         self.language = language
-        if self.language == "fra":
-            self.color_board = self.color_trans
         self.load_language()

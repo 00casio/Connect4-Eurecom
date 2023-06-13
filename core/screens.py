@@ -662,10 +662,12 @@ class GamingScreen(Screen):
         self.blit_board()
         pg.display.update()
         if self.volume:
-            if self.language != "cat":
-                sound = self.conf.sound_disk_touch
-            else:
+            if self.language == "cat":
                 sound = ".png"
                 while sound.split(".")[-1] != "mp3":
                     sound = "assets/cat/" + random_choice(listdir("assets/cat"))
-            playsound(sound, block=True)
+            elif self.language == "fra":
+                sound = self.conf.sound_franz_disk
+            else:
+                sound = self.conf.sound_disk_touch
+            playsound(sound, block=False)
