@@ -623,7 +623,7 @@ class GamingScreen(Screen):
         for y in range(
             p // 2,
             p + row * self.conf.size_cell + self.conf.size_cell // 2,
-            5,
+            10,
         ):
             self.screen.fill(self.conf.color_screen)
             self.draw_token(
