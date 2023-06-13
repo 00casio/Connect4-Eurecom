@@ -6,20 +6,20 @@
 
 #include "ai.h"
 
-int Game::putPiece(uint64_t *player, const int col, uint8_t *heights) {
-    if (heights[col] > MAX_ALLOWED_HEIGHT) {
+int Game::putPiece(uint64_t *player, const int col) {
+    if (col_heights[col] > MAX_ALLOWED_HEIGHT) {
         return NOT_ALLOWED;
     }
-    *player ^= 1ULL << heights[col];
-    heights[col] += 8;
+    *player ^= 1ULL << col_heights[col];
+    col_heights[col] += 8;
     current_depth++;
     return col;
 }
 
-void Game::removePiece(uint64_t *player, const int col, uint8_t *heights) {
-    heights[col] -= 8;
+void Game::removePiece(uint64_t *player, const int col) {
+    col_heights[col] -= 8;
     current_depth--;
-    *player &= ~(1ULL << heights[col]);
+    *player &= ~(1ULL << col_heights[col]);
 }
 
 int Game::countNbrOne(const uint64_t bitboard) {
@@ -157,7 +157,7 @@ int Game::evaluateBoard(const uint64_t bitboard, const uint64_t oppBitboard, con
     return 111;
 }
 
-int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int depth, int alpha, int beta) {
+int Game::negamax(uint64_t *player, uint64_t *opponent, const int depth, int alpha, int beta) {
     int result = evaluateBoard(*player, *opponent, depth);
     if ((depth <= 0) | (result != 111)) {
         return result - current_depth;
@@ -176,29 +176,29 @@ int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const 
 
     // Testing if the player can win with his next move
     for (int i = 0; i < NBR_COL; i++) {
-        int dpRes = putPiece(player, i, heights);
+        int dpRes = putPiece(player, i);
         if (dpRes == NOT_ALLOWED) {
             continue;
         }
         if (quickWinning(*player)) {
-            removePiece(player, dpRes, heights);
+            removePiece(player, dpRes);
             return SCORE_SOMEONE_WIN - current_depth;
         }
-        removePiece(player, dpRes, heights);
+        removePiece(player, dpRes);
     }
 
     // Do all move and look for the result of the opponent
     for (int i = 0; i < NBR_COL; i++) {
         int col = col_ordering[i];
-        int dpRes = putPiece(player, col, heights);
+        int dpRes = putPiece(player, col);
         if (dpRes == NOT_ALLOWED) {
             continue;
         }
 
-        int score = - negamax(opponent, player, heights, depth - 1, - beta, - alpha);
+        int score = - negamax(opponent, player, depth - 1, - beta, - alpha);
         // printBoard();
         // printf("depth = %d, score = %d\n", current_depth, score);
-        removePiece(player, col, heights);
+        removePiece(player, col);
 
         if (score >= beta) {
             return score;
@@ -212,53 +212,53 @@ int Game::negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const 
     return alpha;
 }
 
-int Game::bestStartingMove(const uint8_t *heights) {
-    if (heights[3] < MAX_ALLOWED_HEIGHT) return 3;
-    if (heights[2] < MAX_ALLOWED_HEIGHT) return 2;
-    if (heights[4] < MAX_ALLOWED_HEIGHT) return 4;
-    if (heights[1] < MAX_ALLOWED_HEIGHT) return 1;
-    if (heights[5] < MAX_ALLOWED_HEIGHT) return 5;
-    if (heights[0] < MAX_ALLOWED_HEIGHT) return 0;
-    if (heights[6] < MAX_ALLOWED_HEIGHT) return 6;
+int Game::bestStartingMove() {
+    if (col_heights[3] < MAX_ALLOWED_HEIGHT) return 3;
+    if (col_heights[2] < MAX_ALLOWED_HEIGHT) return 2;
+    if (col_heights[4] < MAX_ALLOWED_HEIGHT) return 4;
+    if (col_heights[1] < MAX_ALLOWED_HEIGHT) return 1;
+    if (col_heights[5] < MAX_ALLOWED_HEIGHT) return 5;
+    if (col_heights[0] < MAX_ALLOWED_HEIGHT) return 0;
+    if (col_heights[6] < MAX_ALLOWED_HEIGHT) return 6;
     printBoard();
     for (int i = 0; i < NBR_COL; i++){
-        printf(" %d  ", heights[i]);
+        printf(" %d  ", col_heights[i]);
     }
     printf("\n");
     fprintf(stderr, "All columns are full\n");
     exit(-1);
 }
 
-int Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, uint8_t *heights) {
-    int bestMove = bestStartingMove(heights);
+int Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth) {
+    int bestMove = bestStartingMove();
     // int bestScore = - SCORE_SOMEONE_WIN;
     int alpha = - SCORE_SOMEONE_WIN;
     int beta = SCORE_SOMEONE_WIN;
 
     for (int i = 0; i < NBR_COL; i++) {
-        int dpRes = putPiece(player, i, heights);
+        int dpRes = putPiece(player, i);
         if (dpRes == NOT_ALLOWED) {
             continue;
         }
         if (quickWinning(*player)) {
-            removePiece(player, dpRes, heights);
+            removePiece(player, dpRes);
             return i;
         }
-        removePiece(player, dpRes, heights);
+        removePiece(player, dpRes);
     }
 
     // int scores[7] = {-SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN, -SCORE_SOMEONE_WIN};
 
     for (int i = 0; i < NBR_COL; i++) {
         int col = col_ordering[i];
-        int dpRes = putPiece(player, col, heights);
+        int dpRes = putPiece(player, col);
         if (dpRes == NOT_ALLOWED) {
             continue;
         }
-        int score = - negamax(opponent, player, heights, depth - 1, - beta, - alpha);
+        int score = - negamax(opponent, player, depth - 1, - beta, - alpha);
         // printBoard();
         // printf("depth = %d, score = %d\n", current_depth, score);
-        removePiece(player, col, heights);
+        removePiece(player, col);
 
         // scores[col] = score;
         if (score > alpha) {
@@ -280,23 +280,23 @@ int Game::aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, ui
 }
 
 int Game::aiMove(const int depth) {
-    int ai_col = aiSearchMove(&ai_board, &human_board, depth, col_heights);
-    return putPiece(&ai_board, ai_col, col_heights);
+    int ai_col = aiSearchMove(&ai_board, &human_board, depth);
+    return putPiece(&ai_board, ai_col);
 }
 
 int Game::humanMove(const int col) {
     if (col < 0 || col > 6) {
         return NOT_ALLOWED;
     }
-    return putPiece(&human_board, col, col_heights);
+    return putPiece(&human_board, col);
 }
 
 int Game::forceAIMove(const int col) {
-    return putPiece(&ai_board, col, col_heights);
+    return putPiece(&ai_board, col);
 }
 
 int Game::scoreAIpos() {
-    return negamax(&ai_board, &human_board, col_heights, 13, - SCORE_SOMEONE_WIN, SCORE_SOMEONE_WIN);
+    return negamax(&ai_board, &human_board, 13, - SCORE_SOMEONE_WIN, SCORE_SOMEONE_WIN);
 }
 
 void Game::resetBoard() {

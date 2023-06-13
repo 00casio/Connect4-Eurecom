@@ -84,7 +84,7 @@ private:
      * @param heights The list of the heights of the different columns
      * @return Return NOT_ALLOWED if the column is not valid (full or out of bound), or the column otherwise
      */
-    int putPiece(uint64_t *player, const int col, uint8_t *heights);
+    int putPiece(uint64_t *player, const int col);
 
     /**
      * @brief Remove the piece at the top of the column chosen
@@ -93,7 +93,7 @@ private:
      * @param col The column we want to remove the piece
      * @param heights The list of the heights of the different columns
      */
-    void removePiece(uint64_t *player, const int col, uint8_t *heights);
+    void removePiece(uint64_t *player, const int col);
 
     /**
      * @brief Count the number of 1 in bitboard
@@ -142,7 +142,7 @@ private:
      * @param beta The beta parameter
      * @return The score of the negamax algorithm at this level
      */
-    int negamax(uint64_t *player, uint64_t *opponent, uint8_t *heights, const int max_depth, int alpha, int beta);
+    int negamax(uint64_t *player, uint64_t *opponent, const int max_depth, int alpha, int beta);
 
     /**
      * @brief Return the best starting move when no evaluation is done
@@ -150,7 +150,7 @@ private:
      * @param heights The list of the heights of the different columns
      * @return the column played
      */
-    int bestStartingMove(const uint8_t *heights);
+    int bestStartingMove();
 
     /**
      * @brief Search the best move the AI can make
@@ -161,7 +161,7 @@ private:
      * @param heights The list of the heights of the different columns
      * @return The number of the column in which we should play
      */
-    int aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth, uint8_t *heights);
+    int aiSearchMove(uint64_t *player, uint64_t *opponent, const int depth);
 
 public:
 
