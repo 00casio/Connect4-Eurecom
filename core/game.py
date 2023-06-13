@@ -241,9 +241,9 @@ class Game:
             volume=self.volume,
             camera=self.camera,
         )
-        box_play_local = Box(self.conf.text_options_play_local)
-        box_play_online = Box(self.conf.text_options_play_online)
-        box_options = Box(self.conf.text_options_options)
+        box_play_local = Box(self.conf.text_options_play_local, language=self.conf.language)
+        box_play_online = Box(self.conf.text_options_play_online, language=self.conf.language)
+        box_options = Box(self.conf.text_options_options, language=self.conf.language)
         start_screen.center_all([[box_play_local], [box_play_online], [box_options]])
 
         while self.status == self.allowed_status["start"]:
@@ -284,9 +284,9 @@ class Game:
     def draw_play_local_options(self) -> None:
         """Show the different options when choosing to play locally"""
         screen = Screen(self.conf, self.screen, self.gestures, self.volume, self.camera)
-        box_HvH = Box(self.conf.text_options_play_HvH)
-        box_HvAI = Box(self.conf.text_options_play_HvAI)
-        box_AIvAI = Box(self.conf.text_options_play_AIvAI)
+        box_HvH = Box(self.conf.text_options_play_HvH, language=self.conf.language)
+        box_HvAI = Box(self.conf.text_options_play_HvAI, language=self.conf.language)
+        box_AIvAI = Box(self.conf.text_options_play_AIvAI, language=self.conf.language)
         screen.center_all([[box_HvH], [box_HvAI], [box_AIvAI]])
 
         self.screen_AI = None
@@ -303,10 +303,10 @@ class Game:
 
     def draw_play_online_options(self) -> None:
         online = Screen(self.conf, self.screen, self.gestures, self.volume, self.camera)
-        box_client = Box("Client")
-        box_server = Box("Server")
-        box_human = Box("Human")
-        box_machi = Box("As AI")
+        box_client = Box("Client", language=self.conf.language)
+        box_server = Box("Server", language=self.conf.language)
+        box_human = Box("Human", language=self.conf.language)
+        box_machi = Box("As AI", language=self.conf.language)
         type_me = None
         player_me = None
         final_box = online.draw_agreement_box(self.conf.text_online_agreement_box)
@@ -445,9 +445,9 @@ class Game:
         screen.screen.fill(self.conf.color_options_screen)
         screen.draw_cancel_box()
         screen.draw_quit_box()
-        msg = Box(f"Looks like {self.communication.get_name_client()} want to play")
-        yes = Box("Accept")
-        nop = Box("Reject")
+        msg = Box(f"Looks like {self.communication.get_name_client()} want to play", language=self.conf.language)
+        yes = Box("Accept", language=self.conf.language)
+        nop = Box("Reject", language=self.conf.language)
         screen.center_all([[msg], [yes, nop]], update=False)
         screen.reset_screen(self.conf.color_options_screen)
         # Act according to the box selected
@@ -560,7 +560,7 @@ class Game:
         )
         End.screen.fill(self.conf.color_screen)
         End.cancel_box.text = self.conf.text_retry
-        End.cancel_box.render(End.screen)
+        End.cancel_box.render(End.screen, self.conf)
         End.draw_quit_box()
 
         p = self.conf.padding

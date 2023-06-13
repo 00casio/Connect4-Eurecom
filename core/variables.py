@@ -147,6 +147,39 @@ class Variables:
                     ],
                 "text_retry": "Ailgynnig"
             },
+            "fra": {
+                "boxAI_text_levels": [
+                    "Start",
+                    "Start",
+                    "Meh, begin",
+                    "Get my a** kicked",
+                    "Welcome to Hell",
+                ],
+                "options_play_local": "Play locally",
+                "options_play_online": "Play online",
+                "options_options": "Options",
+                "options_play_HvH": "Human vs. Human",
+                "options_play_HvAI": "Human vs. AI",
+                "options_play_AIvAI": "Watch the world burn",
+                "options_difficulty_HvAI": "Choose your poison",
+                "options_difficulty_AIvAI": "How badly do you want this game to go ?",
+                "confirmation_button": "Sarah Connor ?",
+                "cancel_box": "Return",
+                "quit_box": "Quit",
+                "message_quit": "You chose to quit the game\nYou are disapointing me",
+                "text_levels": "Level",
+                "online_agreement_box": "Broadcast myself as is",
+                "online_text_waiting": [
+                        "Please wait a few seconds",
+                        "We are getting a list of all potential opponents",
+                    ],
+                "online_text_waiting_empty": [
+                        "Looks like we did not find any.",
+                        "Please wait we will look",
+                        "again in a few seconds",
+                    ],
+                "text_retry": "Retry"
+            },
         }
         self.language = "en"
 
@@ -227,6 +260,7 @@ class Variables:
         self.pos_max_x = self.padding + self.width_board - self.size_cell // 2
         self.text_size = 30
         self.text_font = "monospace"
+        self.text_franz_font = "assets/franz/AlanisHand.ttf"
 
         # Assets
         self.camera = True
@@ -247,9 +281,8 @@ class Variables:
         self.image_welsh = "assets/welsh.svg"
         self.image_cat_tails = "assets/cat/tails.png"
         self.image_cat_heads = "assets/cat/heads_1.png"
-
-        # Fonts
-        self.main_font = pg.font.SysFont(self.text_font, self.text_size)
+        self.image_franz_tails = "assets/franz/pile.png"
+        self.image_franz_heads = "assets/franz/face.png"
 
         # Quit and cancel
         self.coor_cancel_box = (10, 10)
@@ -293,12 +326,14 @@ class Config(Variables):
         self.sound = not arguments.novolume
         self.camera = not arguments.nocamera
         self.language = arguments.language
-        self.load_language()
+        self.change_language(self.language)
 
     def change_language(self, language: str) -> None:
         """Load the correct language in the variables"""
         if language not in list(self.texts):
-            print("This language is not available.\nI will use English")
+            print(f"This language {language} is not available.\nI will use English")
             language = "en"
         self.language = language
+        if self.language == "fra":
+            self.color_board = self.color_trans
         self.load_language()

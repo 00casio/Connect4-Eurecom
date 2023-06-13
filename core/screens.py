@@ -55,6 +55,7 @@ class Screen(Tools):
                 self.conf.white,
                 coordinate=self.conf.coor_cancel_box,
                 align=(-1, 1),
+                language=self.conf.language
             )
             self.cancel_box.hide = hide
         self.cancel_box.render(self.screen)
@@ -70,6 +71,7 @@ class Screen(Tools):
                 self.conf.white,
                 coordinate=self.conf.coor_quit_box,
                 align=(1, 1),
+                language=self.conf.language
             )
         self.quit_box.render(self.screen)
         if self.quit_box not in self.all_boxes:
@@ -122,6 +124,14 @@ class Screen(Tools):
                     disk = pg.image.load(self.conf.image_cat_tails)
                 elif symbol == self.conf.symbol_player_2:
                     disk = pg.image.load(self.conf.image_cat_heads)
+                screen.blit(disk, (x - self.conf.radius_disk, y - self.conf.radius_disk))
+            elif self.language == "fra":
+                if symbol == self.conf.symbol_player_1:
+                    disk = pg.image.load(self.conf.image_franz_heads)
+                    disk = pg.transform.scale(disk, (2*self.conf.radius_disk, 2*self.conf.radius_disk))
+                elif symbol == self.conf.symbol_player_2:
+                    disk = pg.image.load(self.conf.image_franz_tails)
+                    disk = pg.transform.scale(disk, (2*self.conf.radius_disk, 2*self.conf.radius_disk))
                 screen.blit(disk, (x - self.conf.radius_disk, y - self.conf.radius_disk))
 
     def hovering_box(self, box: Box, hover=True) -> None:
@@ -337,7 +347,7 @@ class Screen_AI(Screen):
             [
                 Box(
                     self.conf.text_difficulty_options[number_AI],
-                    color_hovering=self.conf.color_options_box,
+                    color_hovering=self.conf.color_options_box, language=self.conf.language
                 )
             ]
         ]
@@ -348,7 +358,7 @@ class Screen_AI(Screen):
                     f"{self.conf.text_box_levels} {i}",
                     self.conf.black,
                     self.conf.color_player_1,
-                    self.conf.color_hover_player_1,
+                    self.conf.color_hover_player_1, language=self.conf.language
                 )
             )
         boxes_ai_2 = []
@@ -358,7 +368,7 @@ class Screen_AI(Screen):
                     f"{self.conf.text_box_levels} {i}",
                     self.conf.black,
                     self.conf.color_player_2,
-                    self.conf.color_hover_player_2,
+                    self.conf.color_hover_player_2, language=self.conf.language
                 )
             )
         self.boxes_options.append(boxes_ai_1)
@@ -441,9 +451,9 @@ class OpponentSelectionScreen(Screen):
         box_temp = []
         if type(msg) == list:
             for i in msg:
-                box_temp.append([Box(i)])
+                box_temp.append([Box(i, language=self.conf.language)])
         else:
-            box_temp.append([Box(msg)])
+            box_temp.append([Box(msg, language=self.conf.language)])
         self.center_all(box_temp)
 
     def split_list(self, list_to_split: list[tuple[str, int]]) -> list[list[tuple[str, int]]]:
@@ -471,7 +481,7 @@ class OpponentSelectionScreen(Screen):
         for line in self.list_connec:
             tmp = []
             for l in line:
-                tmp.append(Box(l[1]))
+                tmp.append(Box(l[1], language=self.conf.language))
             boxes.append(tmp)
         self.all_boxes = []
         self.screen.fill(self.conf.color_options_screen)
@@ -605,14 +615,18 @@ class GamingScreen(Screen):
     def draw_board(self) -> None:
         """Draw the board on the screen (needed to be sure to see the board)"""
         self.screen.fill(self.color_screen)
-        pg.draw.rect(
-            self.board_surface,
-            self.color_board,
-            (0, 0, self.width_board, self.height_board),
-        )
-        for i in range(7):
-            for j in range(6):
-                self.draw_token(i, j, None, self.conf.radius_hole) # Draw transparent holes where the disks will be placed during the game
+        if self.conf.language == "fra":
+            board = pg.image.load("assets/franz/grille.png").convert_alpha()
+            self.board_surface = pg.transform.scale(board, (self.width_board, self.height_board))
+        else:
+            pg.draw.rect(
+                self.board_surface,
+                self.color_board,
+                (0, 0, self.width_board, self.height_board),
+            )
+            for i in range(7):
+                for j in range(6):
+                    self.draw_token(i, j, None, self.conf.radius_hole) # Draw transparent holes where the disks will be placed during the game
         self.blit_board()
         pg.display.update()
 
@@ -633,14 +647,18 @@ class GamingScreen(Screen):
             pg.display.update()
         self.screen.fill(self.conf.color_screen)
         self.draw_token(col, row, player, self.conf.radius_hole)
-        self.draw_circle(
-            x - p,
-            y - p + 5,
-            self.conf.color_board,
-            self.conf.radius_disk,
-            self.board_surface,
-            width=self.conf.radius_disk - self.conf.radius_hole,
-        )
+        if self.conf.language != "fra":
+            self.draw_circle(
+                x - p,
+                y - p + 5,
+                self.conf.color_board,
+                self.conf.radius_disk,
+                self.board_surface,
+                width=self.conf.radius_disk - self.conf.radius_hole,
+            )
+        else:
+            board = pg.image.load("assets/franz/grille.png").convert_alpha()
+            self.board_surface.blit(pg.transform.scale(board, (self.width_board, self.height_board)), (0, 0))
         self.blit_board()
         pg.display.update()
         if self.volume:

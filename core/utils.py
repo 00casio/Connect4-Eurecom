@@ -42,6 +42,7 @@ class Box:
         color_hovering: Color = Variables().color_hovering_box,
         coordinate: tuple[int, int] = (-1, -1),
         align: tuple[int, int] = (0, 0),
+        language: str = Variables().language
     ) -> None:
         """Initialize all the variables fot this class.
         'align' desribes how the text and box are written according to the coordinate.
@@ -58,12 +59,19 @@ class Box:
         self.font_name = Variables().text_font
         tbs = Variables().text_box_spacing
         self.spacings = [tbs, tbs, tbs, tbs]
-        self.font_r = pg.font.SysFont(self.font_name, self.font_size)
+        self.language = language
+        if self.language == "fra":
+            self.font_r = pg.font.Font(Variables().text_franz_font, self.font_size)
+        else:
+            self.font_r = pg.font.SysFont(self.font_name, self.font_size)
         self.text_r = self.font_r.render(self.text, True, self.color_text)
         self.hide = False
 
     def render(self, screen: Surface) -> None:
-        self.font_r = pg.font.SysFont(self.font_name, self.font_size)
+        if self.language == "fra":
+            self.font_r = pg.font.Font(Variables().text_franz_font, self.font_size)
+        else:
+            self.font_r = pg.font.SysFont(self.font_name, self.font_size)
         self.text_r = self.font_r.render(self.text, True, self.color_text)
         s = self.text_r.get_size()
         spa = self.spacings
@@ -84,27 +92,6 @@ class Box:
             return
         pg.draw.rect(screen, self.color_rect, self.box)
         screen.blit(self.text_r, (x + spa[0], y + spa[1]))
-
-    def change_sfs(
-        self,
-        new_size: Optional[int] = None,
-        new_font: Optional[int] = None,
-        spacings: list[int] = [],
-    ) -> None:
-        """ Allow the change of font size, font, and all spacings """
-        if new_size is not None:
-            self.font_size = new_size
-        if new_font is not None:
-            self.font_name = new_font
-        if len(spacings) == 0:
-            tbs = Variables().text_box_spacing
-            self.spacings = [tbs, tbs, tbs, tbs]
-        elif len(spacings) == 1:
-            self.spacings = [spacings[0] for _ in range(4)]
-        elif len(spacings) == 2:
-            self.spacings = [spacings[i % 2] for i in range(4)]
-        elif len(spacings) == 4:
-            self.spacings = spacings
 
 
 class Tools:
@@ -162,7 +149,7 @@ class Tools:
     ) -> None:
         """Highlight the clicked box to be in a color or another"""
         Box(
-            box.text, color_text, color_box, box.color_hover, box.coor, box.align
+            box.text, color_text, color_box, box.color_hover, box.coor, box.align, language=box.language
         ).render(screen)
         pg.display.update()
 
@@ -177,6 +164,7 @@ class Tools:
                 int(self.conf.height_screen * position),
             ),
             align=(0, 0),
+            language=self.conf.language
         )
         agreement.hide = hide
         self.all_boxes.append(agreement)
