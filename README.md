@@ -1,7 +1,5 @@
 # Project S6
 
-Well know not very know
-
 The project S6 of:
 
 - Francois Barnouin (AI)
@@ -48,6 +46,12 @@ Code | Meaning | Action.s upon reception | Type
 102 | Game accepted | Launch grid, wait for server to play | `byte`
 103 | Game refused | - | `byte`
 201 | Game aborted by user (during a game) | Abandon game | `byte`
+
+## Criteria for AI
+
+- An AI at any depth must always beat a player that is always choosing a column randomly.
+- An AI at any depth must beat an AI which is at a depth level strictly lower than itself.
+- For a given depth level, the AI who starts first must beat an AI at the same depth level.
 
 ## Copyright
 
