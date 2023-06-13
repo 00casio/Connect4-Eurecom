@@ -87,3 +87,9 @@ Code | Meaning | Action.s upon reception | Type
 
 Example of result from find_services:  
 [{'service-classes': ['94F39D29-7D6D-437D-973B-FBA39E49D4EE', '1101'], 'profiles': [('1101', 256)], 'name': 'connect4_1', 'description': None, 'provider': None, 'service-id': '94F39D29-7D6D-437D-973B-FBA39E49D4EE', 'protocol': 'RFCOMM', 'port': 1, 'host': 'E4:5F:01:D2:D2:94'}]
+
+### Copyright
+
+One of the font used ( Tommy's first alphabet) is the intellectual property of Tom Murphy (http://fonts.tom7.com/)
+
+
