@@ -8,15 +8,27 @@ The project S6 of:
 - Guillaume Ung (AI)
 - Hamza Jad AL Aoun (Hands gesture)
 
-### This week objectives
+The project was made under the guiidance of Nicholas Evans.
 
-- Correct bugs:
-  - Seems like when root, hovering line is not correct
-- Polish the game:
-  - Place filter on possible communications
-  - Fuse a "perfect" (look for all poss) AI in our program
+## Speciifiications
 
-### Objectives
+	To use the whole project (meaning, with the camera, the AI in C++, the communication module), you need to have installed:
+	\begin{itemize}
+-A version of Python (preferably \(>=\) 3.11),
+-A C++ compiler (\textit{clang++} produces better binary but \textit{g++} works too),
+-A working bash interpreter,
+-A Raspberry Pi under Raspbian64 with a camera module, a Bluetooth chip, and at least 2 GB of RAM.
+
+	All those requirements are easy to fulfil, and you should not have anything to install on your own. 
+
+## Setting up
+
+	When the previous requirements are fulfilled, you only need to use the launch.sh script, and every other software and libraries required should be installed. 
+	If the script does not find something, then it prints it and launches the program with some options disabled. 
+	If you want to use Bluetooth in server mode, then you need to run the script as root (under Linux, you just need to use sudo ./launch.sh. It is because advertising the Bluetooth service need root permission.
+
+
+## Objectives
 
 The objectives of this project are the following:
 
@@ -31,50 +43,8 @@ If we can use the [boost.Python](https://github.com/boostorg/python) library on 
 
 For the first installation, you need to make sure that `libcairomm-dev` (or equivalent) and `libgirepository-dev` (or equivalent) are installed. They are needed by `pygobject` which is needed by `playsound`.
 
-#### Interface
 
-- [x] Choose mode
-- [x] Grid
-- [x] Play sound
-- [x] Highlight selected column
-- [x] Menu to choose the opponent
-
-Optional:
-
-- [ ] Name
-- [x] Options
-- [ ] Change theme
-- [ ] Background music
-- [ ] Tidy the codebase
-  - [x] rewrite reset_screen
-  - [x] create class for box (will have coordinate of rect, color of box, text, color of text, if the box is "clickable")
-
-#### AI
-
-- [x] Use minimax algorithm
-
-Optional:
-
-- [x] Change difficulty
-- [ ] Different gameplay
-- [ ] Add other algorithms
-- [x] Test if negamax is faster when using only int64/uint64 (yes it is)
-
-#### Hands gesture
-
-- [x] Choose gestures
-- [x] Continuous gesture
-
-Optional:
-
-- [ ] Change on the fly
-- [ ] Detect shapes
-- [ ] Maybe discrete gestures
-
-#### Communication
-
-- [ ] Choose the mean of communication
-- [ ] Choose the protocol
+## Code table
 
 Code | Meaning | Action.s upon reception | Type
 --- | --- | --- | ---
@@ -85,11 +55,8 @@ Code | Meaning | Action.s upon reception | Type
 103 | Game refused | - | `byte`
 201 | Game aborted by user (during a game) _For now, we wait our turn to send this? (beware of this)_ | Abandon game (this way we know the game was ended because of user request, not because of disconnection) | `byte`
 
-Example of result from find_services:  
-[{'service-classes': ['94F39D29-7D6D-437D-973B-FBA39E49D4EE', '1101'], 'profiles': [('1101', 256)], 'name': 'connect4_1', 'description': None, 'provider': None, 'service-id': '94F39D29-7D6D-437D-973B-FBA39E49D4EE', 'protocol': 'RFCOMM', 'port': 1, 'host': 'E4:5F:01:D2:D2:94'}]
+## Copyright
 
-### Copyright
-
-One of the font used ( Tommy's first alphabet) is the intellectual property of Tom Murphy (http://fonts.tom7.com/)
+One of the font used (alanis hand) is the intellectual property of himasf (https://www.1001fonts.com/users/himasf/)
 
 
