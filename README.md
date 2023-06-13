@@ -13,7 +13,7 @@ The project was made under the guiidance of Nicholas Evans.
 ## Speciifiications
 
 	To use the whole project (meaning, with the camera, the AI in C++, the communication module), you need to have installed:
-	\begin{itemize}
+
 -A version of Python (preferably \(>=\) 3.11),
 -A C++ compiler (\textit{clang++} produces better binary but \textit{g++} works too),
 -A working bash interpreter,
