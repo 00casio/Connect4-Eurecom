@@ -67,6 +67,6 @@ fi
 # Use swig to use the C++ code in Python
 echo "Compiling the library..."
 swig -Wall -python -c++ -o ai/ai_wrap.cxx ai/ai.i
-g++ -shared -O3 -fPIC ai/ai.cpp ai/ai_wrap.cxx -o ai/_libai.so -I ${PYTHON_HEADERS} -Wall
+clang++ -shared -O3 -fPIC ai/ai.cpp ai/ai_wrap.cxx -o ai/_libai.so -I ${PYTHON_HEADERS} -Wall
 echo "Compiled the library, launching the game now"
 ${com} main.py --no-camera --no-sound
