@@ -373,9 +373,11 @@ class Game:
         # Create the two player
         if type_me == "client":
             self.player_1 = Player(self.conf, 1, False, online=True)
-            self.player_2 = Player(self.conf, 2, is_ai, 15)
+            self.player_2 = Player(self.conf, 2, is_ai, 1)
+            self.player_2.ai_depth = 15
         else:
-            self.player_1 = Player(self.conf, 1, is_ai, 15)
+            self.player_1 = Player(self.conf, 1, is_ai, 1)
+            self.player_2.ai_depth = 15
             self.player_2 = Player(self.conf, 2, False, online=True)
         self.communication.type = type_me
 
